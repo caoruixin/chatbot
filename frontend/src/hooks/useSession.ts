@@ -19,34 +19,42 @@ export function useSession(agentId: string): UseSessionReturn {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchSessions = useCallback(async () => {
+  const fetchSessions = useCallback(async (signal?: AbortSignal) => {
     try {
-      const data = await api.getActiveSessions(agentId);
-      setSessions(data);
-      setError(null);
+      const data = await api.getActiveSessions(agentId, signal);
+      if (!signal?.aborted) {
+        setSessions(data);
+        setError(null);
+      }
     } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') return;
       const message =
         err instanceof Error ? err.message : 'Failed to fetch sessions';
-      setError(message);
-      console.error('Fetch sessions error:', message);
+      if (!signal?.aborted) {
+        setError(message);
+        console.error('Fetch sessions error:', message);
+      }
     }
   }, [agentId]);
 
   // Initial fetch and polling
   useEffect(() => {
-    let interval: ReturnType<typeof setInterval>;
+    const controller = new AbortController();
+    let interval: ReturnType<typeof setInterval> | undefined;
 
     async function init() {
-      await fetchSessions();
-      setLoading(false);
-
-      // Poll every 5 seconds
-      interval = setInterval(fetchSessions, 5000);
+      await fetchSessions(controller.signal);
+      if (!controller.signal.aborted) {
+        setLoading(false);
+        // Poll every 5 seconds
+        interval = setInterval(() => fetchSessions(controller.signal), 5000);
+      }
     }
 
     init();
 
     return () => {
+      controller.abort();
       if (interval) {
         clearInterval(interval);
       }

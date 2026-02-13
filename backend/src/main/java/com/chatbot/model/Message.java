@@ -1,5 +1,7 @@
 package com.chatbot.model;
 
+import com.chatbot.enums.SenderType;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -8,7 +10,7 @@ public class Message {
     private UUID messageId;
     private UUID conversationId;
     private UUID sessionId;
-    private String senderType;
+    private SenderType senderType;
     private String senderId;
     private String content;
     private String metadataJson;
@@ -42,11 +44,11 @@ public class Message {
         this.sessionId = sessionId;
     }
 
-    public String getSenderType() {
+    public SenderType getSenderType() {
         return senderType;
     }
 
-    public void setSenderType(String senderType) {
+    public void setSenderType(SenderType senderType) {
         this.senderType = senderType;
     }
 

@@ -28,7 +28,13 @@ export function useChat(userId: string): UseChatReturn {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
-  const channelRef = useRef<Channel | null>(null);
+  const [channel, setChannel] = useState<Channel | null>(null);
+  const conversationIdRef = useRef<string | null>(null);
+  const sessionIdRef = useRef<string | null>(null);
+
+  // Keep refs in sync with state for use in callbacks
+  useEffect(() => { conversationIdRef.current = conversationId; }, [conversationId]);
+  useEffect(() => { sessionIdRef.current = sessionId; }, [sessionId]);
 
   // On mount: get token, connect to GetStream, load conversation
   useEffect(() => {
@@ -51,9 +57,9 @@ export function useChat(userId: string): UseChatReturn {
           setConversationId(conv.conversationId);
 
           // Watch the channel for real-time messages
-          const channel = client.channel('messaging', conv.getstreamChannelId);
-          await channel.watch();
-          channelRef.current = channel;
+          const ch = client.channel('messaging', conv.getstreamChannelId);
+          await ch.watch();
+          setChannel(ch);
 
           // Load message history from backend
           const msgs = await api.getMessages({
@@ -102,7 +108,6 @@ export function useChat(userId: string): UseChatReturn {
 
   // Listen for new messages from GetStream
   useEffect(() => {
-    const channel = channelRef.current;
     if (!channel) return;
 
     const handler = channel.on('message.new', (event) => {
@@ -110,8 +115,8 @@ export function useChat(userId: string): UseChatReturn {
       if (event.message?.user?.id !== userId) {
         const newMsg: MessageResponse = {
           messageId: event.message?.id ?? '',
-          conversationId: conversationId ?? '',
-          sessionId: sessionId ?? '',
+          conversationId: conversationIdRef.current ?? '',
+          sessionId: sessionIdRef.current ?? '',
           senderType: mapSenderType(event.message?.user?.id),
           senderId: event.message?.user?.id ?? '',
           content: event.message?.text ?? '',
@@ -125,7 +130,7 @@ export function useChat(userId: string): UseChatReturn {
     return () => {
       handler.unsubscribe();
     };
-  }, [channelRef.current, userId, conversationId, sessionId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [channel, userId]);
 
   const sendMessage = useCallback(
     async (content: string) => {
@@ -136,7 +141,7 @@ export function useChat(userId: string): UseChatReturn {
         const result = await api.sendMessage({ userId, content });
 
         // Update conversation and session if this is the first message
-        if (!conversationId) {
+        if (!conversationIdRef.current) {
           setConversationId(result.conversationId);
 
           // Now connect to the channel
@@ -144,18 +149,19 @@ export function useChat(userId: string): UseChatReturn {
             const conv = await api.getConversation(userId);
             const tokenData = await api.getStreamToken(userId);
             const client = await getStreamClient(userId, tokenData.token);
-            const channel = client.channel(
+            const ch = client.channel(
               'messaging',
               conv.getstreamChannelId,
             );
-            await channel.watch();
-            channelRef.current = channel;
+            await ch.watch();
+            setChannel(ch);
           } catch (err) {
-            console.error('Failed to connect to channel after first message:', err);
+            const errMsg = err instanceof Error ? err.message : 'Unknown error';
+            console.error('Failed to connect to channel after first message:', errMsg);
           }
         }
 
-        if (!sessionId) {
+        if (!sessionIdRef.current) {
           setSessionId(result.sessionId);
         }
 
@@ -182,7 +188,7 @@ export function useChat(userId: string): UseChatReturn {
         setSending(false);
       }
     },
-    [userId, conversationId, sessionId],
+    [userId],
   );
 
   return {

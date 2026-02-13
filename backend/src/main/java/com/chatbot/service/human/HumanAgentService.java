@@ -1,9 +1,9 @@
 package com.chatbot.service.human;
 
-import com.chatbot.mapper.ConversationMapper;
-import com.chatbot.model.Conversation;
 import com.chatbot.model.Message;
 import com.chatbot.model.Session;
+import com.chatbot.service.ConversationService;
+import com.chatbot.service.SessionService;
 import com.chatbot.service.stream.GetStreamService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +16,8 @@ public class HumanAgentService {
     private static final Logger log = LoggerFactory.getLogger(HumanAgentService.class);
 
     private final GetStreamService getStreamService;
-    private final ConversationMapper conversationMapper;
+    private final ConversationService conversationService;
+    private final SessionService sessionService;
 
     @Value("${chatbot.agent.default-id}")
     private String defaultAgentId;
@@ -25,31 +26,34 @@ public class HumanAgentService {
     private String defaultAgentName;
 
     public HumanAgentService(GetStreamService getStreamService,
-                             ConversationMapper conversationMapper) {
+                             ConversationService conversationService,
+                             SessionService sessionService) {
         this.getStreamService = getStreamService;
-        this.conversationMapper = conversationMapper;
+        this.conversationService = conversationService;
+        this.sessionService = sessionService;
     }
 
     /**
      * Assign a human agent to the session.
-     * Adds the agent to the GetStream channel.
+     * Updates assigned_agent_id in database and adds agent to GetStream channel.
      * Note: session status is already updated to HUMAN_HANDLING by MessageRouter.
      */
     public void assignAgent(Session session) {
         log.info("Assigning agent to session: sessionId={}, agentId={}",
                 session.getSessionId(), defaultAgentId);
 
+        // Update assigned_agent_id in database
+        sessionService.assignAgent(session.getSessionId(), defaultAgentId);
+
         // Upsert agent user and add to channel
-        Conversation conv = conversationMapper.findById(session.getConversationId().toString());
-        if (conv != null) {
-            try {
-                getStreamService.upsertUser(defaultAgentId, defaultAgentName);
-                getStreamService.addMember(conv.getGetstreamChannelId(), defaultAgentId);
-                log.info("Agent added to GetStream channel: channelId={}, agentId={}",
-                        conv.getGetstreamChannelId(), defaultAgentId);
-            } catch (Exception e) {
-                log.error("Failed to add agent to GetStream channel: {}", e.getMessage());
-            }
+        String channelId = conversationService.getChannelId(session.getConversationId().toString());
+        try {
+            getStreamService.upsertUser(defaultAgentId, defaultAgentName);
+            getStreamService.addMember(channelId, defaultAgentId);
+            log.info("Agent added to GetStream channel: channelId={}, agentId={}",
+                    channelId, defaultAgentId);
+        } catch (Exception e) {
+            log.error("Failed to add agent to GetStream channel: {}", e.getMessage());
         }
     }
 

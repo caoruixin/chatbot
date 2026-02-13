@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { Channel } from 'stream-chat';
 import { api } from '../services/apiClient';
 import { getStreamClient } from '../services/streamClient';
@@ -27,13 +27,13 @@ export function useAgentChat(
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
-  const channelRef = useRef<Channel | null>(null);
+  const [channel, setChannel] = useState<Channel | null>(null);
 
   // When session changes, load messages and connect to channel
   useEffect(() => {
     if (!session) {
       setMessages([]);
-      channelRef.current = null;
+      setChannel(null);
       return;
     }
 
@@ -75,14 +75,14 @@ export function useAgentChat(
 
         if (matchingChannel) {
           await matchingChannel.watch();
-          channelRef.current = matchingChannel;
+          if (!cancelled) setChannel(matchingChannel);
         } else if (channels.length > 0) {
           // Fallback: use the first available channel
           // This handles cases where channel naming convention differs
           const firstChannel = channels[0];
           if (firstChannel) {
             await firstChannel.watch();
-            channelRef.current = firstChannel;
+            if (!cancelled) setChannel(firstChannel);
           }
         }
       } catch (err) {
@@ -108,7 +108,6 @@ export function useAgentChat(
 
   // Listen for new messages on the channel
   useEffect(() => {
-    const channel = channelRef.current;
     if (!channel) return;
 
     const handler = channel.on('message.new', (event) => {
@@ -131,7 +130,7 @@ export function useAgentChat(
     return () => {
       handler.unsubscribe();
     };
-  }, [channelRef.current, agentId, session]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [channel, agentId, session]);
 
   const sendReply = useCallback(
     async (content: string) => {

@@ -1,5 +1,7 @@
 package com.chatbot.model;
 
+import com.chatbot.enums.ConversationStatus;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -8,7 +10,7 @@ public class Conversation {
     private UUID conversationId;
     private String userId;
     private String getstreamChannelId;
-    private String status;
+    private ConversationStatus status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -39,11 +41,11 @@ public class Conversation {
         this.getstreamChannelId = getstreamChannelId;
     }
 
-    public String getStatus() {
+    public ConversationStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(ConversationStatus status) {
         this.status = status;
     }
 

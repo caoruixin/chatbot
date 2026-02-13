@@ -27,10 +27,11 @@ export class ApiError extends Error {
   }
 }
 
-async function request<T>(url: string, options?: RequestInit): Promise<T> {
+async function request<T>(url: string, options?: RequestInit & { signal?: AbortSignal }): Promise<T> {
+  const { headers: customHeaders, ...restOptions } = options ?? {};
   const response = await fetch(`${API_BASE}${url}`, {
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    ...options,
+    ...restOptions,
+    headers: { 'Content-Type': 'application/json', ...customHeaders },
   });
 
   if (!response.ok) {
@@ -84,9 +85,10 @@ export const api = {
   getSession: (sessionId: string) =>
     request<SessionResponse>(`/api/sessions/${encodeURIComponent(sessionId)}`),
 
-  getActiveSessions: (agentId: string) =>
+  getActiveSessions: (agentId: string, signal?: AbortSignal) =>
     request<SessionResponse[]>(
       `/api/sessions/active?agentId=${encodeURIComponent(agentId)}`,
+      { signal },
     ),
 
   // Stream

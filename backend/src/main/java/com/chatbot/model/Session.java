@@ -1,5 +1,7 @@
 package com.chatbot.model;
 
+import com.chatbot.enums.SessionStatus;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -7,7 +9,7 @@ public class Session {
 
     private UUID sessionId;
     private UUID conversationId;
-    private String status;
+    private SessionStatus status;
     private String assignedAgentId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -32,11 +34,11 @@ public class Session {
         this.conversationId = conversationId;
     }
 
-    public String getStatus() {
+    public SessionStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(SessionStatus status) {
         this.status = status;
     }
 

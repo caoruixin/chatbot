@@ -1,5 +1,6 @@
 package com.chatbot.service;
 
+import com.chatbot.enums.ConversationStatus;
 import com.chatbot.exception.ConversationNotFoundException;
 import com.chatbot.mapper.ConversationMapper;
 import com.chatbot.model.Conversation;
@@ -35,7 +36,7 @@ public class ConversationService {
         Conversation conv = new Conversation();
         conv.setConversationId(UUID.randomUUID());
         conv.setUserId(userId);
-        conv.setStatus("ACTIVE");
+        conv.setStatus(ConversationStatus.ACTIVE);
 
         String channelId = "conv-" + conv.getConversationId().toString();
         conv.setGetstreamChannelId(channelId);
@@ -66,5 +67,13 @@ public class ConversationService {
             throw new ConversationNotFoundException(conversationId);
         }
         return conv;
+    }
+
+    public String getChannelId(String conversationId) {
+        Conversation conv = conversationMapper.findById(conversationId);
+        if (conv != null) {
+            return conv.getGetstreamChannelId();
+        }
+        return "conv-" + conversationId;
     }
 }

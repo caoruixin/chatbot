@@ -26,5 +26,8 @@ public interface SessionMapper {
 
     void updateLastActivity(@Param("sessionId") String sessionId);
 
+    void assignAgent(@Param("sessionId") String sessionId,
+                     @Param("agentId") String agentId);
+
     void closeExpiredSessions(@Param("timeoutMinutes") int timeoutMinutes);
 }

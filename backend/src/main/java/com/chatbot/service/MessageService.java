@@ -1,5 +1,6 @@
 package com.chatbot.service;
 
+import com.chatbot.enums.SenderType;
 import com.chatbot.mapper.MessageMapper;
 import com.chatbot.model.Message;
 import org.slf4j.Logger;
@@ -21,7 +22,7 @@ public class MessageService {
     }
 
     public Message save(UUID conversationId, UUID sessionId,
-                        String senderType, String senderId, String content) {
+                        SenderType senderType, String senderId, String content) {
         Message msg = new Message();
         msg.setMessageId(UUID.randomUUID());
         msg.setConversationId(conversationId);

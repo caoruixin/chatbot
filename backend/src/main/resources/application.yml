@@ -15,6 +15,7 @@ spring:
 mybatis:
   mapper-locations: classpath:mapper/*.xml
   type-aliases-package: com.chatbot.model
+  type-handlers-package: com.chatbot.config
   configuration:
     map-underscore-to-camel-case: true
 
@@ -41,6 +42,8 @@ chatbot:
   agent:
     default-id: agent_default
     default-name: 人工客服
+  router:
+    transfer-keywords: 转人工,转接人工,人工客服,人工服务
   ai:
     bot-id: ai_bot
     bot-name: AI 助手

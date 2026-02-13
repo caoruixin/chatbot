@@ -2,6 +2,7 @@ import { useSearchParams } from 'react-router';
 import Layout from '../components/common/Layout';
 import MessageList from '../components/chat/MessageList';
 import MessageInput from '../components/chat/MessageInput';
+import UserToolPanel from '../components/user/UserToolPanel';
 import { useChat } from '../hooks/useChat';
 
 function UserChatPage() {
@@ -32,6 +33,9 @@ function UserChatPage() {
 
         {/* Message list */}
         <MessageList messages={messages} loading={loading} />
+
+        {/* User tool panel */}
+        <UserToolPanel onSendMessage={sendMessage} disabled={loading} />
 
         {/* Message input */}
         <MessageInput

@@ -2,6 +2,7 @@ package com.chatbot.service.orchestrator;
 
 import com.chatbot.dto.request.InboundMessageRequest;
 import com.chatbot.dto.response.InboundMessageResponse;
+import com.chatbot.enums.SenderType;
 import com.chatbot.model.Conversation;
 import com.chatbot.model.Message;
 import com.chatbot.model.Session;
@@ -50,7 +51,7 @@ public class GlobalOrchestrator {
         Message msg = messageService.save(
                 conv.getConversationId(),
                 session.getSessionId(),
-                "USER",
+                SenderType.USER,
                 request.getUserId(),
                 request.getContent()
         );

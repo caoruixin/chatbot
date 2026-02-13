@@ -5,25 +5,23 @@ import com.chatbot.dto.request.FaqSearchRequest;
 import com.chatbot.dto.request.PostQueryRequest;
 import com.chatbot.dto.request.UserDataDeleteRequest;
 import com.chatbot.dto.response.FaqSearchResponse;
-import com.chatbot.dto.response.PostItem;
 import com.chatbot.dto.response.PostQueryResponse;
 import com.chatbot.dto.response.UserDataDeleteResponse;
-import com.chatbot.mapper.UserPostMapper;
-import com.chatbot.model.UserPost;
+import com.chatbot.service.tool.PostQueryService;
+import com.chatbot.service.tool.ToolResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/tools")
 public class ToolController {
 
-    private final UserPostMapper userPostMapper;
+    private final PostQueryService postQueryService;
 
-    public ToolController(UserPostMapper userPostMapper) {
-        this.userPostMapper = userPostMapper;
+    public ToolController(PostQueryService postQueryService) {
+        this.postQueryService = postQueryService;
     }
 
     @PostMapping("/faq/search")
@@ -47,18 +45,8 @@ public class ToolController {
 
     @PostMapping("/posts/query")
     public ApiResponse<PostQueryResponse> queryPosts(@RequestBody PostQueryRequest request) {
-        List<UserPost> posts = userPostMapper.findByUsername(request.getUsername());
-        List<PostItem> items = posts.stream()
-                .map(p -> new PostItem(
-                        p.getPostId(),
-                        p.getUsername(),
-                        p.getTitle(),
-                        p.getStatus(),
-                        p.getCreatedAt() != null ? p.getCreatedAt().toString() : null
-                ))
-                .collect(Collectors.toList());
-
-        PostQueryResponse response = new PostQueryResponse(items);
+        ToolResult result = postQueryService.execute(Map.of("username", request.getUsername()));
+        PostQueryResponse response = (PostQueryResponse) result.getData();
         return ApiResponse.success(response);
     }
 }

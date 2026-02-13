@@ -1,9 +1,9 @@
 package com.chatbot.service.agent;
 
-import com.chatbot.mapper.ConversationMapper;
-import com.chatbot.model.Conversation;
+import com.chatbot.enums.SenderType;
 import com.chatbot.model.Message;
 import com.chatbot.model.Session;
+import com.chatbot.service.ConversationService;
 import com.chatbot.service.MessageService;
 import com.chatbot.service.stream.GetStreamService;
 import org.slf4j.Logger;
@@ -23,17 +23,17 @@ public class AgentCore {
 
     private final MessageService messageService;
     private final GetStreamService getStreamService;
-    private final ConversationMapper conversationMapper;
+    private final ConversationService conversationService;
 
     @Value("${chatbot.ai.bot-id}")
     private String aiBotId;
 
     public AgentCore(MessageService messageService,
                      GetStreamService getStreamService,
-                     ConversationMapper conversationMapper) {
+                     ConversationService conversationService) {
         this.messageService = messageService;
         this.getStreamService = getStreamService;
-        this.conversationMapper = conversationMapper;
+        this.conversationService = conversationService;
     }
 
     /**
@@ -52,25 +52,17 @@ public class AgentCore {
         messageService.save(
                 session.getConversationId(),
                 session.getSessionId(),
-                "AI_CHATBOT",
+                SenderType.AI_CHATBOT,
                 aiBotId,
                 reply
         );
 
         // Send via GetStream
-        String channelId = getChannelId(session.getConversationId().toString());
+        String channelId = conversationService.getChannelId(session.getConversationId().toString());
         try {
             getStreamService.sendMessage(channelId, aiBotId, reply);
         } catch (Exception e) {
             log.error("Failed to send AI reply via GetStream: {}", e.getMessage());
         }
-    }
-
-    private String getChannelId(String conversationId) {
-        Conversation conv = conversationMapper.findById(conversationId);
-        if (conv != null) {
-            return conv.getGetstreamChannelId();
-        }
-        return "conv-" + conversationId;
     }
 }

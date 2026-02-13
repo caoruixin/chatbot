@@ -64,6 +64,12 @@
         WHERE session_id = #{sessionId}::uuid
     </update>
 
+    <update id="assignAgent">
+        UPDATE session
+        SET assigned_agent_id = #{agentId}, updated_at = NOW()
+        WHERE session_id = #{sessionId}::uuid
+    </update>
+
     <update id="closeExpiredSessions">
         UPDATE session
         SET status = 'CLOSED', updated_at = NOW()

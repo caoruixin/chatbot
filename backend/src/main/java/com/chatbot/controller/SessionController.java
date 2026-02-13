@@ -38,7 +38,7 @@ public class SessionController {
         return new SessionResponse(
                 session.getSessionId().toString(),
                 session.getConversationId().toString(),
-                session.getStatus(),
+                session.getStatus().name(),
                 session.getAssignedAgentId(),
                 session.getCreatedAt() != null ? session.getCreatedAt().toString() : null,
                 session.getLastActivityAt() != null ? session.getLastActivityAt().toString() : null

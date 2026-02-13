@@ -51,7 +51,7 @@ public class ConversationController {
         return new ConversationResponse(
                 conv.getConversationId().toString(),
                 conv.getUserId(),
-                conv.getStatus(),
+                conv.getStatus().name(),
                 conv.getGetstreamChannelId(),
                 conv.getCreatedAt() != null ? conv.getCreatedAt().toString() : null,
                 conv.getUpdatedAt() != null ? conv.getUpdatedAt().toString() : null
@@ -62,7 +62,7 @@ public class ConversationController {
         return new SessionResponse(
                 session.getSessionId().toString(),
                 session.getConversationId().toString(),
-                session.getStatus(),
+                session.getStatus().name(),
                 session.getAssignedAgentId(),
                 session.getCreatedAt() != null ? session.getCreatedAt().toString() : null,
                 session.getLastActivityAt() != null ? session.getLastActivityAt().toString() : null

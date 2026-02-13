@@ -5,6 +5,7 @@ import com.chatbot.dto.request.AgentReplyRequest;
 import com.chatbot.dto.request.InboundMessageRequest;
 import com.chatbot.dto.response.InboundMessageResponse;
 import com.chatbot.dto.response.MessageResponse;
+import com.chatbot.enums.SenderType;
 import com.chatbot.model.Message;
 import com.chatbot.model.Session;
 import com.chatbot.service.ConversationService;
@@ -53,7 +54,7 @@ public class MessageController {
         Message msg = messageService.save(
                 session.getConversationId(),
                 session.getSessionId(),
-                "HUMAN_AGENT",
+                SenderType.HUMAN_AGENT,
                 request.getAgentId(),
                 request.getContent()
         );
@@ -105,7 +106,7 @@ public class MessageController {
                 msg.getMessageId().toString(),
                 msg.getConversationId().toString(),
                 msg.getSessionId().toString(),
-                msg.getSenderType(),
+                msg.getSenderType().name(),
                 msg.getSenderId(),
                 msg.getContent(),
                 msg.getCreatedAt() != null ? msg.getCreatedAt().toString() : null

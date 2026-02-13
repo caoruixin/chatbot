@@ -1,5 +1,6 @@
 package com.chatbot.service;
 
+import com.chatbot.enums.SessionStatus;
 import com.chatbot.exception.SessionNotFoundException;
 import com.chatbot.mapper.SessionMapper;
 import com.chatbot.model.Session;
@@ -32,7 +33,7 @@ public class SessionService {
         Session session = new Session();
         session.setSessionId(UUID.randomUUID());
         session.setConversationId(conversationId);
-        session.setStatus("AI_HANDLING");
+        session.setStatus(SessionStatus.AI_HANDLING);
 
         sessionMapper.insert(session);
         log.info("Created new session: sessionId={}, conversationId={}",
@@ -48,13 +49,18 @@ public class SessionService {
         return session;
     }
 
-    public void updateStatus(UUID sessionId, String status) {
-        sessionMapper.updateStatus(sessionId.toString(), status);
+    public void updateStatus(UUID sessionId, SessionStatus status) {
+        sessionMapper.updateStatus(sessionId.toString(), status.name());
         log.info("Session status updated: sessionId={}, newStatus={}", sessionId, status);
     }
 
     public void updateLastActivity(UUID sessionId) {
         sessionMapper.updateLastActivity(sessionId.toString());
+    }
+
+    public void assignAgent(UUID sessionId, String agentId) {
+        sessionMapper.assignAgent(sessionId.toString(), agentId);
+        log.info("Agent assigned to session: sessionId={}, agentId={}", sessionId, agentId);
     }
 
     public List<Session> findActiveByAgentId(String agentId) {
