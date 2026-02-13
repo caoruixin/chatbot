@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chatbot.mapper.SessionMapper">
+
+    <select id="findById" resultType="com.chatbot.model.Session">
+        SELECT session_id, conversation_id, status, assigned_agent_id,
+               created_at, updated_at, last_activity_at
+        FROM session
+        WHERE session_id = #{sessionId}::uuid
+    </select>
+
+    <select id="findActiveByConversationId" resultType="com.chatbot.model.Session">
+        SELECT session_id, conversation_id, status, assigned_agent_id,
+               created_at, updated_at, last_activity_at
+        FROM session
+        WHERE conversation_id = #{conversationId}::uuid
+          AND status IN ('AI_HANDLING', 'HUMAN_HANDLING')
+        ORDER BY created_at DESC
+        LIMIT 1
+    </select>
+
+    <select id="findByConversationId" resultType="com.chatbot.model.Session">
+        SELECT session_id, conversation_id, status, assigned_agent_id,
+               created_at, updated_at, last_activity_at
+        FROM session
+        WHERE conversation_id = #{conversationId}::uuid
+        ORDER BY created_at DESC
+    </select>
+
+    <select id="findByStatus" resultType="com.chatbot.model.Session">
+        SELECT session_id, conversation_id, status, assigned_agent_id,
+               created_at, updated_at, last_activity_at
+        FROM session
+        WHERE status = #{status}
+        ORDER BY created_at DESC
+    </select>
+
+    <select id="findActiveByAgentId" resultType="com.chatbot.model.Session">
+        SELECT session_id, conversation_id, status, assigned_agent_id,
+               created_at, updated_at, last_activity_at
+        FROM session
+        WHERE assigned_agent_id = #{agentId}
+          AND status IN ('AI_HANDLING', 'HUMAN_HANDLING')
+        ORDER BY last_activity_at DESC
+    </select>
+
+    <insert id="insert" parameterType="com.chatbot.model.Session">
+        INSERT INTO session (session_id, conversation_id, status, assigned_agent_id,
+                            created_at, updated_at, last_activity_at)
+        VALUES (#{sessionId}::uuid, #{conversationId}::uuid, #{status}, #{assignedAgentId},
+                NOW(), NOW(), NOW())
+    </insert>
+
+    <update id="updateStatus">
+        UPDATE session
+        SET status = #{status}, updated_at = NOW()
+        WHERE session_id = #{sessionId}::uuid
+    </update>
+
+    <update id="updateLastActivity">
+        UPDATE session
+        SET last_activity_at = NOW(), updated_at = NOW()
+        WHERE session_id = #{sessionId}::uuid
+    </update>
+
+    <update id="closeExpiredSessions">
+        UPDATE session
+        SET status = 'CLOSED', updated_at = NOW()
+        WHERE status IN ('AI_HANDLING', 'HUMAN_HANDLING')
+          AND last_activity_at &lt; NOW() - (#{timeoutMinutes} || ' minutes')::interval
+    </update>
+
+</mapper>

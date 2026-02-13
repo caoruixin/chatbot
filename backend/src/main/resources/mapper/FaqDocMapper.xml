@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chatbot.mapper.FaqDocMapper">
+
+    <select id="searchByEmbedding" resultType="com.chatbot.model.FaqDoc">
+        SELECT faq_id, question, answer,
+               1 - (embedding &lt;=&gt; #{embeddingVector}::vector) AS score
+        FROM faq_doc
+        WHERE embedding IS NOT NULL
+        ORDER BY embedding &lt;=&gt; #{embeddingVector}::vector
+        LIMIT #{limit}
+    </select>
+
+    <update id="updateEmbedding">
+        UPDATE faq_doc
+        SET embedding = #{embeddingVector}::vector
+        WHERE faq_id = #{faqId}::uuid
+    </update>
+
+    <select id="findWithoutEmbedding" resultType="com.chatbot.model.FaqDoc">
+        SELECT faq_id, question, answer, created_at
+        FROM faq_doc
+        WHERE embedding IS NULL
+    </select>
+
+</mapper>

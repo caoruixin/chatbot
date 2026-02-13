@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chatbot.mapper.MessageMapper">
+
+    <select id="findByConversationId" resultType="com.chatbot.model.Message">
+        SELECT message_id, conversation_id, session_id, sender_type, sender_id,
+               content, metadata_json, getstream_message_id, created_at
+        FROM message
+        WHERE conversation_id = #{conversationId}::uuid
+        ORDER BY created_at ASC
+    </select>
+
+    <select id="findBySessionId" resultType="com.chatbot.model.Message">
+        SELECT message_id, conversation_id, session_id, sender_type, sender_id,
+               content, metadata_json, getstream_message_id, created_at
+        FROM message
+        WHERE session_id = #{sessionId}::uuid
+        ORDER BY created_at ASC
+    </select>
+
+    <select id="findByConversationAndSession" resultType="com.chatbot.model.Message">
+        SELECT message_id, conversation_id, session_id, sender_type, sender_id,
+               content, metadata_json, getstream_message_id, created_at
+        FROM message
+        WHERE conversation_id = #{conversationId}::uuid
+          AND session_id = #{sessionId}::uuid
+        ORDER BY created_at ASC
+    </select>
+
+    <insert id="insert" parameterType="com.chatbot.model.Message">
+        INSERT INTO message (message_id, conversation_id, session_id, sender_type, sender_id,
+                            content, metadata_json, getstream_message_id, created_at)
+        VALUES (#{messageId}::uuid, #{conversationId}::uuid, #{sessionId}::uuid,
+                #{senderType}, #{senderId}, #{content}, #{metadataJson},
+                #{getstreamMessageId}, NOW())
+    </insert>
+
+</mapper>

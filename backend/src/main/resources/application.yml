@@ -1,0 +1,49 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/chatbot
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.chatbot.model
+  configuration:
+    map-underscore-to-camel-case: true
+
+# Kimi LLM
+kimi:
+  api-key: ${KIMI_API_KEY}
+  base-url: https://api.moonshot.cn/v1
+  chat:
+    model: moonshot-v1-8k
+    temperature: 0.7
+    timeout-seconds: 10
+  embedding:
+    model: text-embedding-v1
+
+# GetStream
+getstream:
+  api-key: ${GETSTREAM_API_KEY}
+  api-secret: ${GETSTREAM_API_SECRET}
+
+# 系统配置
+chatbot:
+  session:
+    timeout-minutes: 10
+  agent:
+    default-id: agent_default
+    default-name: 人工客服
+  ai:
+    bot-id: ai_bot
+    bot-name: AI 助手
+    max-react-rounds: 3
+    confidence-threshold: 0.7
+    faq-score-threshold: 0.75

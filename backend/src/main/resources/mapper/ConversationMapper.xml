@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chatbot.mapper.ConversationMapper">
+
+    <select id="findByUserId" resultType="com.chatbot.model.Conversation">
+        SELECT conversation_id, user_id, getstream_channel_id, status, created_at, updated_at
+        FROM conversation
+        WHERE user_id = #{userId}
+    </select>
+
+    <select id="findById" resultType="com.chatbot.model.Conversation">
+        SELECT conversation_id, user_id, getstream_channel_id, status, created_at, updated_at
+        FROM conversation
+        WHERE conversation_id = #{conversationId}::uuid
+    </select>
+
+    <insert id="insert" parameterType="com.chatbot.model.Conversation">
+        INSERT INTO conversation (conversation_id, user_id, getstream_channel_id, status, created_at, updated_at)
+        VALUES (#{conversationId}::uuid, #{userId}, #{getstreamChannelId}, #{status}, NOW(), NOW())
+    </insert>
+
+    <update id="updateStatus">
+        UPDATE conversation
+        SET status = #{status}, updated_at = NOW()
+        WHERE conversation_id = #{conversationId}::uuid
+    </update>
+
+</mapper>
