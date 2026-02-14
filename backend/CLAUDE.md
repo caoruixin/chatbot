@@ -32,7 +32,7 @@ Controller → Service → Mapper
 - **O - 开闭原则**: 新增工具通过在 ToolDefinition 枚举添加条目 + 实现 ToolExecutor 接口完成，不修改 ToolDispatcher 核心逻辑。
 - **L - 里氏替换**: ToolExecutor 接口的所有实现 (FaqService, PostQueryService, UserDataDeletionService) 可互换使用。
 - **I - 接口隔离**: 工具执行器只需实现 `ToolExecutor.execute(Map<String, Object> params): ToolResult`，不强制实现无关方法。
-- **D - 依赖倒置**: AgentCore 依赖 ToolExecutor 接口，不依赖具体 Service 实现。KimiClient 通过 Spring 配置注入 RestTemplate。
+- **D - 依赖倒置**: AgentCore 依赖 ToolExecutor 接口，不依赖具体 Service 实现。KimiClient 通过 Spring 配置注入 RestTemplate（对话用 KimiConfig，Embedding 用 EmbeddingConfig）。
 
 ### YAGNI (You Aren't Gonna Need It)
 
@@ -154,7 +154,7 @@ public class AgentCore {
 | 层 | 策略 |
 |---|------|
 | Controller | 不处理业务异常，由全局异常处理器统一处理。参数校验失败返回 400。 |
-| Service | 业务异常抛自定义异常。外部调用 (Kimi/GetStream) 捕获后包装为业务异常或降级。 |
+| Service | 业务异常抛自定义异常。外部调用 (Kimi/DashScope/GetStream) 捕获后包装为业务异常或降级。 |
 | Mapper | SQL 异常由 Spring/MyBatis 自动转为 DataAccessException，Service 层捕获处理。 |
 | Tool | 工具执行异常返回 `ToolResult.error()`，不抛异常。AgentCore 根据结果决定降级。 |
 
@@ -238,7 +238,7 @@ log.info("Tool dispatched: sessionId={}, tool={}, success={}, duration={}ms",
 ### 敏感信息脱敏
 
 - 日志中不输出用户消息原文（或做截断/脱敏）。
-- 不输出 Kimi API Key、GetStream Secret。
+- 不输出 Kimi API Key、DashScope API Key、GetStream Secret。
 - LLM 请求/响应体仅在 DEBUG 级别输出，生产环境关闭。
 
 ### 不记录 Chain-of-Thought

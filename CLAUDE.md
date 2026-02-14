@@ -13,7 +13,8 @@
 
 ### 2. AI Chatbot
 - 核心验证目标
-- 集成 Kimi 模型作为 LLM
+- 集成 Kimi 模型作为 LLM（对话/意图识别/回复生成）
+- 集成 DashScope text-embedding-v3 作为 Embedding 模型（FAQ 向量化）
 - 与人工客服 IM 系统集成
 
 ## 技术栈
@@ -29,7 +30,8 @@
 
 ### 第三方服务
 - **IM 服务**: GetStream
-- **LLM 服务**: Kimi 模型
+- **LLM 服务（对话）**: Kimi 模型 (Moonshot AI)
+- **Embedding 服务**: DashScope text-embedding-v3 (阿里云通义千问)
 
 ## 系统架构设计
 
@@ -246,7 +248,8 @@ getstream_message_id (VARCHAR)
 
 ### API 密钥
 - GetStream API 密钥
-- Kimi API 密钥
+- Kimi API 密钥（对话）
+- DashScope API 密钥（Embedding）
 
 ## 注意事项
 

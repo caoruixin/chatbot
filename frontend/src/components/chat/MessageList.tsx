@@ -1,19 +1,21 @@
 import { useEffect, useRef } from 'react';
 import type { MessageResponse } from '../../types';
 import MessageBubble from './MessageBubble';
+import TypingIndicator from './TypingIndicator';
 
 interface MessageListProps {
   messages: MessageResponse[];
   loading: boolean;
+  aiThinking?: boolean;
 }
 
-function MessageList({ messages, loading }: MessageListProps) {
+function MessageList({ messages, loading, aiThinking = false }: MessageListProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll to bottom on new messages
+  // Auto-scroll to bottom on new messages or when AI thinking state changes
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  }, [messages, aiThinking]);
 
   if (loading) {
     return (
@@ -44,6 +46,7 @@ function MessageList({ messages, loading }: MessageListProps) {
           createdAt={msg.createdAt}
         />
       ))}
+      {aiThinking && <TypingIndicator />}
       <div ref={bottomRef} />
     </div>
   );

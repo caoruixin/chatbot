@@ -27,8 +27,13 @@ kimi:
     model: moonshot-v1-8k
     temperature: 0.7
     timeout-seconds: 10
+
+# DashScope Embedding (Alibaba Cloud Qwen)
+dashscope:
+  api-key: ${DASHSCOPE_API_KEY}
+  base-url: ${DASHSCOPE_BASE_URL:https://dashscope.aliyuncs.com/compatible-mode/v1}
   embedding:
-    model: text-embedding-v1
+    model: text-embedding-v3
 
 # GetStream
 getstream:
@@ -49,4 +54,4 @@ chatbot:
     bot-name: AI 助手
     max-react-rounds: 3
     confidence-threshold: 0.7
-    faq-score-threshold: 0.75
+    faq-score-threshold: 0.5

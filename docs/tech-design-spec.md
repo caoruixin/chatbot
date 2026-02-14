@@ -33,9 +33,9 @@
 
 **明确不引入的依赖：**
 - ~~Spring Data JPA / Hibernate~~ → 用 MyBatis
-- ~~Spring AI~~ → 直接 RestTemplate 调用 Kimi OpenAI 兼容 API
+- ~~Spring AI~~ → 直接 RestTemplate 调用 OpenAI 兼容 API（Kimi 对话 + DashScope Embedding）
 - ~~Kotlin~~ → 纯 Java + Groovy Gradle
-- ~~ONNX Runtime~~ → Embedding 由 Kimi API 生成
+- ~~ONNX Runtime~~ → Embedding 由 DashScope API 生成（text-embedding-v3）
 
 ### 2.2 前端
 
@@ -55,7 +55,8 @@
 | 服务 | 用途 | 集成方式 |
 |------|------|---------|
 | GetStream Chat | 实时消息收发 | 后端 Java SDK + 前端 React SDK |
-| Kimi (Moonshot AI) | LLM 对话 + 文本 Embedding | RestTemplate 调用 OpenAI 兼容 API |
+| Kimi (Moonshot AI) | LLM 对话（意图识别 / 回复生成） | RestTemplate 调用 OpenAI 兼容 API |
+| DashScope (阿里云通义千问) | 文本 Embedding（FAQ 向量化） | RestTemplate 调用 OpenAI 兼容 API |
 
 ### 2.4 本地环境依赖
 
@@ -535,7 +536,7 @@ CREATE INDEX idx_faq_embedding ON faq_doc
     USING ivfflat (embedding vector_cosine_ops) WITH (lists = 10);
 ```
 
-> **说明**：`embedding vector(1024)` 维度取决于 Kimi embedding 模型输出维度（moonshot-v1-embedding 为 1024 维）。应用启动时为无 embedding 的 FAQ 记录自动生成向量。
+> **说明**：`embedding vector(1024)` 维度取决于 DashScope text-embedding-v3 模型输出维度（默认 1024 维）。应用启动时为无 embedding 的 FAQ 记录自动生成向量。
 
 #### V2__mock_data.sql
 
@@ -948,32 +949,33 @@ Agent Web                    Backend                           Agent Web
 
 ## 9. 核心后端组件设计
 
-### 9.1 Kimi LLM 客户端（直接 HTTP 调用）
+### 9.1 LLM 客户端（直接 HTTP 调用）
 
 ```java
 @Component
 public class KimiClient {
 
-    private final RestTemplate restTemplate;
-    private final String apiKey;
-    private final String baseUrl;  // https://api.moonshot.cn/v1
+    private final RestTemplate restTemplate;          // Kimi 对话用
+    private final RestTemplate embeddingRestTemplate;  // DashScope Embedding 用
+    private final KimiConfig config;                   // Kimi 配置
+    private final EmbeddingConfig embeddingConfig;     // DashScope 配置
 
-    // 聊天补全（意图识别 / 回复生成）
+    // 聊天补全（意图识别 / 回复生成）→ Kimi (Moonshot AI)
     public KimiChatResponse chatCompletion(String systemPrompt,
                                            List<KimiMessage> messages,
                                            double temperature) {
         HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(apiKey);
+        headers.setBearerAuth(config.getApiKey());
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         Map<String, Object> body = Map.of(
-            "model", "moonshot-v1-8k",
+            "model", config.getChatModel(),  // moonshot-v1-8k
             "messages", buildMessages(systemPrompt, messages),
             "temperature", temperature
         );
 
         ResponseEntity<KimiChatResponse> resp = restTemplate.exchange(
-            baseUrl + "/chat/completions",
+            config.getBaseUrl() + "/chat/completions",
             HttpMethod.POST,
             new HttpEntity<>(body, headers),
             KimiChatResponse.class
@@ -981,14 +983,18 @@ public class KimiClient {
         return resp.getBody();
     }
 
-    // 文本 Embedding
+    // 文本 Embedding → DashScope (阿里云通义千问)
     public float[] embedding(String text) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(embeddingConfig.getApiKey());
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
         Map<String, Object> body = Map.of(
-            "model", "text-embedding-v1",
+            "model", embeddingConfig.getEmbeddingModel(),  // text-embedding-v3
             "input", text
         );
-        // ... 类似调用 /embeddings 端点
-        // 返回 float[] 向量
+        // 调用 DashScope OpenAI 兼容 /embeddings 端点
+        // 返回 float[] 向量 (1024 维)
     }
 }
 ```
@@ -1389,20 +1395,21 @@ channel.on('message.new', (event) => { /* 更新消息列表 */ });
 
 ---
 
-## 12. Kimi LLM 集成
+## 12. LLM 与 Embedding 集成
 
 ### 12.1 调用方式
 
-通过 `RestTemplate` 直接调用 Moonshot AI 的 OpenAI 兼容 API：
+通过 `RestTemplate` 直接调用 OpenAI 兼容 API。对话和 Embedding 使用不同的服务商：
 
-| 端点 | 用途 | 模型 |
-|------|------|------|
-| `POST /v1/chat/completions` | 意图识别 / 回复生成 | `moonshot-v1-8k` |
-| `POST /v1/embeddings` | FAQ 文本向量化 | `text-embedding-v1` |
+| 服务商 | 端点 | 用途 | 模型 |
+|--------|------|------|------|
+| Kimi (Moonshot AI) | `POST /v1/chat/completions` | 意图识别 / 回复生成 | `moonshot-v1-8k` |
+| DashScope (阿里云) | `POST /v1/embeddings` | FAQ 文本向量化 | `text-embedding-v3` |
 
 ### 12.2 配置
 
 ```yaml
+# Kimi LLM（对话）
 kimi:
   api-key: ${KIMI_API_KEY}
   base-url: https://api.moonshot.cn/v1
@@ -1410,11 +1417,16 @@ kimi:
     model: moonshot-v1-8k
     temperature: 0.7
     timeout-seconds: 10
+
+# DashScope Embedding（阿里云通义千问）
+dashscope:
+  api-key: ${DASHSCOPE_API_KEY}
+  base-url: ${DASHSCOPE_BASE_URL:https://dashscope.aliyuncs.com/compatible-mode/v1}
   embedding:
-    model: text-embedding-v1
+    model: text-embedding-v3
 ```
 
-不使用 Spring AI，直接在 `KimiClient` 中封装 HTTP 调用。
+不使用 Spring AI，直接在 `KimiClient` 中封装 HTTP 调用。对话调用 Kimi API，Embedding 调用 DashScope API，两者均为 OpenAI 兼容格式。
 
 ---
 
@@ -1440,7 +1452,8 @@ chatbot/
 │       │   │   ├── config/                      # === 配置 ===
 │       │   │   │   ├── WebConfig.java           # CORS
 │       │   │   │   ├── GetStreamConfig.java     # GetStream 客户端 Bean
-│       │   │   │   └── KimiConfig.java          # KimiClient Bean + RestTemplate
+│       │   │   │   ├── KimiConfig.java          # Kimi 对话 Bean + RestTemplate
+│       │   │   │   └── EmbeddingConfig.java     # DashScope Embedding Bean + RestTemplate
 │       │   │   │
 │       │   │   ├── controller/                  # === API 层 ===
 │       │   │   │   ├── MessageController.java
@@ -1654,7 +1667,7 @@ mybatis:
   configuration:
     map-underscore-to-camel-case: true
 
-# Kimi LLM
+# Kimi LLM（对话）
 kimi:
   api-key: ${KIMI_API_KEY}
   base-url: https://api.moonshot.cn/v1
@@ -1662,8 +1675,13 @@ kimi:
     model: moonshot-v1-8k
     temperature: 0.7
     timeout-seconds: 10
+
+# DashScope Embedding（阿里云通义千问）
+dashscope:
+  api-key: ${DASHSCOPE_API_KEY}
+  base-url: ${DASHSCOPE_BASE_URL:https://dashscope.aliyuncs.com/compatible-mode/v1}
   embedding:
-    model: text-embedding-v1
+    model: text-embedding-v3
 
 # GetStream
 getstream:
@@ -1745,6 +1763,8 @@ export default defineConfig({
 DB_USERNAME=postgres
 DB_PASSWORD=postgres
 KIMI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxx
+DASHSCOPE_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxx
+DASHSCOPE_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
 GETSTREAM_API_KEY=xxxxxxxxxxxxxxxxx
 GETSTREAM_API_SECRET=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
@@ -1789,7 +1809,7 @@ cd frontend && npm install && npm run dev
 | 数据访问 | MyBatis | JPA / Hibernate | 灵活轻量，SQL 可控，pgvector 原生 SQL 支持好 |
 | 构建脚本 | Gradle Groovy DSL | Gradle Kotlin DSL / Maven | 不引入 Kotlin 依赖 |
 | LLM 调用 | RestTemplate 直调 Kimi API | Spring AI | 零额外依赖，OpenAI 兼容格式简单 |
-| Embedding | Kimi embedding API | 本地 ONNX 模型 | 不引入 ONNX Runtime（~200MB） |
+| Embedding | DashScope text-embedding-v3 API | Kimi embedding / 本地 ONNX 模型 | 1024 维向量，支持 50+ 语言，OpenAI 兼容 API |
 | 向量存储 | pgvector (PG 扩展) | Chroma / Qdrant | 已有 PG，无额外服务 |
 | AI 架构 | Bounded Agent (Router+ReAct+Composer) | 简单 3-Agent 流水线 | 参考 ai-service-agent.md，支持置信度、风险级别、失败降级 |
 | 高风险回复 | 模板输出 | LLM 自由生成 | 避免 LLM 幻觉导致误承诺 |

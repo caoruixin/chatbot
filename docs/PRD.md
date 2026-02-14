@@ -21,7 +21,8 @@
 | 数据库 | PostgreSQL (本地) |
 | 向量数据库 | 轻量级开源 Vector DB (用于 FAQ 知识库) |
 | IM 服务 | GetStream |
-| LLM | Kimi 模型 |
+| LLM（对话） | Kimi 模型 (Moonshot AI) |
+| Embedding | DashScope text-embedding-v3 (阿里云通义千问) |
 | 部署 | 本地运行，不使用 Docker |
 
 ---

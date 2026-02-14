@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import type { Channel } from 'stream-chat';
 import { api } from '../services/apiClient';
 import { getStreamClient, disconnectStream } from '../services/streamClient';
-import type { MessageResponse, SenderType } from '../types';
+import type { MessageResponse, SenderType, SessionStatus } from '../types';
 
 function mapSenderType(streamUserId: string | undefined): SenderType {
   if (!streamUserId) return 'USER';
@@ -11,10 +11,19 @@ function mapSenderType(streamUserId: string | undefined): SenderType {
   return 'USER';
 }
 
+// Keywords that trigger transfer to human agent
+const TRANSFER_KEYWORDS = ['转人工', '人工客服', '人工服务'];
+
+function isTransferToHuman(content: string): boolean {
+  return TRANSFER_KEYWORDS.some((keyword) => content.includes(keyword));
+}
+
 interface UseChatReturn {
   messages: MessageResponse[];
   conversationId: string | null;
   sessionId: string | null;
+  sessionStatus: SessionStatus | null;
+  aiThinking: boolean;
   loading: boolean;
   error: string | null;
   sendMessage: (content: string) => Promise<void>;
@@ -28,13 +37,17 @@ export function useChat(userId: string): UseChatReturn {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
+  const [sessionStatus, setSessionStatus] = useState<SessionStatus | null>(null);
+  const [aiThinking, setAiThinking] = useState(false);
   const [channel, setChannel] = useState<Channel | null>(null);
   const conversationIdRef = useRef<string | null>(null);
   const sessionIdRef = useRef<string | null>(null);
+  const sessionStatusRef = useRef<SessionStatus | null>(null);
 
   // Keep refs in sync with state for use in callbacks
   useEffect(() => { conversationIdRef.current = conversationId; }, [conversationId]);
   useEffect(() => { sessionIdRef.current = sessionId; }, [sessionId]);
+  useEffect(() => { sessionStatusRef.current = sessionStatus; }, [sessionStatus]);
 
   // On mount: get token, connect to GetStream, load conversation
   useEffect(() => {
@@ -75,6 +88,7 @@ export function useChat(userId: string): UseChatReturn {
               const latestSession = sessions[0];
               if (latestSession) {
                 setSessionId(latestSession.sessionId);
+                setSessionStatus(latestSession.status);
               }
             }
           }
@@ -113,17 +127,29 @@ export function useChat(userId: string): UseChatReturn {
     const handler = channel.on('message.new', (event) => {
       // Only add messages from others (our own messages are already added optimistically)
       if (event.message?.user?.id !== userId) {
+        const senderType = mapSenderType(event.message?.user?.id);
         const newMsg: MessageResponse = {
           messageId: event.message?.id ?? '',
           conversationId: conversationIdRef.current ?? '',
           sessionId: sessionIdRef.current ?? '',
-          senderType: mapSenderType(event.message?.user?.id),
+          senderType,
           senderId: event.message?.user?.id ?? '',
           content: event.message?.text ?? '',
           createdAt:
             event.message?.created_at?.toString() ?? new Date().toISOString(),
         };
         setMessages((prev) => [...prev, newMsg]);
+
+        // Clear AI thinking indicator when AI reply arrives
+        if (senderType === 'AI_CHATBOT') {
+          setAiThinking(false);
+        }
+
+        // Update session status when a human agent message arrives
+        if (senderType === 'HUMAN_AGENT') {
+          setAiThinking(false);
+          setSessionStatus('HUMAN_HANDLING');
+        }
       }
     });
 
@@ -178,6 +204,19 @@ export function useChat(userId: string): UseChatReturn {
             createdAt: new Date().toISOString(),
           },
         ]);
+
+        // Show AI thinking indicator if session is AI_HANDLING and not transferring to human
+        const currentStatus = sessionStatusRef.current;
+        if (!isTransferToHuman(content)) {
+          // For new conversations (no session yet) or AI_HANDLING sessions, show thinking
+          if (!currentStatus || currentStatus === 'AI_HANDLING') {
+            setAiThinking(true);
+            // New conversations start in AI_HANDLING
+            if (!currentStatus) {
+              setSessionStatus('AI_HANDLING');
+            }
+          }
+        }
       } catch (err) {
         const message =
           err instanceof Error ? err.message : 'Failed to send message';
@@ -195,6 +234,8 @@ export function useChat(userId: string): UseChatReturn {
     messages,
     conversationId,
     sessionId,
+    sessionStatus,
+    aiThinking,
     loading,
     error,
     sendMessage,

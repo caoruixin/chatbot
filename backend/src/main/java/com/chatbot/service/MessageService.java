@@ -23,6 +23,12 @@ public class MessageService {
 
     public Message save(UUID conversationId, UUID sessionId,
                         SenderType senderType, String senderId, String content) {
+        return save(conversationId, sessionId, senderType, senderId, content, null);
+    }
+
+    public Message save(UUID conversationId, UUID sessionId,
+                        SenderType senderType, String senderId, String content,
+                        String metadataJson) {
         Message msg = new Message();
         msg.setMessageId(UUID.randomUUID());
         msg.setConversationId(conversationId);
@@ -30,6 +36,7 @@ public class MessageService {
         msg.setSenderType(senderType);
         msg.setSenderId(senderId);
         msg.setContent(content);
+        msg.setMetadataJson(metadataJson);
 
         messageMapper.insert(msg);
         log.info("Message saved: messageId={}, conversationId={}, sessionId={}, senderType={}",

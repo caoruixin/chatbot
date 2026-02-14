@@ -24,4 +24,10 @@
         WHERE embedding IS NULL
     </select>
 
+    <select id="findAll" resultType="com.chatbot.model.FaqDoc">
+        SELECT faq_id, question, answer, created_at
+        FROM faq_doc
+        ORDER BY created_at
+    </select>
+
 </mapper>

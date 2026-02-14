@@ -16,4 +16,6 @@ public interface FaqDocMapper {
                          @Param("embeddingVector") String embeddingVector);
 
     List<FaqDoc> findWithoutEmbedding();
+
+    List<FaqDoc> findAll();
 }

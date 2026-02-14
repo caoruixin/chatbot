@@ -42,6 +42,7 @@
 |------|------|---------|
 | GetStream Chat | 实时消息收发 | 后端 Java SDK + 前端 React SDK |
 | Kimi (Moonshot AI) | LLM 对话 / 意图识别 / 回复生成 | Spring AI OpenAI 兼容模式 |
+| DashScope (阿里云通义千问) | 文本 Embedding（FAQ 向量化） | RestTemplate 调用 OpenAI 兼容 API |
 
 ### 2.4 本地环境依赖
 
@@ -339,7 +340,7 @@ CREATE TABLE faq_doc (
 );
 ```
 
-> **说明**：`embedding vector(384)` 中 384 是 `all-MiniLM-L6-v2` 模型输出的向量维度。使用 Spring AI Transformers 模块在本地生成 embedding，无需外部 API。
+> **说明**：`embedding vector(384)` 是旧版设计（all-MiniLM-L6-v2）。当前实现已切换为 DashScope text-embedding-v3（1024 维），见主 tech-design-spec.md。
 
 #### V2__mock_data.sql
 
@@ -1268,28 +1269,24 @@ spring:
 
 ### 10.2 Embedding 生成
 
-FAQ 知识库的向量化使用 Spring AI Transformers（本地 ONNX 模型），不依赖外部 API：
+> **注意**：此备份文档中的 Embedding 配置已过时。当前实现使用 DashScope text-embedding-v3（阿里云通义千问），通过 RestTemplate 调用 OpenAI 兼容 API，1024 维向量。详见主 tech-design-spec.md Section 12。
+
+~~FAQ 知识库的向量化使用 Spring AI Transformers（本地 ONNX 模型）~~：
 
 ```yaml
-spring:
-  ai:
-    embedding:
-      transformer:
-        onnx:
-          model-uri: classpath:all-MiniLM-L6-v2.onnx
-        tokenizer-uri: classpath:tokenizer.json
+# 当前实现（替代下方旧配置）：
+dashscope:
+  api-key: ${DASHSCOPE_API_KEY}
+  base-url: ${DASHSCOPE_BASE_URL:https://dashscope.aliyuncs.com/compatible-mode/v1}
+  embedding:
+    model: text-embedding-v3
 ```
 
 ### 10.3 PGVector 向量存储
 
 ```yaml
-spring:
-  ai:
-    vectorstore:
-      pgvector:
-        dimensions: 384
-        index-type: HNSW
-        distance-type: COSINE_DISTANCE
+# 当前实现使用 pgvector 扩展，1024 维（DashScope text-embedding-v3 默认维度）
+# embedding vector(1024) - 见 V1__init_schema.sql
 ```
 
 ---
@@ -1824,6 +1821,8 @@ export const streamApi = {
 DB_USERNAME=postgres
 DB_PASSWORD=postgres
 KIMI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxx
+DASHSCOPE_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxx
+DASHSCOPE_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
 GETSTREAM_API_KEY=xxxxxxxxxxxxxxxxx
 GETSTREAM_API_SECRET=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
@@ -1872,7 +1871,7 @@ npm run dev
 | 决策 | 选择 | 替代方案 | 理由 |
 |------|------|---------|------|
 | 向量存储 | PGVector (PostgreSQL 扩展) | Chroma / Qdrant / Milvus | 已使用 PostgreSQL，无需额外服务，Spring AI 原生支持 |
-| Embedding 模型 | 本地 ONNX (all-MiniLM-L6-v2) | Kimi API / OpenAI Embedding | 零成本、零外部依赖、384 维足够 FAQ 场景 |
+| Embedding 模型 | DashScope text-embedding-v3 | 本地 ONNX / Kimi API | 1024 维向量，支持 50+ 语言，OpenAI 兼容 API，Kimi 不支持 Embedding |
 | 前端框架 | React + Vite | Next.js / Vue | 无需 SSR，Vite 开发体验好，GetStream React SDK 成熟 |
 | 消息发送路径 | 前端 → 后端 API → GetStream | 前端直接通过 GetStream 发送 | 所有消息必须经过 Orchestrator 路由，保证业务逻辑一致性 |
 | LLM 集成 | Spring AI + OpenAI 兼容模式 | 直接 HTTP 调用 Kimi API | 统一抽象，未来可替换 LLM 供应商 |

@@ -9,7 +9,7 @@ function UserChatPage() {
   const [searchParams] = useSearchParams();
   const userId = searchParams.get('userId') ?? 'user_alice';
 
-  const { messages, loading, error, sendMessage, sending } = useChat(userId);
+  const { messages, loading, error, sendMessage, sending, aiThinking } = useChat(userId);
 
   return (
     <Layout title="智能客服系统">
@@ -32,7 +32,7 @@ function UserChatPage() {
         </div>
 
         {/* Message list */}
-        <MessageList messages={messages} loading={loading} />
+        <MessageList messages={messages} loading={loading} aiThinking={aiThinking} />
 
         {/* User tool panel */}
         <UserToolPanel onSendMessage={sendMessage} disabled={loading} />

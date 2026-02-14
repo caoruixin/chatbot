@@ -7,28 +7,22 @@ import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration
-public class KimiConfig {
+public class EmbeddingConfig {
 
-    @Value("${kimi.api-key}")
+    @Value("${dashscope.api-key}")
     private String apiKey;
 
-    @Value("${kimi.base-url}")
+    @Value("${dashscope.base-url}")
     private String baseUrl;
 
-    @Value("${kimi.chat.model}")
-    private String chatModel;
-
-    @Value("${kimi.chat.temperature}")
-    private double chatTemperature;
-
-    @Value("${kimi.chat.timeout-seconds}")
-    private int chatTimeoutSeconds;
+    @Value("${dashscope.embedding.model}")
+    private String embeddingModel;
 
     @Bean
-    public RestTemplate kimiRestTemplate() {
+    public RestTemplate embeddingRestTemplate() {
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout(5000);
-        factory.setReadTimeout(chatTimeoutSeconds * 1000);
+        factory.setReadTimeout(30000);
         return new RestTemplate(factory);
     }
 
@@ -40,11 +34,7 @@ public class KimiConfig {
         return baseUrl;
     }
 
-    public String getChatModel() {
-        return chatModel;
-    }
-
-    public double getChatTemperature() {
-        return chatTemperature;
+    public String getEmbeddingModel() {
+        return embeddingModel;
     }
 }
