@@ -14,6 +14,8 @@ function getSenderLabel(senderType: SenderType): string {
       return 'AI助手';
     case 'HUMAN_AGENT':
       return '人工客服';
+    case 'SYSTEM':
+      return '系统';
   }
 }
 
@@ -31,6 +33,17 @@ function formatTime(createdAt: string): string {
 
 function MessageBubble({ content, senderType, createdAt }: MessageBubbleProps) {
   const isUser = senderType === 'USER';
+  const isSystem = senderType === 'SYSTEM';
+
+  if (isSystem) {
+    return (
+      <div className="mb-3 flex justify-center">
+        <span className="rounded-full bg-gray-100 px-4 py-1 text-xs text-gray-500">
+          {content}
+        </span>
+      </div>
+    );
+  }
 
   return (
     <div

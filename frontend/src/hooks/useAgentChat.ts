@@ -7,6 +7,7 @@ import type { MessageResponse, SessionResponse, SenderType } from '../types';
 function mapSenderType(streamUserId: string | undefined): SenderType {
   if (!streamUserId) return 'USER';
   if (streamUserId === 'ai_bot') return 'AI_CHATBOT';
+  if (streamUserId === 'system') return 'SYSTEM';
   if (streamUserId.startsWith('agent')) return 'HUMAN_AGENT';
   return 'USER';
 }

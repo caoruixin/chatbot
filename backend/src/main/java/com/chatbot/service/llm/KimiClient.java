@@ -14,7 +14,8 @@ import java.util.*;
 /**
  * LLM client - uses Kimi (Moonshot AI) for chat completions
  * and DashScope (Alibaba Cloud Qwen) for text embeddings.
- * Both APIs are OpenAI-compatible.
+ * Chat uses Kimi's OpenAI-compatible API.
+ * Embeddings use DashScope's native API (required for text_type parameter).
  */
 @Component
 public class KimiClient {
@@ -75,25 +76,55 @@ public class KimiClient {
     }
 
     /**
-     * Text embedding call to DashScope (Alibaba Cloud Qwen) API.
-     * Uses OpenAI-compatible endpoint.
+     * Generate embedding for a document (FAQ, knowledge base entry).
+     * Uses text_type=document for optimal asymmetric retrieval.
+     */
+    public float[] embeddingDocument(String text) {
+        return embeddingInternal(text, "document");
+    }
+
+    /**
+     * Generate embedding for a user query (search input).
+     * Uses text_type=query for optimal asymmetric retrieval.
+     */
+    public float[] embeddingQuery(String text) {
+        return embeddingInternal(text, "query");
+    }
+
+    /**
+     * Text embedding call to DashScope native API.
+     * Uses the native API (not OpenAI-compatible) to support text_type parameter
+     * for asymmetric retrieval optimization.
      *
+     * Native API request format:
+     * {
+     *   "model": "text-embedding-v4",
+     *   "input": {"texts": ["text"]},
+     *   "parameters": {"text_type": "query", "dimension": 1024}
+     * }
+     *
+     * @param text     the text to embed
+     * @param textType "query" for user searches, "document" for stored content
      * @throws LlmCallException on API failure or empty/invalid response
      */
     @SuppressWarnings("unchecked")
-    public float[] embedding(String text) {
+    private float[] embeddingInternal(String text, String textType) {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(embeddingConfig.getApiKey());
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        Map<String, Object> body = Map.of(
-                "model", embeddingConfig.getEmbeddingModel(),
-                "input", text
-        );
+        // Native DashScope API request format
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("model", embeddingConfig.getEmbeddingModel());
+        body.put("input", Map.of("texts", List.of(text)));
+        body.put("parameters", Map.of(
+                "text_type", textType,
+                "dimension", 1024
+        ));
 
         try {
             ResponseEntity<Map> resp = embeddingRestTemplate.exchange(
-                    embeddingConfig.getBaseUrl() + "/embeddings",
+                    embeddingConfig.getEmbeddingApiUrl(),
                     HttpMethod.POST,
                     new HttpEntity<>(body, headers),
                     Map.class
@@ -104,12 +135,18 @@ public class KimiClient {
                 throw new LlmCallException("DashScope embedding API returned null body");
             }
 
-            List<Map<String, Object>> data = (List<Map<String, Object>>) responseBody.get("data");
-            if (data == null || data.isEmpty()) {
-                throw new LlmCallException("DashScope embedding API returned empty data");
+            // Native API response format: {"output": {"embeddings": [{"embedding": [...]}]}}
+            Map<String, Object> output = (Map<String, Object>) responseBody.get("output");
+            if (output == null) {
+                throw new LlmCallException("DashScope embedding API returned null output");
             }
 
-            List<Number> embedding = (List<Number>) data.get(0).get("embedding");
+            List<Map<String, Object>> embeddings = (List<Map<String, Object>>) output.get("embeddings");
+            if (embeddings == null || embeddings.isEmpty()) {
+                throw new LlmCallException("DashScope embedding API returned empty embeddings");
+            }
+
+            List<Number> embedding = (List<Number>) embeddings.get(0).get("embedding");
             if (embedding == null || embedding.isEmpty()) {
                 throw new LlmCallException("DashScope embedding API returned empty embedding vector");
             }
@@ -118,7 +155,8 @@ public class KimiClient {
             for (int i = 0; i < embedding.size(); i++) {
                 result[i] = embedding.get(i).floatValue();
             }
-            log.debug("Embedding generated: textLength={}, dimension={}", text.length(), result.length);
+            log.debug("Embedding generated: textType={}, textLength={}, dimension={}",
+                    textType, text.length(), result.length);
             return result;
         } catch (LlmCallException e) {
             throw e;

@@ -44,7 +44,7 @@ public class FaqEmbeddingInitializer implements ApplicationRunner {
 
         for (FaqDoc doc : docsWithoutEmbedding) {
             try {
-                float[] embedding = kimiClient.embedding(doc.getQuestion());
+                float[] embedding = kimiClient.embeddingDocument(doc.getQuestion());
                 if (embedding.length == 0) {
                     log.warn("Empty embedding returned for faqId={}, question={}",
                             doc.getFaqId(), doc.getQuestion());

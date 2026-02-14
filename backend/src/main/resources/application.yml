@@ -33,7 +33,8 @@ dashscope:
   api-key: ${DASHSCOPE_API_KEY}
   base-url: ${DASHSCOPE_BASE_URL:https://dashscope.aliyuncs.com/compatible-mode/v1}
   embedding:
-    model: text-embedding-v3
+    model: text-embedding-v4
+    api-url: https://dashscope.aliyuncs.com/api/v1/services/embeddings/text-embedding/text-embedding
 
 # GetStream
 getstream:
@@ -54,4 +55,4 @@ chatbot:
     bot-name: AI 助手
     max-react-rounds: 3
     confidence-threshold: 0.7
-    faq-score-threshold: 0.5
+    faq-score-threshold: 0.75

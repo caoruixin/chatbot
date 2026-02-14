@@ -6,7 +6,7 @@ export interface ApiResponse<T> {
 }
 
 // Sender types
-export type SenderType = 'USER' | 'AI_CHATBOT' | 'HUMAN_AGENT';
+export type SenderType = 'USER' | 'AI_CHATBOT' | 'HUMAN_AGENT' | 'SYSTEM';
 export type SessionStatus = 'AI_HANDLING' | 'HUMAN_HANDLING' | 'CLOSED';
 export type ConversationStatus = 'ACTIVE' | 'CLOSED';
 

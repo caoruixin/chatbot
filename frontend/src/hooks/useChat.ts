@@ -7,6 +7,7 @@ import type { MessageResponse, SenderType, SessionStatus } from '../types';
 function mapSenderType(streamUserId: string | undefined): SenderType {
   if (!streamUserId) return 'USER';
   if (streamUserId === 'ai_bot') return 'AI_CHATBOT';
+  if (streamUserId === 'system') return 'SYSTEM';
   if (streamUserId.startsWith('agent')) return 'HUMAN_AGENT';
   return 'USER';
 }
@@ -138,11 +139,21 @@ export function useChat(userId: string): UseChatReturn {
           createdAt:
             event.message?.created_at?.toString() ?? new Date().toISOString(),
         };
-        setMessages((prev) => [...prev, newMsg]);
+        setMessages((prev) => {
+          const updated = [...prev, newMsg];
+          updated.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+          return updated;
+        });
 
         // Clear AI thinking indicator when AI reply arrives
         if (senderType === 'AI_CHATBOT') {
           setAiThinking(false);
+        }
+
+        // Update session status when a system transfer message arrives
+        if (senderType === 'SYSTEM') {
+          setAiThinking(false);
+          setSessionStatus('HUMAN_HANDLING');
         }
 
         // Update session status when a human agent message arrives

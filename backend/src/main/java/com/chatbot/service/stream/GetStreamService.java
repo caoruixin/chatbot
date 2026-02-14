@@ -24,6 +24,9 @@ public class GetStreamService {
             System.setProperty("io.getstream.chat.apiKey", config.getApiKey());
             System.setProperty("io.getstream.chat.apiSecret", config.getApiSecret());
             log.info("GetStream SDK initialized with API key");
+
+            // Ensure "system" user exists for system messages
+            upsertUser("system", "系统通知");
         } catch (Exception e) {
             log.error("Failed to initialize GetStream SDK", e);
         }

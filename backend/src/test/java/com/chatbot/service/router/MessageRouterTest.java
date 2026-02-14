@@ -82,12 +82,12 @@ class MessageRouterTest {
 
         verify(sessionService).updateStatus(session.getSessionId(), SessionStatus.HUMAN_HANDLING);
         verify(humanAgentService).assignAgent(session);
-        verify(getStreamService).sendMessage(eq(conversation.getGetstreamChannelId()), eq("ai_bot"), anyString());
+        verify(getStreamService).sendMessage(eq(conversation.getGetstreamChannelId()), eq("system"), anyString());
         verify(messageService).save(
                 eq(session.getConversationId()),
                 eq(session.getSessionId()),
-                eq(SenderType.AI_CHATBOT),
-                eq("ai_bot"),
+                eq(SenderType.SYSTEM),
+                eq("system"),
                 anyString()
         );
         verify(agentCore, never()).handleMessage(any(), any());

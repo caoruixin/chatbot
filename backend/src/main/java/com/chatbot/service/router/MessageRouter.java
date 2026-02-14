@@ -59,9 +59,9 @@ public class MessageRouter {
 
             // Send system message
             String systemMessage = "正在为您转接人工客服，请稍候...";
-            getStreamService.sendMessage(channelId, "ai_bot", systemMessage);
+            getStreamService.sendMessage(channelId, "system", systemMessage);
             messageService.save(session.getConversationId(), session.getSessionId(),
-                    SenderType.AI_CHATBOT, "ai_bot", systemMessage);
+                    SenderType.SYSTEM, "system", systemMessage);
             return;
         }
 

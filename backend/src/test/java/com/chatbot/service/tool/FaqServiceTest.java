@@ -39,7 +39,7 @@ class FaqServiceTest {
     @Test
     void execute_validQuery_returnsMatchingResult() {
         float[] mockEmbedding = {0.1f, 0.2f, 0.3f};
-        when(kimiClient.embedding(anyString())).thenReturn(mockEmbedding);
+        when(kimiClient.embeddingQuery(anyString())).thenReturn(mockEmbedding);
 
         FaqDoc faqDoc = new FaqDoc();
         faqDoc.setFaqId(UUID.randomUUID());
@@ -58,7 +58,7 @@ class FaqServiceTest {
     @Test
     void execute_noResults_returnsEmptyResult() {
         float[] mockEmbedding = {0.1f, 0.2f, 0.3f};
-        when(kimiClient.embedding(anyString())).thenReturn(mockEmbedding);
+        when(kimiClient.embeddingQuery(anyString())).thenReturn(mockEmbedding);
         when(faqDocMapper.searchByEmbedding(anyString(), eq(3))).thenReturn(Collections.emptyList());
 
         ToolResult result = faqService.execute(Map.of("query", "something random"));
@@ -68,7 +68,7 @@ class FaqServiceTest {
 
     @Test
     void execute_embeddingThrowsLlmCallException_returnsError() {
-        when(kimiClient.embedding(anyString()))
+        when(kimiClient.embeddingQuery(anyString()))
                 .thenThrow(new LlmCallException("Kimi embedding API returned empty embedding vector"));
 
         ToolResult result = faqService.execute(Map.of("query", "test"));
@@ -79,7 +79,7 @@ class FaqServiceTest {
     @Test
     void execute_belowThreshold_stillReturnsSuccess() {
         float[] mockEmbedding = {0.1f, 0.2f, 0.3f};
-        when(kimiClient.embedding(anyString())).thenReturn(mockEmbedding);
+        when(kimiClient.embeddingQuery(anyString())).thenReturn(mockEmbedding);
 
         FaqDoc faqDoc = new FaqDoc();
         faqDoc.setFaqId(UUID.randomUUID());
@@ -96,7 +96,7 @@ class FaqServiceTest {
 
     @Test
     void execute_embeddingApiFails_returnsError() {
-        when(kimiClient.embedding(anyString())).thenThrow(new RuntimeException("API error"));
+        when(kimiClient.embeddingQuery(anyString())).thenThrow(new RuntimeException("API error"));
 
         ToolResult result = faqService.execute(Map.of("query", "test"));
 

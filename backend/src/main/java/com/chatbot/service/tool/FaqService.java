@@ -45,7 +45,7 @@ public class FaqService implements ToolExecutor {
 
         try {
             // Try embedding-based search first
-            float[] queryEmbedding = kimiClient.embedding(query);
+            float[] queryEmbedding = kimiClient.embeddingQuery(query);
 
             String vectorString = floatArrayToVectorString(queryEmbedding);
 

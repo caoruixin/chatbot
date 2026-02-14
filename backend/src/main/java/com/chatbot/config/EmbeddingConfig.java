@@ -18,6 +18,9 @@ public class EmbeddingConfig {
     @Value("${dashscope.embedding.model}")
     private String embeddingModel;
 
+    @Value("${dashscope.embedding.api-url}")
+    private String embeddingApiUrl;
+
     @Bean
     public RestTemplate embeddingRestTemplate() {
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
@@ -36,5 +39,9 @@ public class EmbeddingConfig {
 
     public String getEmbeddingModel() {
         return embeddingModel;
+    }
+
+    public String getEmbeddingApiUrl() {
+        return embeddingApiUrl;
     }
 }
