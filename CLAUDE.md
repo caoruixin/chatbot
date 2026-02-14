@@ -14,7 +14,7 @@
 ### 2. AI Chatbot
 - 核心验证目标
 - 集成 Kimi 模型作为 LLM（对话/意图识别/回复生成）
-- 集成 DashScope text-embedding-v3 作为 Embedding 模型（FAQ 向量化）
+- 集成 DashScope text-embedding-v4 作为 Embedding 模型（FAQ 向量化）
 - 与人工客服 IM 系统集成
 
 ## 技术栈
@@ -25,13 +25,16 @@
 - **数据库**: PostgreSQL (本地部署)
 
 ### 前端
-- **技术栈**: 现代化前端技术栈 (待选型，如 React/Vue/Next.js)
-- **UI 组件**: (待补充)
+- **框架**: React 19 + TypeScript 5.7
+- **构建工具**: Vite 6
+- **样式**: Tailwind CSS 4
+- **路由**: React Router 7
+- **IM SDK**: stream-chat-react 12 / stream-chat 8
 
 ### 第三方服务
 - **IM 服务**: GetStream
 - **LLM 服务（对话）**: Kimi 模型 (Moonshot AI)
-- **Embedding 服务**: DashScope text-embedding-v3 (阿里云通义千问)
+- **Embedding 服务**: DashScope text-embedding-v4 (阿里云通义千问)
 
 ## 系统架构设计
 
@@ -51,7 +54,6 @@
 
 #### Session 状态
 - `AI_HANDLING`: AI Chatbot 处理中
-- `HUMAN_REQUESTED`: 用户请求转人工
 - `HUMAN_HANDLING`: 人工客服处理中
 - `CLOSED`: 会话已关闭
 
@@ -69,7 +71,8 @@
 3. **Router（路由决策）**
    - 根据 session 状态决定消息路由
    - 判断条件：
-     - 如果 session 状态为 `HUMAN_HANDLING` 或 `HUMAN_REQUESTED` → 转人工客服
+     - 如果用户消息包含转人工关键词 → 转人工客服
+     - 如果 session 状态为 `HUMAN_HANDLING` → 转人工客服
      - 否则 → 转 AI Chatbot
 
 4. **消息处理**
@@ -96,9 +99,8 @@
 - 一旦转人工，同一个 session 内不再回到 AI Chatbot
 
 #### 转人工触发条件
-- 用户明确请求人工服务
-- AI Chatbot 主动转接（如遇到无法处理的问题）
-- Session 状态更新为 `HUMAN_REQUESTED` 或 `HUMAN_HANDLING`
+- 用户消息包含转人工关键词（转人工、转接人工、人工客服、人工服务）
+- Session 状态更新为 `HUMAN_HANDLING`
 
 ### 系统组件
 
@@ -148,20 +150,21 @@
 ```sql
 conversation_id (UUID, PK)
 user_id (VARCHAR)
+getstream_channel_id (VARCHAR)
+status (VARCHAR) -- ACTIVE, CLOSED
 created_at (TIMESTAMP)
 updated_at (TIMESTAMP)
-status (VARCHAR) -- ACTIVE, CLOSED
 ```
 
 #### Session 表
 ```sql
 session_id (UUID, PK)
 conversation_id (UUID, FK)
-status (VARCHAR) -- AI_HANDLING, HUMAN_REQUESTED, HUMAN_HANDLING, CLOSED
+status (VARCHAR) -- AI_HANDLING, HUMAN_HANDLING, CLOSED
 created_at (TIMESTAMP)
 updated_at (TIMESTAMP)
 last_activity_at (TIMESTAMP)
-assigned_agent_id (UUID, NULLABLE)
+assigned_agent_id (VARCHAR, NULLABLE)
 ```
 
 #### Message 表
@@ -169,11 +172,30 @@ assigned_agent_id (UUID, NULLABLE)
 message_id (UUID, PK)
 conversation_id (UUID, FK)
 session_id (UUID, FK)
-sender_type (VARCHAR) -- USER, AI, HUMAN_AGENT
+sender_type (VARCHAR) -- USER, AI_CHATBOT, HUMAN_AGENT, SYSTEM
 sender_id (VARCHAR)
 content (TEXT)
-created_at (TIMESTAMP)
+metadata_json (TEXT)
 getstream_message_id (VARCHAR)
+created_at (TIMESTAMP)
+```
+
+#### UserPost 表（Mock 数据）
+```sql
+post_id (SERIAL, PK)
+username (VARCHAR)
+title (VARCHAR)
+status (VARCHAR) -- PUBLISHED, UNDER_REVIEW, REMOVED, DRAFT
+created_at (TIMESTAMP)
+```
+
+#### FaqDoc 表（向量存储）
+```sql
+faq_id (UUID, PK)
+question (TEXT)
+answer (TEXT)
+embedding (vector(1024))
+created_at (TIMESTAMP)
 ```
 
 ### 技术优化建议
@@ -224,20 +246,20 @@ getstream_message_id (VARCHAR)
 ## 项目阶段
 
 ### Phase 1: 人工客服 IM 系统
-- [ ] 设计系统架构
-- [ ] 集成 GetStream
-- [ ] 实现基础 IM 功能
-- [ ] 前后端开发
+- [x] 设计系统架构
+- [x] 集成 GetStream
+- [x] 实现基础 IM 功能
+- [x] 前后端开发
 
 ### Phase 2: AI Chatbot
-- [ ] 集成 Kimi 模型
-- [ ] 实现 AI 对话能力
-- [ ] 验证 AI Chatbot 功能
+- [x] 集成 Kimi 模型
+- [x] 实现 AI 对话能力（Bounded Agent 架构）
+- [x] 验证 AI Chatbot 功能
 
 ### Phase 3: 系统集成
-- [ ] AI Chatbot 与人工 IM 集成
-- [ ] 人机协作流程设计
-- [ ] 完整功能测试
+- [x] AI Chatbot 与人工 IM 集成
+- [x] 人机协作流程设计（转人工关键词触发）
+- [x] 完整功能测试
 
 ## 环境配置
 

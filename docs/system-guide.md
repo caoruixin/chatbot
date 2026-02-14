@@ -21,7 +21,7 @@
 | 样式 | Tailwind CSS 4.x |
 | IM 服务 | GetStream Chat (SDK 1.24 后端 / 12.x 前端) |
 | LLM 对话 | Kimi (Moonshot AI) moonshot-v1-8k |
-| 文本嵌入 | DashScope (阿里云通义千问) text-embedding-v3 |
+| 文本嵌入 | DashScope (阿里云通义千问) text-embedding-v4 |
 
 ### 1.3 AI Agent 与 Human Agent 协作模型
 
@@ -189,7 +189,8 @@ dashscope:
   api-key: ${DASHSCOPE_API_KEY}
   base-url: ${DASHSCOPE_BASE_URL:https://dashscope.aliyuncs.com/compatible-mode/v1}
   embedding:
-    model: text-embedding-v3           # 嵌入模型 (1024 维)
+    model: text-embedding-v4           # 嵌入模型 (1024 维)
+    api-url: https://dashscope.aliyuncs.com/api/v1/services/embeddings/text-embedding/text-embedding
 
 chatbot:
   session:
@@ -204,7 +205,7 @@ chatbot:
     bot-name: AI 助手
     max-react-rounds: 3                # ReAct 循环最大轮数
     confidence-threshold: 0.7          # 意图识别置信度阈值
-    faq-score-threshold: 0.5           # FAQ 向量相似度阈值
+    faq-score-threshold: 0.75          # FAQ 向量相似度阈值
 ```
 
 ### 3.4 前端配置
@@ -418,6 +419,8 @@ psql chatbot
 | `user_post` | 用户帖子（Mock 数据） | V1 + V2__mock_data.sql |
 | `faq_doc` | FAQ 知识库（含向量嵌入） | V1 + V2__mock_data.sql |
 
+> **注意**：还有 V3__clear_kimi_embeddings.sql 和 V4__clear_v3_embeddings_for_v4_upgrade.sql 两个嵌入向量清理迁移，用于从旧嵌入模型升级到 text-embedding-v4。
+
 ### 6.3 常用查询
 
 #### 查看所有对话
@@ -564,7 +567,7 @@ curl -X POST http://localhost:8080/api/messages/inbound \
 | `GET` | `/api/conversations?userId=` | 查询用户的对话 |
 | `GET` | `/api/conversations/{id}/sessions` | 查询对话下的所有 Session |
 | `GET` | `/api/sessions/{id}` | 查询 Session 详情 |
-| `GET` | `/api/sessions/active?agentId=` | 查询客服的活跃 Session |
+| `GET` | `/api/sessions/active?agentId=` | 查询分配给该客服的所有 Session |
 | `POST` | `/api/tools/posts/query` | 手动调用帖子查询工具 |
 | `POST` | `/api/tools/user-data/delete` | 手动调用数据删除工具 |
 | `POST` | `/api/tools/faq/search` | 手动调用 FAQ 搜索工具 |
@@ -647,7 +650,7 @@ AI Agent 拥有 3 个工具：
 ### 8.3 FAQ 语义搜索
 
 FAQ 搜索使用**双层策略**：
-1. **主路径**：DashScope text-embedding-v3 生成查询向量 → pgvector 余弦相似度搜索 → 返回最匹配的 FAQ
+1. **主路径**：DashScope text-embedding-v4 生成查询向量 → pgvector 余弦相似度搜索 → 返回最匹配的 FAQ
 2. **降级路径**：如果嵌入 API 不可用，使用 Kimi 对话模型直接从 FAQ 列表中匹配
 
 启动时，`FaqEmbeddingInitializer` 自动为没有嵌入向量的 FAQ 文档生成嵌入。
@@ -856,6 +859,7 @@ chatbot/
 ├── docs/
 │   ├── system-guide.md             # 本文档
 │   ├── tech-design-spec.md         # 技术设计规格
+│   ├── backup-tech-design-spec.md  # 技术设计规格备份
 │   ├── ai-service-agent.md         # AI Agent 设计文档
 │   └── PRD.md                      # 产品需求文档
 ├── backend/
@@ -863,7 +867,7 @@ chatbot/
 │   ├── CLAUDE.md                   # 后端开发指南
 │   └── src/main/
 │       ├── java/com/chatbot/
-│       │   ├── config/             # 配置类 (KimiConfig, EmbeddingConfig, AsyncConfig, ...)
+│       │   ├── config/             # 配置类 (KimiConfig, EmbeddingConfig, AsyncConfig, UUIDTypeHandler, ...)
 │       │   ├── controller/         # REST API 控制器
 │       │   ├── dto/                # 请求/响应 DTO
 │       │   ├── enums/              # 枚举 (SessionStatus, SenderType, RiskLevel)
@@ -874,14 +878,14 @@ chatbot/
 │       │   └── service/
 │       │       ├── orchestrator/   # GlobalOrchestrator (核心编排)
 │       │       ├── router/         # MessageRouter (消息路由)
-│       │       ├── agent/          # AI Agent (AgentCore, IntentRouter, ReactPlanner, ResponseComposer)
+│       │       ├── agent/          # AI Agent (AgentCore, IntentRouter, IntentResult, ReactPlanner, ResponseComposer)
 │       │       ├── human/          # HumanAgentService (人工客服)
-│       │       ├── tool/           # 工具系统 (ToolDispatcher, FaqService, ...)
+│       │       ├── tool/           # 工具系统 (ToolDispatcher, FaqService, FaqEmbeddingInitializer, ...)
 │       │       ├── llm/            # KimiClient (LLM 调用)
 │       │       └── stream/         # GetStreamService (IM 服务)
 │       └── resources/
 │           ├── application.yml     # 应用配置
-│           ├── db/migration/       # Flyway 迁移脚本
+│           ├── db/migration/       # Flyway 迁移脚本 (V1~V4)
 │           └── mapper/             # MyBatis XML 映射
 └── frontend/
     ├── package.json                # Node.js 依赖
@@ -889,10 +893,16 @@ chatbot/
     ├── CLAUDE.md                   # 前端开发指南
     └── src/
         ├── App.tsx                 # 路由配置 (/chat, /agent)
-        ├── pages/                  # 页面组件
-        ├── components/             # UI 组件
-        ├── services/               # API 客户端
-        ├── hooks/                  # 自定义 Hooks
+        ├── main.tsx                # 入口文件
+        ├── index.css               # Tailwind CSS 入口
+        ├── pages/                  # 页面组件 (UserChatPage, AgentDashboardPage)
+        ├── components/
+        │   ├── chat/               # 消息展示 (MessageList, MessageBubble, MessageInput, TypingIndicator)
+        │   ├── agent/              # 人工客服 (SessionList, ToolPanel)
+        │   ├── user/               # 用户端 (UserToolPanel)
+        │   └── common/             # 通用 (Layout)
+        ├── services/               # API 客户端 (apiClient, streamClient)
+        ├── hooks/                  # 自定义 Hooks (useChat, useSession, useAgentChat, useTools)
         ├── types/                  # TypeScript 类型
         └── config/env.ts           # 环境变量
 ```

@@ -41,7 +41,6 @@
                created_at, updated_at, last_activity_at
         FROM session
         WHERE assigned_agent_id = #{agentId}
-          AND status IN ('AI_HANDLING', 'HUMAN_HANDLING')
         ORDER BY last_activity_at DESC
     </select>
 

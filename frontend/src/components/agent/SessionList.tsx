@@ -62,7 +62,7 @@ function SessionList({
   if (sessions.length === 0) {
     return (
       <div className="flex h-full items-center justify-center p-4">
-        <p className="text-center text-sm text-gray-400">暂无活跃会话</p>
+        <p className="text-center text-sm text-gray-400">暂无会话</p>
       </div>
     );
   }

@@ -30,7 +30,7 @@ function AgentDashboardPage() {
         <div className="flex w-72 shrink-0 flex-col border-r border-gray-200 bg-white">
           <div className="border-b border-gray-200 px-4 py-3">
             <h2 className="text-sm font-semibold text-gray-700">
-              活跃会话
+              我的会话
               {sessions.length > 0 && (
                 <span className="ml-2 rounded-full bg-blue-100 px-2 py-0.5 text-xs text-blue-600">
                   {sessions.length}

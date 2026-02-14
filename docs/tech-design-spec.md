@@ -35,7 +35,7 @@
 - ~~Spring Data JPA / Hibernate~~ → 用 MyBatis
 - ~~Spring AI~~ → 直接 RestTemplate 调用 OpenAI 兼容 API（Kimi 对话 + DashScope Embedding）
 - ~~Kotlin~~ → 纯 Java + Groovy Gradle
-- ~~ONNX Runtime~~ → Embedding 由 DashScope API 生成（text-embedding-v3）
+- ~~ONNX Runtime~~ → Embedding 由 DashScope API 生成（text-embedding-v4）
 
 ### 2.2 前端
 
@@ -48,7 +48,7 @@
 | React Router | 7.x | 客户端路由 |
 | Tailwind CSS | 4.x | 样式 |
 | stream-chat-react | 12.x | GetStream Chat React SDK |
-| stream-chat | 9.x | GetStream Chat JS 客户端 |
+| stream-chat | 8.x | GetStream Chat JS 客户端 |
 
 ### 2.3 第三方服务
 
@@ -56,7 +56,7 @@
 |------|------|---------|
 | GetStream Chat | 实时消息收发 | 后端 Java SDK + 前端 React SDK |
 | Kimi (Moonshot AI) | LLM 对话（意图识别 / 回复生成） | RestTemplate 调用 OpenAI 兼容 API |
-| DashScope (阿里云通义千问) | 文本 Embedding（FAQ 向量化） | RestTemplate 调用 OpenAI 兼容 API |
+| DashScope (阿里云通义千问) | 文本 Embedding（FAQ 向量化） | RestTemplate 调用 DashScope API |
 
 ### 2.4 本地环境依赖
 
@@ -536,7 +536,7 @@ CREATE INDEX idx_faq_embedding ON faq_doc
     USING ivfflat (embedding vector_cosine_ops) WITH (lists = 10);
 ```
 
-> **说明**：`embedding vector(1024)` 维度取决于 DashScope text-embedding-v3 模型输出维度（默认 1024 维）。应用启动时为无 embedding 的 FAQ 记录自动生成向量。
+> **说明**：`embedding vector(1024)` 维度取决于 DashScope text-embedding-v4 模型输出维度（默认 1024 维）。应用启动时为无 embedding 的 FAQ 记录自动生成向量。
 
 #### V2__mock_data.sql
 
@@ -570,7 +570,7 @@ INSERT INTO faq_doc (question, answer) VALUES
 |------|---|------|
 | ConversationStatus | `ACTIVE`, `CLOSED` | |
 | SessionStatus | `AI_HANDLING`, `HUMAN_HANDLING`, `CLOSED` | |
-| SenderType | `USER`, `AI_CHATBOT`, `HUMAN_AGENT` | |
+| SenderType | `USER`, `AI_CHATBOT`, `HUMAN_AGENT`, `SYSTEM` | |
 | PostStatus | `PUBLISHED`, `UNDER_REVIEW`, `REMOVED`, `DRAFT` | |
 | RiskLevel | `READ`, `WRITE`, `IRREVERSIBLE` | 工具风险级别 |
 
@@ -805,7 +805,7 @@ public class StreamTokenResponse {
 
 #### GET /api/sessions/active?agentId={agentId}
 
-获取人工客服的活跃 session 列表。
+获取分配给该客服的所有 session 列表（包括已关闭的）。
 
 ### 7.4 Tools API (ToolController)
 
@@ -848,7 +848,7 @@ public class StreamTokenResponse {
 | GET  | `/api/conversations` | 获取 conversation | User Web |
 | GET  | `/api/conversations/{id}/sessions` | session 列表 | Agent Web |
 | GET  | `/api/sessions/{id}` | session 详情 | Agent Web |
-| GET  | `/api/sessions/active` | 活跃 session | Agent Web |
+| GET  | `/api/sessions/active` | 客服的所有 session | Agent Web |
 | POST | `/api/tools/faq/search` | FAQ 搜索 | Agent Web / AI |
 | POST | `/api/tools/user-data/delete` | 数据删除 | Agent Web / AI |
 | POST | `/api/tools/posts/query` | 帖子查询 | Agent Web / AI |
@@ -990,7 +990,7 @@ public class KimiClient {
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         Map<String, Object> body = Map.of(
-            "model", embeddingConfig.getEmbeddingModel(),  // text-embedding-v3
+            "model", embeddingConfig.getEmbeddingModel(),  // text-embedding-v4
             "input", text
         );
         // 调用 DashScope OpenAI 兼容 /embeddings 端点
@@ -1404,7 +1404,7 @@ channel.on('message.new', (event) => { /* 更新消息列表 */ });
 | 服务商 | 端点 | 用途 | 模型 |
 |--------|------|------|------|
 | Kimi (Moonshot AI) | `POST /v1/chat/completions` | 意图识别 / 回复生成 | `moonshot-v1-8k` |
-| DashScope (阿里云) | `POST /v1/embeddings` | FAQ 文本向量化 | `text-embedding-v3` |
+| DashScope (阿里云) | `POST /v1/embeddings` | FAQ 文本向量化 | `text-embedding-v4` |
 
 ### 12.2 配置
 
@@ -1423,10 +1423,11 @@ dashscope:
   api-key: ${DASHSCOPE_API_KEY}
   base-url: ${DASHSCOPE_BASE_URL:https://dashscope.aliyuncs.com/compatible-mode/v1}
   embedding:
-    model: text-embedding-v3
+    model: text-embedding-v4
+    api-url: https://dashscope.aliyuncs.com/api/v1/services/embeddings/text-embedding/text-embedding
 ```
 
-不使用 Spring AI，直接在 `KimiClient` 中封装 HTTP 调用。对话调用 Kimi API，Embedding 调用 DashScope API，两者均为 OpenAI 兼容格式。
+不使用 Spring AI，直接在 `KimiClient` 中封装 HTTP 调用。对话调用 Kimi API，Embedding 调用 DashScope API。
 
 ---
 
@@ -1451,9 +1452,11 @@ chatbot/
 │       │   │   │
 │       │   │   ├── config/                      # === 配置 ===
 │       │   │   │   ├── WebConfig.java           # CORS
+│       │   │   │   ├── AsyncConfig.java         # 异步线程池 (aiTaskExecutor)
 │       │   │   │   ├── GetStreamConfig.java     # GetStream 客户端 Bean
 │       │   │   │   ├── KimiConfig.java          # Kimi 对话 Bean + RestTemplate
-│       │   │   │   └── EmbeddingConfig.java     # DashScope Embedding Bean + RestTemplate
+│       │   │   │   ├── EmbeddingConfig.java     # DashScope Embedding Bean + RestTemplate
+│       │   │   │   └── UUIDTypeHandler.java     # MyBatis UUID 类型处理器
 │       │   │   │
 │       │   │   ├── controller/                  # === API 层 ===
 │       │   │   │   ├── MessageController.java
@@ -1488,6 +1491,7 @@ chatbot/
 │       │   │   │   ├── agent/                   # Bounded Agent
 │       │   │   │   │   ├── AgentCore.java       # Agent 主循环
 │       │   │   │   │   ├── IntentRouter.java    # 意图识别
+│       │   │   │   │   ├── IntentResult.java    # 意图识别结果
 │       │   │   │   │   ├── ReactPlanner.java    # ReAct 规划
 │       │   │   │   │   └── ResponseComposer.java # 回复组织
 │       │   │   │   ├── tool/                    # 工具系统
@@ -1497,6 +1501,7 @@ chatbot/
 │       │   │   │   │   ├── ToolResult.java      # 工具调用结果
 │       │   │   │   │   ├── ToolExecutor.java    # 执行器接口
 │       │   │   │   │   ├── FaqService.java
+│       │   │   │   │   ├── FaqEmbeddingInitializer.java  # 启动时初始化嵌入
 │       │   │   │   │   ├── UserDataDeletionService.java
 │       │   │   │   │   └── PostQueryService.java
 │       │   │   │   ├── human/
@@ -1521,9 +1526,16 @@ chatbot/
 │       │   │   ├── enums/
 │       │   │   │   ├── ConversationStatus.java
 │       │   │   │   ├── SessionStatus.java
-│       │   │   │   ├── SenderType.java
+│       │   │   │   ├── SenderType.java          # USER, AI_CHATBOT, HUMAN_AGENT, SYSTEM
 │       │   │   │   ├── PostStatus.java
 │       │   │   │   └── RiskLevel.java
+│       │   │   │
+│       │   │   ├── exception/                   # === 异常处理 ===
+│       │   │   │   ├── ChatbotException.java
+│       │   │   │   ├── SessionNotFoundException.java
+│       │   │   │   ├── ConversationNotFoundException.java
+│       │   │   │   ├── LlmCallException.java
+│       │   │   │   └── GlobalExceptionHandler.java
 │       │   │   │
 │       │   │   ├── mapper/                      # === MyBatis Mapper ===
 │       │   │   │   ├── ConversationMapper.java
@@ -1545,7 +1557,9 @@ chatbot/
 │       │       │   └── FaqDocMapper.xml
 │       │       └── db/migration/                # Flyway
 │       │           ├── V1__init_schema.sql
-│       │           └── V2__mock_data.sql
+│       │           ├── V2__mock_data.sql
+│       │           ├── V3__clear_kimi_embeddings.sql
+│       │           └── V4__clear_v3_embeddings_for_v4_upgrade.sql
 │       │
 │       └── test/java/com/chatbot/
 │
@@ -1557,6 +1571,8 @@ chatbot/
 │   └── src/
 │       ├── main.tsx
 │       ├── App.tsx
+│       ├── index.css
+│       ├── vite-env.d.ts
 │       ├── pages/
 │       │   ├── UserChatPage.tsx
 │       │   └── AgentDashboardPage.tsx
@@ -1564,10 +1580,13 @@ chatbot/
 │       │   ├── chat/
 │       │   │   ├── MessageList.tsx
 │       │   │   ├── MessageBubble.tsx
-│       │   │   └── MessageInput.tsx
+│       │   │   ├── MessageInput.tsx
+│       │   │   └── TypingIndicator.tsx
 │       │   ├── agent/
 │       │   │   ├── SessionList.tsx
 │       │   │   └── ToolPanel.tsx
+│       │   ├── user/
+│       │   │   └── UserToolPanel.tsx
 │       │   └── common/
 │       │       └── Layout.tsx
 │       ├── services/
@@ -1576,6 +1595,7 @@ chatbot/
 │       ├── hooks/
 │       │   ├── useChat.ts
 │       │   ├── useSession.ts
+│       │   ├── useAgentChat.ts
 │       │   └── useTools.ts
 │       ├── types/
 │       │   └── index.ts
@@ -1583,8 +1603,8 @@ chatbot/
 │           └── env.ts
 │
 └── scripts/
-    ├── init-db.sh
-    └── start-dev.sh
+    ├── start-backend.sh
+    └── start-frontend.sh
 ```
 
 ---
@@ -1664,6 +1684,7 @@ spring:
 mybatis:
   mapper-locations: classpath:mapper/*.xml
   type-aliases-package: com.chatbot.model
+  type-handlers-package: com.chatbot.config
   configuration:
     map-underscore-to-camel-case: true
 
@@ -1681,7 +1702,8 @@ dashscope:
   api-key: ${DASHSCOPE_API_KEY}
   base-url: ${DASHSCOPE_BASE_URL:https://dashscope.aliyuncs.com/compatible-mode/v1}
   embedding:
-    model: text-embedding-v3
+    model: text-embedding-v4
+    api-url: https://dashscope.aliyuncs.com/api/v1/services/embeddings/text-embedding/text-embedding
 
 # GetStream
 getstream:
@@ -1695,6 +1717,8 @@ chatbot:
   agent:
     default-id: agent_default
     default-name: 人工客服
+  router:
+    transfer-keywords: 转人工,转接人工,人工客服,人工服务
   ai:
     bot-id: ai_bot
     bot-name: AI 助手
@@ -1720,7 +1744,7 @@ chatbot:
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router": "^7.0.0",
-    "stream-chat": "^9.0.0",
+    "stream-chat": "^8.55.0",
     "stream-chat-react": "^12.0.0"
   },
   "devDependencies": {
@@ -1809,7 +1833,7 @@ cd frontend && npm install && npm run dev
 | 数据访问 | MyBatis | JPA / Hibernate | 灵活轻量，SQL 可控，pgvector 原生 SQL 支持好 |
 | 构建脚本 | Gradle Groovy DSL | Gradle Kotlin DSL / Maven | 不引入 Kotlin 依赖 |
 | LLM 调用 | RestTemplate 直调 Kimi API | Spring AI | 零额外依赖，OpenAI 兼容格式简单 |
-| Embedding | DashScope text-embedding-v3 API | Kimi embedding / 本地 ONNX 模型 | 1024 维向量，支持 50+ 语言，OpenAI 兼容 API |
+| Embedding | DashScope text-embedding-v4 API | Kimi embedding / 本地 ONNX 模型 | 1024 维向量，支持 50+ 语言 |
 | 向量存储 | pgvector (PG 扩展) | Chroma / Qdrant | 已有 PG，无额外服务 |
 | AI 架构 | Bounded Agent (Router+ReAct+Composer) | 简单 3-Agent 流水线 | 参考 ai-service-agent.md，支持置信度、风险级别、失败降级 |
 | 高风险回复 | 模板输出 | LLM 自由生成 | 避免 LLM 幻觉导致误承诺 |
