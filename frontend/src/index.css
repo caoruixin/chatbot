@@ -1,1 +1,77 @@
 @import "tailwindcss";
+
+:root {
+  /* Brand defaults (Gumtree-like) */
+  --gt-green-cta: #5CE00B;
+  --gt-ink: #0D495C;
+
+  /* Text */
+  --gt-text: #3c3241;
+  --gt-muted: #635b67;
+
+  /* Surfaces */
+  --gt-bg: #ffffff;
+  --gt-border: 1px solid rgba(60, 50, 65, 0.15);
+  --gt-border-color: rgba(60, 50, 65, 0.15);
+  --gt-shadow: 0 0 12px rgba(0, 0, 0, 0.20);
+
+  /* Radii */
+  --gt-radius: 8px;
+  --gt-radius-cta: 6px;
+
+  /* Spacing */
+  --gt-pad-1: 8px;
+  --gt-pad-2: 12px;
+  --gt-pad-3: 16px;
+
+  /* Typography */
+  --gt-font: inherit;
+  --gt-font-size: 14px;
+  --gt-line: 1.4;
+
+  /* Message bubbles */
+  --gt-user-bubble: rgba(92, 224, 11, 0.15);
+  --gt-ai-bubble: rgba(60, 50, 65, 0.06);
+}
+
+/* Typing indicator animation */
+@keyframes gt-dot-pulse {
+  0%, 60%, 100% { opacity: 0.3; }
+  30% { opacity: 1; }
+}
+
+.gt-dot {
+  animation: gt-dot-pulse 1.4s infinite;
+}
+
+/* Panel open/close animation */
+@keyframes gt-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.gt-panel-enter {
+  animation: gt-panel-in 0.2s ease-out;
+}
+
+/* Jump to latest fade-in */
+@keyframes gt-fade-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.gt-fade-slide-up {
+  animation: gt-fade-slide-up 0.2s ease-out;
+}

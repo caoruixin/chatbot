@@ -1,50 +1,93 @@
+import { useState, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router';
-import Layout from '../components/common/Layout';
-import MessageList from '../components/chat/MessageList';
-import MessageInput from '../components/chat/MessageInput';
-import UserToolPanel from '../components/user/UserToolPanel';
+import HelpLauncherButton from '../components/help/HelpLauncherButton';
+import HelpPanel from '../components/help/HelpPanel';
 import { useChat } from '../hooks/useChat';
 
 function UserChatPage() {
   const [searchParams] = useSearchParams();
   const userId = searchParams.get('userId') ?? 'user_alice';
+  const [panelOpen, setPanelOpen] = useState(false);
+  const launcherRef = useRef<HTMLDivElement>(null);
 
-  const { messages, loading, error, sendMessage, sending, aiThinking } = useChat(userId);
+  const { messages, loading, error, sendMessage, aiThinking } = useChat(userId);
+
+  const handleOpen = useCallback(() => setPanelOpen(true), []);
+  const handleClose = useCallback(() => {
+    setPanelOpen(false);
+    // Return focus to launcher area
+    const btn = launcherRef.current?.querySelector('button');
+    if (btn) requestAnimationFrame(() => btn.focus());
+  }, []);
+
+  const handleToggle = useCallback(() => {
+    if (panelOpen) {
+      handleClose();
+    } else {
+      handleOpen();
+    }
+  }, [panelOpen, handleOpen, handleClose]);
 
   return (
-    <Layout title="智能客服系统">
-      <div className="flex flex-1 flex-col">
-        {/* Connection status */}
-        {error && (
-          <div className="bg-red-50 px-4 py-2 text-sm text-red-600">
-            {error}
-          </div>
-        )}
-
-        {/* User info bar */}
-        <div className="flex items-center justify-between border-b border-gray-100 bg-white px-4 py-2">
-          <span className="text-sm text-gray-600">
-            当前用户: <span className="font-medium">{userId}</span>
+    <div className="min-h-screen bg-gray-50">
+      {/* Simulated marketplace page header */}
+      <header className="flex h-14 items-center justify-between border-b border-gray-200 bg-white px-6 shadow-sm">
+        <h1 className="text-lg font-semibold" style={{ color: 'var(--gt-ink)' }}>
+          Marketplace
+        </h1>
+        <nav className="flex items-center gap-4">
+          <span className="text-sm text-gray-500">
+            User: <span className="font-medium">{userId}</span>
           </span>
-          {sending && (
-            <span className="text-xs text-gray-400">发送中...</span>
+          <button
+            type="button"
+            onClick={handleOpen}
+            className="text-sm font-medium text-[var(--gt-ink)] underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--gt-green-cta)]"
+          >
+            Help
+          </button>
+        </nav>
+      </header>
+
+      {/* Demo marketplace content */}
+      <main className="mx-auto max-w-4xl px-6 py-8">
+        <h2 className="mb-4 text-xl font-semibold" style={{ color: 'var(--gt-text)' }}>
+          Featured Listings
+        </h2>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {['Mountain Bike - $350', 'Sofa Set - $200', 'iPhone 14 - $600'].map(
+            (item) => (
+              <div
+                key={item}
+                className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
+              >
+                <div className="mb-3 h-32 rounded bg-gray-100" />
+                <p className="font-medium" style={{ color: 'var(--gt-text)' }}>
+                  {item}
+                </p>
+              </div>
+            ),
           )}
         </div>
+      </main>
 
-        {/* Message list */}
-        <MessageList messages={messages} loading={loading} aiThinking={aiThinking} />
-
-        {/* User tool panel */}
-        <UserToolPanel onSendMessage={sendMessage} disabled={loading} />
-
-        {/* Message input */}
-        <MessageInput
-          onSend={sendMessage}
-          disabled={loading}
-          placeholder="输入消息... (Shift+Enter 换行)"
-        />
+      {/* Help launcher button */}
+      <div ref={launcherRef}>
+        <HelpLauncherButton onClick={handleToggle} isOpen={panelOpen} />
       </div>
-    </Layout>
+
+      {/* Help panel dialog */}
+      {panelOpen && (
+        <HelpPanel
+          messages={messages}
+          loading={loading}
+          aiThinking={aiThinking}
+          error={error}
+          onSendMessage={sendMessage}
+          onClose={handleClose}
+        />
+      )}
+    </div>
   );
 }
 
