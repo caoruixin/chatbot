@@ -1,0 +1,120 @@
+{
+  "runResult" : {
+    "episodeId" : "post_query_004",
+    "finalReply" : "请问您要查询哪位用户的帖子？请提供用户名，例如：\"帮我查一下user_alice的帖子\"。",
+    "actions" : [ ],
+    "artifacts" : {
+      "identityArtifacts" : {
+        "intent" : "POST_QUERY",
+        "confidence" : 0.9,
+        "risk" : "low"
+      },
+      "executionArtifacts" : {
+        "toolCallCount" : 0,
+        "retrievedContextCount" : 0
+      },
+      "composerArtifacts" : {
+        "replyLength" : 45
+      }
+    },
+    "metrics" : {
+      "latencyMs" : 958,
+      "tokenIn" : null,
+      "tokenOut" : null,
+      "cost" : null,
+      "toolCallCount" : 0
+    },
+    "trace" : {
+      "spans" : [ {
+        "spanName" : "intent_recognition",
+        "startMs" : 1772335406940,
+        "endMs" : 1772335407898,
+        "attributes" : {
+          "intent" : "POST_QUERY",
+          "confidence" : 0.9,
+          "risk" : "low"
+        }
+      }, {
+        "spanName" : "response_composition",
+        "startMs" : 1772335407898,
+        "endMs" : 1772335407898,
+        "attributes" : {
+          "replyLength" : "45"
+        }
+      } ]
+    },
+    "version" : {
+      "modelId" : "moonshot-v1-8k",
+      "promptHashes" : {
+        "intent_system_prompt" : "33a24afedf2b",
+        "evidence_system_prompt" : "6b3324dcfd96"
+      },
+      "workflowVersion" : "7545f2315ea8",
+      "toolSchemaVersion" : "c063b959a923",
+      "kbSnapshot" : "unknown",
+      "gitCommit" : "70d8fbf4c54bba1993987904694dd9b76fe87ed6",
+      "compositeHash" : "ed3546d1f2c8"
+    },
+    "retrievedContexts" : [ ]
+  },
+  "score" : {
+    "episodeId" : "post_query_004",
+    "overallPass" : true,
+    "overallScore" : 0.9996221518885989,
+    "evaluatorResults" : [ {
+      "evaluatorName" : "contract",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "trajectory",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "efficiency",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "latencyMs" : 958,
+        "toolCallCount" : 0
+      }
+    }, {
+      "evaluatorName" : "outcome",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "note" : "Stub evaluator - real implementation in Iter2"
+      }
+    }, {
+      "evaluatorName" : "semantic",
+      "passed" : true,
+      "score" : 0.9977329113315933,
+      "violations" : [ ],
+      "details" : {
+        "similarityScore" : 0.995,
+        "similarityThreshold" : 0.65,
+        "judgeScores" : {
+          "correctness" : 5,
+          "completeness" : 5,
+          "tone" : 5,
+          "reasoning" : "实际回复与参考回复完全一致，正确性、完整性和语气均符合要求。"
+        },
+        "judgeCompositeScore" : 5.0,
+        "judgeScoreThreshold" : 3.5
+      }
+    }, {
+      "evaluatorName" : "rag_quality",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "note" : "No RAG quality checks configured for this episode"
+      }
+    } ]
+  }
+}

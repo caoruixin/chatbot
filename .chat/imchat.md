@@ -8,8 +8,8 @@ Chatbot 项目最终会包括人工客服IM， 以及在这上基础上集成 AI
 构建 AI Chatbot 是我的核心目标，我需要去验证这个 AI Chatbot 的能力，并且验证如何集成 AI，完成人工 IM 的一个继承
 直接在我的laptop上搭建所需的各个服务不使用docker，降低不必要的复杂度
 llm使用kimi 模型
-后面我会分别人工客服IM ，以及AI chatbot
 帮我创建claude.md 文件
+后面我会分别开发人工客服IM ，以及AI chatbot，并进行集成
 
 ##  人工客服 IM 系统 
 

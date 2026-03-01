@@ -1,0 +1,120 @@
+{
+  "runResult" : {
+    "episodeId" : "chat_004",
+    "finalReply" : "您好，我是您的人工智能助手，由月之暗面科技有限公司研发，擅长中英文对话，可以帮您解答问题、提供信息。有什么可以帮到您的吗？",
+    "actions" : [ ],
+    "artifacts" : {
+      "identityArtifacts" : {
+        "intent" : "GENERAL_CHAT",
+        "confidence" : 0.9,
+        "risk" : "low"
+      },
+      "executionArtifacts" : {
+        "toolCallCount" : 0,
+        "retrievedContextCount" : 0
+      },
+      "composerArtifacts" : {
+        "replyLength" : 61
+      }
+    },
+    "metrics" : {
+      "latencyMs" : 2040,
+      "tokenIn" : null,
+      "tokenOut" : null,
+      "cost" : null,
+      "toolCallCount" : 0
+    },
+    "trace" : {
+      "spans" : [ {
+        "spanName" : "intent_recognition",
+        "startMs" : 1772335476203,
+        "endMs" : 1772335476982,
+        "attributes" : {
+          "intent" : "GENERAL_CHAT",
+          "confidence" : 0.9,
+          "risk" : "low"
+        }
+      }, {
+        "spanName" : "response_composition",
+        "startMs" : 1772335476982,
+        "endMs" : 1772335478243,
+        "attributes" : {
+          "replyLength" : "61"
+        }
+      } ]
+    },
+    "version" : {
+      "modelId" : "moonshot-v1-8k",
+      "promptHashes" : {
+        "intent_system_prompt" : "33a24afedf2b",
+        "evidence_system_prompt" : "6b3324dcfd96"
+      },
+      "workflowVersion" : "7545f2315ea8",
+      "toolSchemaVersion" : "c063b959a923",
+      "kbSnapshot" : "unknown",
+      "gitCommit" : "70d8fbf4c54bba1993987904694dd9b76fe87ed6",
+      "compositeHash" : "ed3546d1f2c8"
+    },
+    "retrievedContexts" : [ ]
+  },
+  "score" : {
+    "episodeId" : "chat_004",
+    "overallPass" : false,
+    "overallScore" : 0.9518900328411047,
+    "evaluatorResults" : [ {
+      "evaluatorName" : "contract",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "trajectory",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "efficiency",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "latencyMs" : 2040,
+        "toolCallCount" : 0
+      }
+    }, {
+      "evaluatorName" : "outcome",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "note" : "Stub evaluator - real implementation in Iter2"
+      }
+    }, {
+      "evaluatorName" : "semantic",
+      "passed" : false,
+      "score" : 0.7113401970466284,
+      "violations" : [ "Similarity 0.483 below threshold 0.650" ],
+      "details" : {
+        "similarityScore" : 0.483,
+        "similarityThreshold" : 0.65,
+        "judgeScores" : {
+          "correctness" : 5,
+          "completeness" : 4,
+          "tone" : 5,
+          "reasoning" : "实际回复正确地介绍了自己的身份，并且提供了额外的信息，比如擅长中英文对话，这与参考回复的语义一致，但缺少了关于如何转人工客服的说明。语气礼貌且专业，符合客服场景。"
+        },
+        "judgeCompositeScore" : 4.7,
+        "judgeScoreThreshold" : 3.5
+      }
+    }, {
+      "evaluatorName" : "rag_quality",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "note" : "No RAG quality checks configured for this episode"
+      }
+    } ]
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "tool_registry" : [ {
+    "name" : "faq_search",
+    "description" : "搜索 FAQ 知识库",
+    "risk_level" : "READ",
+    "params_schema" : {
+      "query" : {
+        "description" : "Search query for FAQ knowledge base",
+        "type" : "string",
+        "required" : true
+      }
+    }
+  }, {
+    "name" : "post_query",
+    "description" : "查询用户帖子状态",
+    "risk_level" : "READ",
+    "params_schema" : {
+      "username" : {
+        "description" : "Username to query posts for",
+        "type" : "string",
+        "required" : true
+      }
+    }
+  }, {
+    "name" : "user_data_delete",
+    "description" : "删除用户数据",
+    "risk_level" : "IRREVERSIBLE",
+    "params_schema" : {
+      "username" : {
+        "description" : "Username whose data should be deleted",
+        "type" : "string",
+        "required" : true
+      }
+    }
+  } ],
+  "prompts" : {
+    "intent_system_prompt" : {
+      "hash" : "33a24afedf2b",
+      "length" : 1969
+    },
+    "evidence_system_prompt" : {
+      "hash" : "6b3324dcfd96",
+      "length" : 142
+    }
+  },
+  "workflow" : {
+    "sub_agents" : [ "IntentRouter", "ReactPlanner", "ResponseComposer" ],
+    "max_react_rounds" : 3,
+    "confidence_threshold" : 0.7,
+    "routing_strategy" : "intent_based"
+  },
+  "model_config" : {
+    "chat_model" : "moonshot-v1-8k",
+    "chat_temperature" : 0.7,
+    "embedding_model" : "text-embedding-v4"
+  },
+  "kb_snapshot_method" : "FAQ doc count + content hash from faq_doc table via pgvector"
+}

@@ -1,0 +1,137 @@
+{
+  "runResult" : {
+    "episodeId" : "cross_001",
+    "finalReply" : "我查了一下，系统中没有找到Alice的帖子。关于退款政策，需要根据具体订单情况来判断。一般情况下，如果商品存在质量问题，我们提供免费退换货服务。如果是无理由退货，需要商品保持完好无损，并在收到商品7天内联系我们处理。如果有任何疑问，欢迎随时联系我们，我们会竭诚为您服务。您还有其他问题吗？",
+    "actions" : [ {
+      "name" : "post_query",
+      "args" : {
+        "username" : "alice"
+      },
+      "status" : "ok",
+      "resultSummary" : "{\"error\":\"\",\"data\":{\"posts\":[]},\"success\":true}",
+      "timestampMs" : 1772339194726
+    } ],
+    "artifacts" : {
+      "identityArtifacts" : {
+        "intent" : "POST_QUERY",
+        "confidence" : 0.9,
+        "risk" : "low"
+      },
+      "executionArtifacts" : {
+        "toolCallCount" : 1,
+        "retrievedContextCount" : 0
+      },
+      "composerArtifacts" : {
+        "replyLength" : 144
+      }
+    },
+    "metrics" : {
+      "latencyMs" : 3366,
+      "tokenIn" : null,
+      "tokenOut" : null,
+      "cost" : null,
+      "toolCallCount" : 1
+    },
+    "trace" : {
+      "spans" : [ {
+        "spanName" : "intent_recognition",
+        "startMs" : 1772339193071,
+        "endMs" : 1772339194726,
+        "attributes" : {
+          "risk" : "low",
+          "confidence" : 0.9,
+          "intent" : "POST_QUERY"
+        }
+      }, {
+        "spanName" : "tool_call",
+        "startMs" : 1772339194726,
+        "endMs" : 1772339194728,
+        "attributes" : {
+          "tool" : "post_query",
+          "success" : "true",
+          "round" : "0"
+        }
+      }, {
+        "spanName" : "response_composition",
+        "startMs" : 1772339194728,
+        "endMs" : 1772339196437,
+        "attributes" : {
+          "replyLength" : "144"
+        }
+      } ]
+    },
+    "version" : {
+      "modelId" : "moonshot-v1-8k",
+      "promptHashes" : {
+        "intent_system_prompt" : "33a24afedf2b",
+        "evidence_system_prompt" : "6b3324dcfd96"
+      },
+      "workflowVersion" : "7545f2315ea8",
+      "toolSchemaVersion" : "c063b959a923",
+      "kbSnapshot" : "unknown",
+      "gitCommit" : "70d8fbf4c54bba1993987904694dd9b76fe87ed6",
+      "compositeHash" : "ed3546d1f2c8"
+    },
+    "retrievedContexts" : [ ]
+  },
+  "score" : {
+    "episodeId" : "cross_001",
+    "overallPass" : false,
+    "overallScore" : 0.9490976110825101,
+    "evaluatorResults" : [ {
+      "evaluatorName" : "contract",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "trajectory",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "efficiency",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "latencyMs" : 3366,
+        "toolCallCount" : 1
+      }
+    }, {
+      "evaluatorName" : "outcome",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "note" : "Stub evaluator - real implementation in Iter2"
+      }
+    }, {
+      "evaluatorName" : "semantic",
+      "passed" : false,
+      "score" : 0.6945856664950611,
+      "violations" : [ "Judge composite score 2.90 below threshold 3.50" ],
+      "details" : {
+        "similarityScore" : 0.809,
+        "similarityThreshold" : 0.65,
+        "judgeScores" : {
+          "correctness" : 2,
+          "completeness" : 3,
+          "tone" : 5,
+          "reasoning" : "实际回复中没有提供alice帖子的具体信息，与参考回复中给出的帖子信息不符，因此正确性得分较低。完整性方面，实际回复提到了退款政策的一般情况，但没有明确说明7天内无理由退款的具体政策，因此得分为3。语气方面，实际回复礼貌且专业，提供了进一步的帮助和联系信息，因此得分为5。"
+        },
+        "judgeCompositeScore" : 2.9,
+        "judgeScoreThreshold" : 3.5
+      }
+    }, {
+      "evaluatorName" : "rag_quality",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "note" : "No RAG quality checks configured for this episode"
+      }
+    } ]
+  }
+}

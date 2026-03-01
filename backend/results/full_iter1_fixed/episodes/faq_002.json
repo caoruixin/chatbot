@@ -1,0 +1,141 @@
+{
+  "runResult" : {
+    "episodeId" : "faq_002",
+    "finalReply" : "重置密码通常需要遵循以下步骤：\n\n1. 访问网站或应用的登录页面，找到“忘记密码”或“重置密码”的选项。\n2. 点击后输入您的注册邮箱或手机号。\n3. 系统会向您的邮箱或手机发送重置密码的链接或验证码。\n4. 点击链接或使用验证码，在新页面输入新密码并确认。\n5. 完成密码重设后，使用新密码重新登录。\n\n不同网站或应用的具体步骤可能略有差异，需要根据实际情况操作。如果无法解决，可以联系相应平台的客服寻求帮助。",
+    "actions" : [ {
+      "name" : "faq_search",
+      "args" : {
+        "query" : "怎么重置密码"
+      },
+      "status" : "ok",
+      "resultSummary" : "{\"success\":true,\"data\":{\"question\":\"\",\"answer\":\"未找到相关问题\",\"score\":0.0},\"error\":\"\"}",
+      "timestampMs" : 1772335424448
+    } ],
+    "artifacts" : {
+      "identityArtifacts" : {
+        "intent" : "KB_QUESTION",
+        "confidence" : 0.85,
+        "risk" : "low"
+      },
+      "executionArtifacts" : {
+        "toolCallCount" : 1,
+        "retrievedContextCount" : 0
+      },
+      "composerArtifacts" : {
+        "replyLength" : 206
+      }
+    },
+    "metrics" : {
+      "latencyMs" : 4604,
+      "tokenIn" : null,
+      "tokenOut" : null,
+      "cost" : null,
+      "toolCallCount" : 1
+    },
+    "trace" : {
+      "spans" : [ {
+        "spanName" : "intent_recognition",
+        "startMs" : 1772335423630,
+        "endMs" : 1772335424448,
+        "attributes" : {
+          "intent" : "KB_QUESTION",
+          "confidence" : 0.85,
+          "risk" : "low"
+        }
+      }, {
+        "spanName" : "tool_call",
+        "startMs" : 1772335424448,
+        "endMs" : 1772335425932,
+        "attributes" : {
+          "round" : "0",
+          "success" : "true",
+          "tool" : "faq_search"
+        }
+      }, {
+        "spanName" : "response_composition",
+        "startMs" : 1772335425933,
+        "endMs" : 1772335428234,
+        "attributes" : {
+          "replyLength" : "206"
+        }
+      } ]
+    },
+    "version" : {
+      "modelId" : "moonshot-v1-8k",
+      "promptHashes" : {
+        "intent_system_prompt" : "33a24afedf2b",
+        "evidence_system_prompt" : "6b3324dcfd96"
+      },
+      "workflowVersion" : "7545f2315ea8",
+      "toolSchemaVersion" : "c063b959a923",
+      "kbSnapshot" : "unknown",
+      "gitCommit" : "70d8fbf4c54bba1993987904694dd9b76fe87ed6",
+      "compositeHash" : "ed3546d1f2c8"
+    },
+    "retrievedContexts" : [ ]
+  },
+  "score" : {
+    "episodeId" : "faq_002",
+    "overallPass" : false,
+    "overallScore" : 0.8091510749395359,
+    "evaluatorResults" : [ {
+      "evaluatorName" : "contract",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "trajectory",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "efficiency",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "latencyMs" : 4604,
+        "toolCallCount" : 1
+      }
+    }, {
+      "evaluatorName" : "outcome",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "note" : "Stub evaluator - real implementation in Iter2"
+      }
+    }, {
+      "evaluatorName" : "semantic",
+      "passed" : true,
+      "score" : 0.8549064496372155,
+      "violations" : [ ],
+      "details" : {
+        "similarityScore" : 0.71,
+        "similarityThreshold" : 0.65,
+        "judgeScores" : {
+          "correctness" : 5,
+          "completeness" : 5,
+          "tone" : 5,
+          "reasoning" : "实际回复详细描述了重置密码的一般步骤，与参考回复的指导原则一致，并且提供了额外的步骤和建议，如联系客服寻求帮助，因此正确性、完整性和语气都得到了很好的体现。"
+        },
+        "judgeCompositeScore" : 5.0,
+        "judgeScoreThreshold" : 3.5
+      }
+    }, {
+      "evaluatorName" : "rag_quality",
+      "passed" : false,
+      "score" : 0.0,
+      "violations" : [ "Context recall 0.000 is below 0.5 (retrieved 0 of 1 expected)" ],
+      "details" : {
+        "contextPrecision" : 0.0,
+        "contextRecall" : 0.0,
+        "expectedContexts" : [ "如何重置密码？" ],
+        "retrievedContexts" : [ ],
+        "faithfulnessNote" : "Skipped: no retrieved contexts available"
+      }
+    } ]
+  }
+}

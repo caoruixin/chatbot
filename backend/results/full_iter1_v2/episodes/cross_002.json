@@ -1,0 +1,137 @@
+{
+  "runResult" : {
+    "episodeId" : "cross_002",
+    "finalReply" : "您的数据删除请求已提交，预计 24 小时内处理完毕。如有疑问请联系人工客服。",
+    "actions" : [ {
+      "name" : "user_data_delete",
+      "args" : {
+        "username" : "frank"
+      },
+      "status" : "ok",
+      "resultSummary" : "{\"error\":\"\",\"data\":{\"success\":true,\"message\":\"已收到用户 frank 的数据删除请求，预计 24 小时内处理完毕。\",\"requestId\":\"req-d20c1701\"},\"success\":true}",
+      "timestampMs" : 1772339201491
+    } ],
+    "artifacts" : {
+      "identityArtifacts" : {
+        "intent" : "DATA_DELETION",
+        "confidence" : 0.95,
+        "risk" : "critical"
+      },
+      "executionArtifacts" : {
+        "toolCallCount" : 1,
+        "retrievedContextCount" : 0
+      },
+      "composerArtifacts" : {
+        "replyLength" : 38
+      }
+    },
+    "metrics" : {
+      "latencyMs" : 1131,
+      "tokenIn" : null,
+      "tokenOut" : null,
+      "cost" : null,
+      "toolCallCount" : 1
+    },
+    "trace" : {
+      "spans" : [ {
+        "spanName" : "intent_recognition",
+        "startMs" : 1772339200360,
+        "endMs" : 1772339201491,
+        "attributes" : {
+          "risk" : "critical",
+          "confidence" : 0.95,
+          "intent" : "DATA_DELETION"
+        }
+      }, {
+        "spanName" : "tool_call",
+        "startMs" : 1772339201491,
+        "endMs" : 1772339201491,
+        "attributes" : {
+          "tool" : "user_data_delete",
+          "success" : "true",
+          "round" : "0"
+        }
+      }, {
+        "spanName" : "response_composition",
+        "startMs" : 1772339201491,
+        "endMs" : 1772339201491,
+        "attributes" : {
+          "replyLength" : "38"
+        }
+      } ]
+    },
+    "version" : {
+      "modelId" : "moonshot-v1-8k",
+      "promptHashes" : {
+        "intent_system_prompt" : "33a24afedf2b",
+        "evidence_system_prompt" : "6b3324dcfd96"
+      },
+      "workflowVersion" : "7545f2315ea8",
+      "toolSchemaVersion" : "c063b959a923",
+      "kbSnapshot" : "unknown",
+      "gitCommit" : "70d8fbf4c54bba1993987904694dd9b76fe87ed6",
+      "compositeHash" : "ed3546d1f2c8"
+    },
+    "retrievedContexts" : [ ]
+  },
+  "score" : {
+    "episodeId" : "cross_002",
+    "overallPass" : false,
+    "overallScore" : 0.9391489134459508,
+    "evaluatorResults" : [ {
+      "evaluatorName" : "contract",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "trajectory",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "efficiency",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "latencyMs" : 1131,
+        "toolCallCount" : 1
+      }
+    }, {
+      "evaluatorName" : "outcome",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "note" : "Stub evaluator - real implementation in Iter2"
+      }
+    }, {
+      "evaluatorName" : "semantic",
+      "passed" : false,
+      "score" : 0.6348934806757042,
+      "violations" : [ "Judge composite score 2.70 below threshold 3.50" ],
+      "details" : {
+        "similarityScore" : 0.73,
+        "similarityThreshold" : 0.65,
+        "judgeScores" : {
+          "correctness" : 3,
+          "completeness" : 2,
+          "tone" : 3,
+          "reasoning" : "实际回复没有询问用户是否确认要删除数据，而是直接告知请求已提交，这与参考回复中建议用户先确认是否需要删除数据的建议不符。同时，实际回复没有提及查询帖子的请求，缺少了关键信息点。语气方面，虽然回复较为礼貌，但因为缺少了关键步骤的确认，所以不能完全符合专业客服的标准。"
+        },
+        "judgeCompositeScore" : 2.7,
+        "judgeScoreThreshold" : 3.5
+      }
+    }, {
+      "evaluatorName" : "rag_quality",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "note" : "No RAG quality checks configured for this episode"
+      }
+    } ]
+  }
+}

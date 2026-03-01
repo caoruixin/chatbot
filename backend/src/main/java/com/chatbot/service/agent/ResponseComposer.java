@@ -32,6 +32,10 @@ public class ResponseComposer {
             5. 使用中文回复
             """;
 
+    public static String getSystemPrompt() {
+        return EVIDENCE_SYSTEM_PROMPT;
+    }
+
     private final KimiClient kimiClient;
 
     public ResponseComposer(KimiClient kimiClient) {

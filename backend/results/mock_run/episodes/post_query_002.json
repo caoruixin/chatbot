@@ -1,0 +1,145 @@
+{
+  "runResult" : {
+    "episodeId" : "post_query_002",
+    "finalReply" : "经过查询，系统中没有找到bob发布的帖子。您可以尝试搜索其他关键词或用户名，或者让bob再检查一下是否已经发帖。如果还有其他问题，欢迎随时咨询。",
+    "actions" : [ {
+      "name" : "post_query",
+      "args" : {
+        "username" : "bob"
+      },
+      "status" : "ok",
+      "resultSummary" : "{\"data\":{\"posts\":[]},\"error\":\"\",\"success\":true}",
+      "timestampMs" : 1772339570544
+    } ],
+    "artifacts" : {
+      "identityArtifacts" : {
+        "intent" : "POST_QUERY",
+        "confidence" : 0.95,
+        "risk" : "low"
+      },
+      "executionArtifacts" : {
+        "toolCallCount" : 1,
+        "retrievedContextCount" : 0
+      },
+      "composerArtifacts" : {
+        "replyLength" : 72
+      }
+    },
+    "metrics" : {
+      "latencyMs" : 2131,
+      "tokenIn" : null,
+      "tokenOut" : null,
+      "cost" : null,
+      "toolCallCount" : 1
+    },
+    "trace" : {
+      "spans" : [ {
+        "spanName" : "intent_recognition",
+        "startMs" : 1772339569572,
+        "endMs" : 1772339570544,
+        "attributes" : {
+          "risk" : "low",
+          "intent" : "POST_QUERY",
+          "confidence" : 0.95
+        }
+      }, {
+        "spanName" : "tool_call",
+        "startMs" : 1772339570544,
+        "endMs" : 1772339570545,
+        "attributes" : {
+          "tool" : "post_query",
+          "round" : "0",
+          "success" : "true"
+        }
+      }, {
+        "spanName" : "response_composition",
+        "startMs" : 1772339570545,
+        "endMs" : 1772339571703,
+        "attributes" : {
+          "replyLength" : "72"
+        }
+      } ]
+    },
+    "version" : {
+      "modelId" : "moonshot-v1-8k",
+      "promptHashes" : {
+        "intent_system_prompt" : "33a24afedf2b",
+        "evidence_system_prompt" : "6b3324dcfd96"
+      },
+      "workflowVersion" : "7545f2315ea8",
+      "toolSchemaVersion" : "c063b959a923",
+      "kbSnapshot" : "unknown",
+      "gitCommit" : "70d8fbf4c54bba1993987904694dd9b76fe87ed6",
+      "compositeHash" : "ed3546d1f2c8"
+    },
+    "retrievedContexts" : [ ]
+  },
+  "score" : {
+    "episodeId" : "post_query_002",
+    "overallPass" : true,
+    "overallScore" : 0.98,
+    "evaluatorResults" : [ {
+      "evaluatorName" : "contract",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "trajectory",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "efficiency",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "latencyMs" : 2131,
+        "toolCallCount" : 1
+      }
+    }, {
+      "evaluatorName" : "outcome",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "note" : "Stub evaluator - real implementation in Iter2"
+      }
+    }, {
+      "evaluatorName" : "semantic",
+      "passed" : true,
+      "score" : 0.88,
+      "violations" : [ ],
+      "details" : {
+        "mode" : "mock",
+        "similarityScore" : 0.9,
+        "similarityThreshold" : 0.65,
+        "judgeScores" : {
+          "reasoning" : "[mock] 待人工评估补充",
+          "completeness" : 4,
+          "correctness" : 4,
+          "tone" : 5
+        },
+        "judgeCompositeScore" : 4.3,
+        "judgeScoreThreshold" : 3.5,
+        "toolArgResults" : [ {
+          "tool" : "post_query",
+          "expectedArgs" : {
+            "username" : "bob"
+          },
+          "passed" : true
+        } ]
+      }
+    }, {
+      "evaluatorName" : "rag_quality",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "note" : "No RAG quality checks configured for this episode"
+      }
+    } ]
+  }
+}

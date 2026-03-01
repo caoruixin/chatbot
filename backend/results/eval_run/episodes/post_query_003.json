@@ -1,0 +1,71 @@
+{
+  "runResult" : {
+    "episodeId" : "post_query_003",
+    "finalReply" : "根据查询结果，user_charlie没有发布任何帖子，帖子列表为空。您有其他问题需要帮助吗？",
+    "actions" : [ {
+      "name" : "post_query",
+      "args" : {
+        "username" : "user_charlie"
+      },
+      "status" : "ok",
+      "resultSummary" : "{\"success\":true,\"data\":{\"posts\":[]},\"error\":\"\"}",
+      "timestampMs" : 1771859219011
+    } ],
+    "artifacts" : null,
+    "metrics" : {
+      "latencyMs" : 1417,
+      "tokenIn" : null,
+      "tokenOut" : null,
+      "cost" : null,
+      "toolCallCount" : 1
+    },
+    "trace" : null,
+    "version" : {
+      "modelId" : "moonshot-v1-8k",
+      "promptHashes" : {
+        "intent_system_prompt" : "33a24afedf2b",
+        "evidence_system_prompt" : "6b3324dcfd96"
+      },
+      "workflowVersion" : "7545f2315ea8",
+      "toolSchemaVersion" : "c063b959a923",
+      "kbSnapshot" : "unknown",
+      "gitCommit" : "70d8fbf4c54bba1993987904694dd9b76fe87ed6",
+      "compositeHash" : "ed3546d1f2c8"
+    }
+  },
+  "score" : {
+    "episodeId" : "post_query_003",
+    "overallPass" : true,
+    "overallScore" : 1.0,
+    "evaluatorResults" : [ {
+      "evaluatorName" : "contract",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "trajectory",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "efficiency",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "latencyMs" : 1417,
+        "toolCallCount" : 1
+      }
+    }, {
+      "evaluatorName" : "outcome",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "note" : "Stub evaluator - real implementation in Iter2"
+      }
+    } ]
+  }
+}

@@ -1,0 +1,137 @@
+{
+  "runResult" : {
+    "episodeId" : "faq_005",
+    "finalReply" : "您好，目前我们支持支付宝、微信支付、银联卡等多种支付方式，方便您选择。如有疑问，欢迎随时咨询。",
+    "actions" : [ {
+      "name" : "faq_search",
+      "args" : {
+        "query" : "你们支持哪些支付方式"
+      },
+      "status" : "ok",
+      "resultSummary" : "{\"error\":\"\",\"data\":{\"question\":\"\",\"answer\":\"未找到与用户问题相关的FAQ\",\"score\":0.0},\"success\":true}",
+      "timestampMs" : 1772339153667
+    } ],
+    "artifacts" : {
+      "identityArtifacts" : {
+        "intent" : "KB_QUESTION",
+        "confidence" : 0.95,
+        "risk" : "low"
+      },
+      "executionArtifacts" : {
+        "toolCallCount" : 1,
+        "retrievedContextCount" : 0
+      },
+      "composerArtifacts" : {
+        "replyLength" : 47
+      }
+    },
+    "metrics" : {
+      "latencyMs" : 2841,
+      "tokenIn" : null,
+      "tokenOut" : null,
+      "cost" : null,
+      "toolCallCount" : 1
+    },
+    "trace" : {
+      "spans" : [ {
+        "spanName" : "intent_recognition",
+        "startMs" : 1772339152767,
+        "endMs" : 1772339153667,
+        "attributes" : {
+          "risk" : "low",
+          "confidence" : 0.95,
+          "intent" : "KB_QUESTION"
+        }
+      }, {
+        "spanName" : "tool_call",
+        "startMs" : 1772339153667,
+        "endMs" : 1772339154651,
+        "attributes" : {
+          "tool" : "faq_search",
+          "success" : "true",
+          "round" : "0"
+        }
+      }, {
+        "spanName" : "response_composition",
+        "startMs" : 1772339154651,
+        "endMs" : 1772339155608,
+        "attributes" : {
+          "replyLength" : "47"
+        }
+      } ]
+    },
+    "version" : {
+      "modelId" : "moonshot-v1-8k",
+      "promptHashes" : {
+        "intent_system_prompt" : "33a24afedf2b",
+        "evidence_system_prompt" : "6b3324dcfd96"
+      },
+      "workflowVersion" : "7545f2315ea8",
+      "toolSchemaVersion" : "c063b959a923",
+      "kbSnapshot" : "unknown",
+      "gitCommit" : "70d8fbf4c54bba1993987904694dd9b76fe87ed6",
+      "compositeHash" : "ed3546d1f2c8"
+    },
+    "retrievedContexts" : [ ]
+  },
+  "score" : {
+    "episodeId" : "faq_005",
+    "overallPass" : true,
+    "overallScore" : 0.9805822615388876,
+    "evaluatorResults" : [ {
+      "evaluatorName" : "contract",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "trajectory",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "efficiency",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "latencyMs" : 2841,
+        "toolCallCount" : 1
+      }
+    }, {
+      "evaluatorName" : "outcome",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "note" : "Stub evaluator - real implementation in Iter2"
+      }
+    }, {
+      "evaluatorName" : "semantic",
+      "passed" : true,
+      "score" : 0.883493569233326,
+      "violations" : [ ],
+      "details" : {
+        "similarityScore" : 0.767,
+        "similarityThreshold" : 0.65,
+        "judgeScores" : {
+          "correctness" : 5,
+          "completeness" : 5,
+          "tone" : 5,
+          "reasoning" : "实际回复提供了具体的支付方式，包括支付宝、微信支付和银联卡，与参考回复相比，提供了更具体的信息，因此正确性得分为5。实际回复包含了所有关键信息点，即支持的支付方式，因此完整性得分为5。实际回复的语气礼貌、专业，符合客服场景，因此语气得分为5。"
+        },
+        "judgeCompositeScore" : 5.0,
+        "judgeScoreThreshold" : 3.5
+      }
+    }, {
+      "evaluatorName" : "rag_quality",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "note" : "No RAG quality checks configured for this episode"
+      }
+    } ]
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "totalEpisodes" : 1,
+  "totalPass" : 0,
+  "totalFail" : 1,
+  "overallPassRate" : 0.0,
+  "passRateByEvaluator" : {
+    "contract" : 1.0,
+    "trajectory" : 1.0,
+    "efficiency" : 1.0,
+    "outcome" : 1.0,
+    "semantic" : 0.0,
+    "rag_quality" : 0.0
+  },
+  "suiteBreakdown" : {
+    "faq" : {
+      "total" : 1,
+      "pass" : 0,
+      "fail" : 1,
+      "passRate" : 0.0,
+      "avgLatencyMs" : 4950.0
+    }
+  },
+  "tagBreakdown" : {
+    "kb_question" : {
+      "total" : 1,
+      "pass" : 0,
+      "fail" : 1,
+      "passRate" : 0.0,
+      "avgLatencyMs" : 4950.0
+    }
+  },
+  "latencyStats" : {
+    "p50" : 4950.0,
+    "p95" : 4950.0,
+    "avg" : 4950.0,
+    "max" : 4950.0
+  },
+  "fingerprint" : {
+    "modelId" : "moonshot-v1-8k",
+    "promptHashes" : {
+      "intent_system_prompt" : "33a24afedf2b",
+      "evidence_system_prompt" : "6b3324dcfd96"
+    },
+    "workflowVersion" : "7545f2315ea8",
+    "toolSchemaVersion" : "c063b959a923",
+    "kbSnapshot" : "unknown",
+    "gitCommit" : "70d8fbf4c54bba1993987904694dd9b76fe87ed6",
+    "compositeHash" : "ed3546d1f2c8"
+  },
+  "timestamp" : "2026-03-01T03:08:28.291965Z",
+  "scores" : [ {
+    "episodeId" : "faq_001",
+    "overallPass" : false,
+    "overallScore" : 0.7504760670353675,
+    "evaluatorResults" : [ {
+      "evaluatorName" : "contract",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "trajectory",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "efficiency",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "latencyMs" : 4950,
+        "toolCallCount" : 1
+      }
+    }, {
+      "evaluatorName" : "outcome",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "note" : "Stub evaluator - real implementation in Iter2"
+      }
+    }, {
+      "evaluatorName" : "semantic",
+      "passed" : false,
+      "score" : 0.5028564022122053,
+      "violations" : [ "Similarity 0.646 below threshold 0.750", "Judge composite score 1.80 below threshold 3.50" ],
+      "details" : {
+        "similarityScore" : 0.646,
+        "similarityThreshold" : 0.75,
+        "judgeScores" : {
+          "correctness" : 1,
+          "completeness" : 1,
+          "tone" : 5,
+          "reasoning" : "实际回复没有提供具体的退款政策信息，与参考回复中的明确退款政策相矛盾，因此正确性和完整性得分较低。尽管如此，实际回复的语气保持了礼貌和专业，因此语气得分较高。"
+        },
+        "judgeCompositeScore" : 1.8,
+        "judgeScoreThreshold" : 3.5
+      }
+    }, {
+      "evaluatorName" : "rag_quality",
+      "passed" : false,
+      "score" : 0.0,
+      "violations" : [ "Context recall 0.000 is below 0.5 (retrieved 0 of 1 expected)" ],
+      "details" : {
+        "contextPrecision" : 0.0,
+        "contextRecall" : 0.0,
+        "expectedContexts" : [ "退款政策是什么？" ],
+        "retrievedContexts" : [ ],
+        "faithfulnessNote" : "Skipped: no retrieved contexts available"
+      }
+    } ]
+  } ]
+}

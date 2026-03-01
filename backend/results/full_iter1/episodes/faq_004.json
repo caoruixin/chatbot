@@ -1,0 +1,141 @@
+{
+  "runResult" : {
+    "episodeId" : "faq_004",
+    "finalReply" : "帖子审核通常需要2-4小时，高峰期可能延长至12小时。请耐心等待审核结果。",
+    "actions" : [ {
+      "name" : "faq_search",
+      "args" : {
+        "query" : "帖子审核需要多久"
+      },
+      "status" : "ok",
+      "resultSummary" : "{\"error\":\"\",\"data\":{\"question\":\"帖子审核需要多久？\",\"answer\":\"帖子通常在发布后2-4小时内完成审核。高峰期可能延长至12小时。\",\"score\":0.9922618260696855},\"success\":true}",
+      "timestampMs" : 1772334872854
+    } ],
+    "artifacts" : {
+      "identityArtifacts" : {
+        "intent" : "KB_QUESTION",
+        "confidence" : 0.85,
+        "risk" : "low"
+      },
+      "executionArtifacts" : {
+        "toolCallCount" : 1,
+        "retrievedContextCount" : 0
+      },
+      "composerArtifacts" : {
+        "replyLength" : 37
+      }
+    },
+    "metrics" : {
+      "latencyMs" : 2274,
+      "tokenIn" : null,
+      "tokenOut" : null,
+      "cost" : null,
+      "toolCallCount" : 1
+    },
+    "trace" : {
+      "spans" : [ {
+        "spanName" : "intent_recognition",
+        "startMs" : 1772334871906,
+        "endMs" : 1772334872854,
+        "attributes" : {
+          "risk" : "low",
+          "confidence" : 0.85,
+          "intent" : "KB_QUESTION"
+        }
+      }, {
+        "spanName" : "tool_call",
+        "startMs" : 1772334872854,
+        "endMs" : 1772334873371,
+        "attributes" : {
+          "tool" : "faq_search",
+          "success" : "true",
+          "round" : "0"
+        }
+      }, {
+        "spanName" : "response_composition",
+        "startMs" : 1772334873372,
+        "endMs" : 1772334874180,
+        "attributes" : {
+          "replyLength" : "37"
+        }
+      } ]
+    },
+    "version" : {
+      "modelId" : "moonshot-v1-8k",
+      "promptHashes" : {
+        "intent_system_prompt" : "33a24afedf2b",
+        "evidence_system_prompt" : "6b3324dcfd96"
+      },
+      "workflowVersion" : "7545f2315ea8",
+      "toolSchemaVersion" : "c063b959a923",
+      "kbSnapshot" : "unknown",
+      "gitCommit" : "70d8fbf4c54bba1993987904694dd9b76fe87ed6",
+      "compositeHash" : "ed3546d1f2c8"
+    },
+    "retrievedContexts" : [ ]
+  },
+  "score" : {
+    "episodeId" : "faq_004",
+    "overallPass" : false,
+    "overallScore" : 0.8281493151328929,
+    "evaluatorResults" : [ {
+      "evaluatorName" : "contract",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "trajectory",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "efficiency",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "latencyMs" : 2274,
+        "toolCallCount" : 1
+      }
+    }, {
+      "evaluatorName" : "outcome",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "note" : "Stub evaluator - real implementation in Iter2"
+      }
+    }, {
+      "evaluatorName" : "semantic",
+      "passed" : true,
+      "score" : 0.9688958907973575,
+      "violations" : [ ],
+      "details" : {
+        "similarityScore" : 0.938,
+        "similarityThreshold" : 0.75,
+        "judgeScores" : {
+          "correctness" : 5,
+          "completeness" : 5,
+          "tone" : 5,
+          "reasoning" : "实际回复与参考回复在内容上完全一致，都提到了帖子审核通常需要2-4小时，高峰期可能延长至12小时，并且都提醒用户耐心等待审核结果，因此正确性、完整性和语气都得到了很好的体现。"
+        },
+        "judgeCompositeScore" : 5.0,
+        "judgeScoreThreshold" : 3.5
+      }
+    }, {
+      "evaluatorName" : "rag_quality",
+      "passed" : false,
+      "score" : 0.0,
+      "violations" : [ "Context recall 0.000 is below 0.5 (retrieved 0 of 1 expected)" ],
+      "details" : {
+        "contextPrecision" : 0.0,
+        "contextRecall" : 0.0,
+        "expectedContexts" : [ "帖子审核需要多久？" ],
+        "retrievedContexts" : [ ],
+        "faithfulnessNote" : "Skipped: no retrieved contexts available"
+      }
+    } ]
+  }
+}

@@ -1,0 +1,141 @@
+{
+  "runResult" : {
+    "episodeId" : "faq_001",
+    "finalReply" : "很抱歉，我未能查询到具体的退款政策信息。建议您直接联系我们的客服人员，他们会详细为您解答退款相关问题。感谢您的理解与支持！",
+    "actions" : [ {
+      "name" : "faq_search",
+      "args" : {
+        "query" : "你们的退款政策是什么"
+      },
+      "status" : "ok",
+      "resultSummary" : "{\"error\":\"\",\"data\":{\"question\":\"\",\"answer\":\"未找到与用户问题相关的FAQ\",\"score\":0.0},\"success\":true}",
+      "timestampMs" : 1772334856227
+    } ],
+    "artifacts" : {
+      "identityArtifacts" : {
+        "intent" : "KB_QUESTION",
+        "confidence" : 0.95,
+        "risk" : "low"
+      },
+      "executionArtifacts" : {
+        "toolCallCount" : 1,
+        "retrievedContextCount" : 0
+      },
+      "composerArtifacts" : {
+        "replyLength" : 61
+      }
+    },
+    "metrics" : {
+      "latencyMs" : 2281,
+      "tokenIn" : null,
+      "tokenOut" : null,
+      "cost" : null,
+      "toolCallCount" : 1
+    },
+    "trace" : {
+      "spans" : [ {
+        "spanName" : "intent_recognition",
+        "startMs" : 1772334855325,
+        "endMs" : 1772334856226,
+        "attributes" : {
+          "risk" : "low",
+          "confidence" : 0.95,
+          "intent" : "KB_QUESTION"
+        }
+      }, {
+        "spanName" : "tool_call",
+        "startMs" : 1772334856227,
+        "endMs" : 1772334856656,
+        "attributes" : {
+          "tool" : "faq_search",
+          "success" : "true",
+          "round" : "0"
+        }
+      }, {
+        "spanName" : "response_composition",
+        "startMs" : 1772334856658,
+        "endMs" : 1772334857606,
+        "attributes" : {
+          "replyLength" : "61"
+        }
+      } ]
+    },
+    "version" : {
+      "modelId" : "moonshot-v1-8k",
+      "promptHashes" : {
+        "intent_system_prompt" : "33a24afedf2b",
+        "evidence_system_prompt" : "6b3324dcfd96"
+      },
+      "workflowVersion" : "7545f2315ea8",
+      "toolSchemaVersion" : "c063b959a923",
+      "kbSnapshot" : "unknown",
+      "gitCommit" : "70d8fbf4c54bba1993987904694dd9b76fe87ed6",
+      "compositeHash" : "ed3546d1f2c8"
+    },
+    "retrievedContexts" : [ ]
+  },
+  "score" : {
+    "episodeId" : "faq_001",
+    "overallPass" : false,
+    "overallScore" : 0.7443113612147724,
+    "evaluatorResults" : [ {
+      "evaluatorName" : "contract",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "trajectory",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "efficiency",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "latencyMs" : 2281,
+        "toolCallCount" : 1
+      }
+    }, {
+      "evaluatorName" : "outcome",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "note" : "Stub evaluator - real implementation in Iter2"
+      }
+    }, {
+      "evaluatorName" : "semantic",
+      "passed" : false,
+      "score" : 0.465868167288634,
+      "violations" : [ "Similarity 0.652 below threshold 0.750", "Judge composite score 1.40 below threshold 3.50" ],
+      "details" : {
+        "similarityScore" : 0.652,
+        "similarityThreshold" : 0.75,
+        "judgeScores" : {
+          "correctness" : 1,
+          "completeness" : 1,
+          "tone" : 3,
+          "reasoning" : "实际回复没有提供具体的退款政策信息，与参考回复中的明确退款政策相矛盾，因此正确性和完整性得分较低。语气虽然礼貌，但由于没有提供所需信息，所以不能得到更高的分数。"
+        },
+        "judgeCompositeScore" : 1.4,
+        "judgeScoreThreshold" : 3.5
+      }
+    }, {
+      "evaluatorName" : "rag_quality",
+      "passed" : false,
+      "score" : 0.0,
+      "violations" : [ "Context recall 0.000 is below 0.5 (retrieved 0 of 1 expected)" ],
+      "details" : {
+        "contextPrecision" : 0.0,
+        "contextRecall" : 0.0,
+        "expectedContexts" : [ "退款政策是什么？" ],
+        "retrievedContexts" : [ ],
+        "faithfulnessNote" : "Skipped: no retrieved contexts available"
+      }
+    } ]
+  }
+}

@@ -1,0 +1,144 @@
+{
+  "runResult" : {
+    "episodeId" : "post_query_002",
+    "finalReply" : "经过查询，系统中没有找到Bob的相关帖子。您可以尝试其他关键词搜索，或者详细描述Bob的信息，以便我们提供更准确的结果。",
+    "actions" : [ {
+      "name" : "post_query",
+      "args" : {
+        "username" : "bob"
+      },
+      "status" : "ok",
+      "resultSummary" : "{\"error\":\"\",\"data\":{\"posts\":[]},\"success\":true}",
+      "timestampMs" : 1772339105723
+    } ],
+    "artifacts" : {
+      "identityArtifacts" : {
+        "intent" : "POST_QUERY",
+        "confidence" : 0.95,
+        "risk" : "low"
+      },
+      "executionArtifacts" : {
+        "toolCallCount" : 1,
+        "retrievedContextCount" : 0
+      },
+      "composerArtifacts" : {
+        "replyLength" : 60
+      }
+    },
+    "metrics" : {
+      "latencyMs" : 2093,
+      "tokenIn" : null,
+      "tokenOut" : null,
+      "cost" : null,
+      "toolCallCount" : 1
+    },
+    "trace" : {
+      "spans" : [ {
+        "spanName" : "intent_recognition",
+        "startMs" : 1772339104573,
+        "endMs" : 1772339105723,
+        "attributes" : {
+          "risk" : "low",
+          "confidence" : 0.95,
+          "intent" : "POST_QUERY"
+        }
+      }, {
+        "spanName" : "tool_call",
+        "startMs" : 1772339105723,
+        "endMs" : 1772339105724,
+        "attributes" : {
+          "tool" : "post_query",
+          "success" : "true",
+          "round" : "0"
+        }
+      }, {
+        "spanName" : "response_composition",
+        "startMs" : 1772339105725,
+        "endMs" : 1772339106666,
+        "attributes" : {
+          "replyLength" : "60"
+        }
+      } ]
+    },
+    "version" : {
+      "modelId" : "moonshot-v1-8k",
+      "promptHashes" : {
+        "intent_system_prompt" : "33a24afedf2b",
+        "evidence_system_prompt" : "6b3324dcfd96"
+      },
+      "workflowVersion" : "7545f2315ea8",
+      "toolSchemaVersion" : "c063b959a923",
+      "kbSnapshot" : "unknown",
+      "gitCommit" : "70d8fbf4c54bba1993987904694dd9b76fe87ed6",
+      "compositeHash" : "ed3546d1f2c8"
+    },
+    "retrievedContexts" : [ ]
+  },
+  "score" : {
+    "episodeId" : "post_query_002",
+    "overallPass" : false,
+    "overallScore" : 0.9252020448725157,
+    "evaluatorResults" : [ {
+      "evaluatorName" : "contract",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "trajectory",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "efficiency",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "latencyMs" : 2093,
+        "toolCallCount" : 1
+      }
+    }, {
+      "evaluatorName" : "outcome",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "note" : "Stub evaluator - real implementation in Iter2"
+      }
+    }, {
+      "evaluatorName" : "semantic",
+      "passed" : false,
+      "score" : 0.5512122692350938,
+      "violations" : [ "Similarity 0.598 below threshold 0.650", "Judge composite score 1.40 below threshold 3.50" ],
+      "details" : {
+        "similarityScore" : 0.598,
+        "similarityThreshold" : 0.65,
+        "judgeScores" : {
+          "correctness" : 1,
+          "completeness" : 1,
+          "tone" : 3,
+          "reasoning" : "实际回复与参考回复不一致，参考回复提供了具体的帖子信息，而实际回复则表示没有找到任何帖子，这与参考回复中提供的信息相矛盾。实际回复没有包含任何帖子信息，因此完整性得分低。语气方面，虽然实际回复提供了替代方案，但因为信息不准确，所以语气得分不是最高。"
+        },
+        "judgeCompositeScore" : 1.4,
+        "judgeScoreThreshold" : 3.5,
+        "toolArgResults" : [ {
+          "tool" : "post_query",
+          "expectedArgs" : {
+            "username" : "bob"
+          },
+          "passed" : true
+        } ]
+      }
+    }, {
+      "evaluatorName" : "rag_quality",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "note" : "No RAG quality checks configured for this episode"
+      }
+    } ]
+  }
+}

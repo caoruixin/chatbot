@@ -1,0 +1,141 @@
+{
+  "runResult" : {
+    "episodeId" : "faq_003",
+    "finalReply" : "开启两步验证的步骤如下：\n\n1. 前往“设置 > 账号安全”。\n2. 选择“两步验证”选项。\n3. 选择验证方式，可以是短信验证或使用验证器应用。\n4. 按照提示完成相关操作。\n\n开启两步验证后，登录账号时除了输入密码外，还需要验证手机短信验证码或验证器应用生成的动态口令，以增强账号安全性。如果还有其他问题，欢迎随时咨询。",
+    "actions" : [ {
+      "name" : "faq_search",
+      "args" : {
+        "query" : "如何开启两步验证"
+      },
+      "status" : "ok",
+      "resultSummary" : "{\"success\":true,\"data\":{\"question\":\"如何开启两步验证？\",\"answer\":\"请前往\\\"设置 > 账号安全 > 两步验证\\\"，选择验证方式（短信或验证器应用）并按提示操作。\",\"score\":0.9913731243094449},\"error\":\"\"}",
+      "timestampMs" : 1772335431629
+    } ],
+    "artifacts" : {
+      "identityArtifacts" : {
+        "intent" : "KB_QUESTION",
+        "confidence" : 0.85,
+        "risk" : "low"
+      },
+      "executionArtifacts" : {
+        "toolCallCount" : 1,
+        "retrievedContextCount" : 0
+      },
+      "composerArtifacts" : {
+        "replyLength" : 162
+      }
+    },
+    "metrics" : {
+      "latencyMs" : 3165,
+      "tokenIn" : null,
+      "tokenOut" : null,
+      "cost" : null,
+      "toolCallCount" : 1
+    },
+    "trace" : {
+      "spans" : [ {
+        "spanName" : "intent_recognition",
+        "startMs" : 1772335430643,
+        "endMs" : 1772335431629,
+        "attributes" : {
+          "intent" : "KB_QUESTION",
+          "confidence" : 0.85,
+          "risk" : "low"
+        }
+      }, {
+        "spanName" : "tool_call",
+        "startMs" : 1772335431629,
+        "endMs" : 1772335431897,
+        "attributes" : {
+          "round" : "0",
+          "success" : "true",
+          "tool" : "faq_search"
+        }
+      }, {
+        "spanName" : "response_composition",
+        "startMs" : 1772335431898,
+        "endMs" : 1772335433808,
+        "attributes" : {
+          "replyLength" : "162"
+        }
+      } ]
+    },
+    "version" : {
+      "modelId" : "moonshot-v1-8k",
+      "promptHashes" : {
+        "intent_system_prompt" : "33a24afedf2b",
+        "evidence_system_prompt" : "6b3324dcfd96"
+      },
+      "workflowVersion" : "7545f2315ea8",
+      "toolSchemaVersion" : "c063b959a923",
+      "kbSnapshot" : "unknown",
+      "gitCommit" : "70d8fbf4c54bba1993987904694dd9b76fe87ed6",
+      "compositeHash" : "ed3546d1f2c8"
+    },
+    "retrievedContexts" : [ ]
+  },
+  "score" : {
+    "episodeId" : "faq_003",
+    "overallPass" : false,
+    "overallScore" : 0.8248832151139572,
+    "evaluatorResults" : [ {
+      "evaluatorName" : "contract",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "trajectory",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "efficiency",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "latencyMs" : 3165,
+        "toolCallCount" : 1
+      }
+    }, {
+      "evaluatorName" : "outcome",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "note" : "Stub evaluator - real implementation in Iter2"
+      }
+    }, {
+      "evaluatorName" : "semantic",
+      "passed" : true,
+      "score" : 0.9492992906837433,
+      "violations" : [ ],
+      "details" : {
+        "similarityScore" : 0.899,
+        "similarityThreshold" : 0.65,
+        "judgeScores" : {
+          "correctness" : 5,
+          "completeness" : 5,
+          "tone" : 5,
+          "reasoning" : "实际回复与参考回复在开启两步验证的方法上完全一致，提供了详细的步骤说明，并且额外解释了两步验证的作用，即增强账号安全性，同时保持了礼貌和专业的语气。"
+        },
+        "judgeCompositeScore" : 5.0,
+        "judgeScoreThreshold" : 3.5
+      }
+    }, {
+      "evaluatorName" : "rag_quality",
+      "passed" : false,
+      "score" : 0.0,
+      "violations" : [ "Context recall 0.000 is below 0.5 (retrieved 0 of 1 expected)" ],
+      "details" : {
+        "contextPrecision" : 0.0,
+        "contextRecall" : 0.0,
+        "expectedContexts" : [ "如何开启两步验证？" ],
+        "retrievedContexts" : [ ],
+        "faithfulnessNote" : "Skipped: no retrieved contexts available"
+      }
+    } ]
+  }
+}

@@ -1,0 +1,137 @@
+{
+  "runResult" : {
+    "episodeId" : "faq_006",
+    "finalReply" : "配送时间会受到多种因素的影响，例如商品的存储地点、物流方式、目的地等。通常情况下，同城配送可能需要1-3天，而跨城市的配送可能需要3-7天甚至更长。为了获得更准确的配送时间，建议您在下单时查看商品页面提供的预计配送时间，或者咨询客服获取更详细的信息。",
+    "actions" : [ {
+      "name" : "faq_search",
+      "args" : {
+        "query" : "配送一般需要几天"
+      },
+      "status" : "ok",
+      "resultSummary" : "{\"error\":\"\",\"data\":{\"question\":\"\",\"answer\":\"未找到与用户问题相关的FAQ\",\"score\":0.0},\"success\":true}",
+      "timestampMs" : 1772339159572
+    } ],
+    "artifacts" : {
+      "identityArtifacts" : {
+        "intent" : "KB_QUESTION",
+        "confidence" : 0.95,
+        "risk" : "low"
+      },
+      "executionArtifacts" : {
+        "toolCallCount" : 1,
+        "retrievedContextCount" : 0
+      },
+      "composerArtifacts" : {
+        "replyLength" : 125
+      }
+    },
+    "metrics" : {
+      "latencyMs" : 3053,
+      "tokenIn" : null,
+      "tokenOut" : null,
+      "cost" : null,
+      "toolCallCount" : 1
+    },
+    "trace" : {
+      "spans" : [ {
+        "spanName" : "intent_recognition",
+        "startMs" : 1772339158509,
+        "endMs" : 1772339159572,
+        "attributes" : {
+          "risk" : "low",
+          "confidence" : 0.95,
+          "intent" : "KB_QUESTION"
+        }
+      }, {
+        "spanName" : "tool_call",
+        "startMs" : 1772339159572,
+        "endMs" : 1772339159843,
+        "attributes" : {
+          "tool" : "faq_search",
+          "success" : "true",
+          "round" : "0"
+        }
+      }, {
+        "spanName" : "response_composition",
+        "startMs" : 1772339159843,
+        "endMs" : 1772339161562,
+        "attributes" : {
+          "replyLength" : "125"
+        }
+      } ]
+    },
+    "version" : {
+      "modelId" : "moonshot-v1-8k",
+      "promptHashes" : {
+        "intent_system_prompt" : "33a24afedf2b",
+        "evidence_system_prompt" : "6b3324dcfd96"
+      },
+      "workflowVersion" : "7545f2315ea8",
+      "toolSchemaVersion" : "c063b959a923",
+      "kbSnapshot" : "unknown",
+      "gitCommit" : "70d8fbf4c54bba1993987904694dd9b76fe87ed6",
+      "compositeHash" : "ed3546d1f2c8"
+    },
+    "retrievedContexts" : [ ]
+  },
+  "score" : {
+    "episodeId" : "faq_006",
+    "overallPass" : true,
+    "overallScore" : 0.9767479252120174,
+    "evaluatorResults" : [ {
+      "evaluatorName" : "contract",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "trajectory",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "efficiency",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "latencyMs" : 3053,
+        "toolCallCount" : 1
+      }
+    }, {
+      "evaluatorName" : "outcome",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "note" : "Stub evaluator - real implementation in Iter2"
+      }
+    }, {
+      "evaluatorName" : "semantic",
+      "passed" : true,
+      "score" : 0.8604875512721041,
+      "violations" : [ ],
+      "details" : {
+        "similarityScore" : 0.721,
+        "similarityThreshold" : 0.65,
+        "judgeScores" : {
+          "correctness" : 5,
+          "completeness" : 5,
+          "tone" : 5,
+          "reasoning" : "实际回复提供了关于配送时间的一般信息，并建议用户查看商品页面或咨询客服以获得更准确的信息，这与参考回复建议联系人工客服获取详细解答是一致的。实际回复还额外提供了同城和跨城市配送的大致时间范围，这增加了回答的详细程度。语气礼貌且专业。"
+        },
+        "judgeCompositeScore" : 5.0,
+        "judgeScoreThreshold" : 3.5
+      }
+    }, {
+      "evaluatorName" : "rag_quality",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "note" : "No RAG quality checks configured for this episode"
+      }
+    } ]
+  }
+}

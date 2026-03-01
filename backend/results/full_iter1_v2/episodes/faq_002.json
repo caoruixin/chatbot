@@ -1,0 +1,141 @@
+{
+  "runResult" : {
+    "episodeId" : "faq_002",
+    "finalReply" : "您好，系统当前没有找到重置密码的具体步骤。建议您可以通过以下方式尝试：\n\n1. 打开网站或应用的登录页面，点击“忘记密码”或“找回密码”的链接。\n\n2. 按照提示输入您的用户名或注册邮箱，然后点击下一步。\n\n3. 您可能会收到一封包含重置密码链接的邮件。点击邮件中的链接，按照页面提示设置新密码。\n\n4. 如果无法收到邮件，可以尝试检查垃圾邮件箱，或联系网站的客服寻求帮助。\n\n如果以上方法仍无法解决您的问题，建议您联系网站或应用的官方客服寻求人工协助。希望这些建议能帮到您。",
+    "actions" : [ {
+      "name" : "faq_search",
+      "args" : {
+        "query" : "怎么重置密码"
+      },
+      "status" : "ok",
+      "resultSummary" : "{\"error\":\"\",\"data\":{\"question\":\"\",\"answer\":\"未找到相关问题\",\"score\":0.0},\"success\":true}",
+      "timestampMs" : 1772339129730
+    } ],
+    "artifacts" : {
+      "identityArtifacts" : {
+        "intent" : "KB_QUESTION",
+        "confidence" : 0.9,
+        "risk" : "low"
+      },
+      "executionArtifacts" : {
+        "toolCallCount" : 1,
+        "retrievedContextCount" : 0
+      },
+      "composerArtifacts" : {
+        "replyLength" : 238
+      }
+    },
+    "metrics" : {
+      "latencyMs" : 3864,
+      "tokenIn" : null,
+      "tokenOut" : null,
+      "cost" : null,
+      "toolCallCount" : 1
+    },
+    "trace" : {
+      "spans" : [ {
+        "spanName" : "intent_recognition",
+        "startMs" : 1772339128802,
+        "endMs" : 1772339129730,
+        "attributes" : {
+          "risk" : "low",
+          "confidence" : 0.9,
+          "intent" : "KB_QUESTION"
+        }
+      }, {
+        "spanName" : "tool_call",
+        "startMs" : 1772339129730,
+        "endMs" : 1772339130008,
+        "attributes" : {
+          "tool" : "faq_search",
+          "success" : "true",
+          "round" : "0"
+        }
+      }, {
+        "spanName" : "response_composition",
+        "startMs" : 1772339130008,
+        "endMs" : 1772339132666,
+        "attributes" : {
+          "replyLength" : "238"
+        }
+      } ]
+    },
+    "version" : {
+      "modelId" : "moonshot-v1-8k",
+      "promptHashes" : {
+        "intent_system_prompt" : "33a24afedf2b",
+        "evidence_system_prompt" : "6b3324dcfd96"
+      },
+      "workflowVersion" : "7545f2315ea8",
+      "toolSchemaVersion" : "c063b959a923",
+      "kbSnapshot" : "unknown",
+      "gitCommit" : "70d8fbf4c54bba1993987904694dd9b76fe87ed6",
+      "compositeHash" : "ed3546d1f2c8"
+    },
+    "retrievedContexts" : [ ]
+  },
+  "score" : {
+    "episodeId" : "faq_002",
+    "overallPass" : false,
+    "overallScore" : 0.8041905786323369,
+    "evaluatorResults" : [ {
+      "evaluatorName" : "contract",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "trajectory",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "efficiency",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "latencyMs" : 3864,
+        "toolCallCount" : 1
+      }
+    }, {
+      "evaluatorName" : "outcome",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "note" : "Stub evaluator - real implementation in Iter2"
+      }
+    }, {
+      "evaluatorName" : "semantic",
+      "passed" : true,
+      "score" : 0.8251434717940209,
+      "violations" : [ ],
+      "details" : {
+        "similarityScore" : 0.75,
+        "similarityThreshold" : 0.65,
+        "judgeScores" : {
+          "correctness" : 4,
+          "completeness" : 5,
+          "tone" : 5,
+          "reasoning" : "实际回复提供了详细的步骤来指导用户如何重置密码，包括点击忘记密码链接、输入用户名或邮箱、检查邮件和联系客服等，与参考回复的指导步骤基本一致，但提供了更多的细节和备选方案。因此，在正确性、完整性和语气方面都表现良好。"
+        },
+        "judgeCompositeScore" : 4.5,
+        "judgeScoreThreshold" : 3.5
+      }
+    }, {
+      "evaluatorName" : "rag_quality",
+      "passed" : false,
+      "score" : 0.0,
+      "violations" : [ "Context recall 0.000 is below 0.5 (retrieved 0 of 1 expected)" ],
+      "details" : {
+        "contextPrecision" : 0.0,
+        "contextRecall" : 0.0,
+        "expectedContexts" : [ "如何重置密码？" ],
+        "retrievedContexts" : [ ],
+        "faithfulnessNote" : "Skipped: no retrieved contexts available"
+      }
+    } ]
+  }
+}

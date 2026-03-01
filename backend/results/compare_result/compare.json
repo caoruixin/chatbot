@@ -1,0 +1,58 @@
+{
+  "baselineFingerprint" : {
+    "modelId" : "moonshot-v1-8k",
+    "promptHashes" : {
+      "intent_system_prompt" : "33a24afedf2b",
+      "evidence_system_prompt" : "6b3324dcfd96"
+    },
+    "workflowVersion" : "7545f2315ea8",
+    "toolSchemaVersion" : "c063b959a923",
+    "kbSnapshot" : "unknown",
+    "gitCommit" : "70d8fbf4c54bba1993987904694dd9b76fe87ed6",
+    "compositeHash" : "ed3546d1f2c8"
+  },
+  "candidateFingerprint" : {
+    "modelId" : "moonshot-v1-8k",
+    "promptHashes" : {
+      "intent_system_prompt" : "33a24afedf2b",
+      "evidence_system_prompt" : "6b3324dcfd96"
+    },
+    "workflowVersion" : "7545f2315ea8",
+    "toolSchemaVersion" : "c063b959a923",
+    "kbSnapshot" : "unknown",
+    "gitCommit" : "70d8fbf4c54bba1993987904694dd9b76fe87ed6",
+    "compositeHash" : "ed3546d1f2c8"
+  },
+  "baselinePassRate" : 1.0,
+  "candidatePassRate" : 1.0,
+  "deltaPassRate" : 0.0,
+  "suiteDeltas" : {
+    "general" : {
+      "baselinePassRate" : 1.0,
+      "candidatePassRate" : 1.0,
+      "delta" : 0.0
+    },
+    "cross_intent" : {
+      "baselinePassRate" : 1.0,
+      "candidatePassRate" : 1.0,
+      "delta" : 0.0
+    },
+    "data_deletion" : {
+      "baselinePassRate" : 1.0,
+      "candidatePassRate" : 1.0,
+      "delta" : 0.0
+    },
+    "faq" : {
+      "baselinePassRate" : 1.0,
+      "candidatePassRate" : 1.0,
+      "delta" : 0.0
+    },
+    "post_query" : {
+      "baselinePassRate" : 1.0,
+      "candidatePassRate" : 1.0,
+      "delta" : 0.0
+    }
+  },
+  "regressions" : [ ],
+  "newPasses" : [ ]
+}

@@ -1,0 +1,147 @@
+{
+  "runResult" : {
+    "episodeId" : "faq_004",
+    "finalReply" : "帖子审核通常需要2-4小时，在高峰期可能会延长到12小时。请耐心等待。如果长时间未通过审核，可以联系客服进一步咨询。",
+    "actions" : [ {
+      "name" : "faq_search",
+      "args" : {
+        "query" : "帖子审核需要多久"
+      },
+      "status" : "ok",
+      "resultSummary" : "{\"data\":{\"question\":\"帖子审核需要多久？\",\"answer\":\"帖子通常在发布后2-4小时内完成审核。高峰期可能延长至12小时。\",\"score\":0.9922618260696855},\"error\":\"\",\"success\":true}",
+      "timestampMs" : 1772339587676
+    } ],
+    "artifacts" : {
+      "identityArtifacts" : {
+        "intent" : "KB_QUESTION",
+        "confidence" : 0.85,
+        "risk" : "low"
+      },
+      "executionArtifacts" : {
+        "toolCallCount" : 1,
+        "retrievedContextCount" : 1
+      },
+      "composerArtifacts" : {
+        "replyLength" : 58
+      }
+    },
+    "metrics" : {
+      "latencyMs" : 2194,
+      "tokenIn" : null,
+      "tokenOut" : null,
+      "cost" : null,
+      "toolCallCount" : 1
+    },
+    "trace" : {
+      "spans" : [ {
+        "spanName" : "intent_recognition",
+        "startMs" : 1772339586775,
+        "endMs" : 1772339587676,
+        "attributes" : {
+          "risk" : "low",
+          "intent" : "KB_QUESTION",
+          "confidence" : 0.85
+        }
+      }, {
+        "spanName" : "tool_call",
+        "startMs" : 1772339587676,
+        "endMs" : 1772339587975,
+        "attributes" : {
+          "tool" : "faq_search",
+          "round" : "0",
+          "success" : "true"
+        }
+      }, {
+        "spanName" : "response_composition",
+        "startMs" : 1772339587976,
+        "endMs" : 1772339588969,
+        "attributes" : {
+          "replyLength" : "58"
+        }
+      } ]
+    },
+    "version" : {
+      "modelId" : "moonshot-v1-8k",
+      "promptHashes" : {
+        "intent_system_prompt" : "33a24afedf2b",
+        "evidence_system_prompt" : "6b3324dcfd96"
+      },
+      "workflowVersion" : "7545f2315ea8",
+      "toolSchemaVersion" : "c063b959a923",
+      "kbSnapshot" : "unknown",
+      "gitCommit" : "70d8fbf4c54bba1993987904694dd9b76fe87ed6",
+      "compositeHash" : "ed3546d1f2c8"
+    },
+    "retrievedContexts" : [ {
+      "faqId" : null,
+      "question" : "帖子审核需要多久？",
+      "score" : 0.9922618260696855
+    } ]
+  },
+  "score" : {
+    "episodeId" : "faq_004",
+    "overallPass" : true,
+    "overallScore" : 0.9674999999999999,
+    "evaluatorResults" : [ {
+      "evaluatorName" : "contract",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "trajectory",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "efficiency",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "latencyMs" : 2194,
+        "toolCallCount" : 1
+      }
+    }, {
+      "evaluatorName" : "outcome",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "note" : "Stub evaluator - real implementation in Iter2"
+      }
+    }, {
+      "evaluatorName" : "semantic",
+      "passed" : true,
+      "score" : 0.88,
+      "violations" : [ ],
+      "details" : {
+        "mode" : "mock",
+        "similarityScore" : 0.9,
+        "similarityThreshold" : 0.65,
+        "judgeScores" : {
+          "reasoning" : "[mock] 待人工评估补充",
+          "completeness" : 4,
+          "correctness" : 4,
+          "tone" : 5
+        },
+        "judgeCompositeScore" : 4.3,
+        "judgeScoreThreshold" : 3.5
+      }
+    }, {
+      "evaluatorName" : "rag_quality",
+      "passed" : true,
+      "score" : 0.925,
+      "violations" : [ ],
+      "details" : {
+        "contextPrecision" : 1.0,
+        "contextRecall" : 1.0,
+        "expectedContexts" : [ "帖子审核需要多久？" ],
+        "retrievedContexts" : [ "帖子审核需要多久？" ],
+        "faithfulnessMode" : "mock",
+        "faithfulnessScore" : 0.85
+      }
+    } ]
+  }
+}

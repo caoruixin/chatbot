@@ -1,0 +1,120 @@
+{
+  "runResult" : {
+    "episodeId" : "delete_003",
+    "finalReply" : "请提供您的用户名，以便我们处理您的数据删除请求。",
+    "actions" : [ ],
+    "artifacts" : {
+      "identityArtifacts" : {
+        "intent" : "DATA_DELETION",
+        "confidence" : 0.95,
+        "risk" : "critical"
+      },
+      "executionArtifacts" : {
+        "toolCallCount" : 0,
+        "retrievedContextCount" : 0
+      },
+      "composerArtifacts" : {
+        "replyLength" : 24
+      }
+    },
+    "metrics" : {
+      "latencyMs" : 815,
+      "tokenIn" : null,
+      "tokenOut" : null,
+      "cost" : null,
+      "toolCallCount" : 0
+    },
+    "trace" : {
+      "spans" : [ {
+        "spanName" : "intent_recognition",
+        "startMs" : 1772335457708,
+        "endMs" : 1772335458523,
+        "attributes" : {
+          "intent" : "DATA_DELETION",
+          "confidence" : 0.95,
+          "risk" : "critical"
+        }
+      }, {
+        "spanName" : "response_composition",
+        "startMs" : 1772335458523,
+        "endMs" : 1772335458523,
+        "attributes" : {
+          "replyLength" : "24"
+        }
+      } ]
+    },
+    "version" : {
+      "modelId" : "moonshot-v1-8k",
+      "promptHashes" : {
+        "intent_system_prompt" : "33a24afedf2b",
+        "evidence_system_prompt" : "6b3324dcfd96"
+      },
+      "workflowVersion" : "7545f2315ea8",
+      "toolSchemaVersion" : "c063b959a923",
+      "kbSnapshot" : "unknown",
+      "gitCommit" : "70d8fbf4c54bba1993987904694dd9b76fe87ed6",
+      "compositeHash" : "ed3546d1f2c8"
+    },
+    "retrievedContexts" : [ ]
+  },
+  "score" : {
+    "episodeId" : "delete_003",
+    "overallPass" : true,
+    "overallScore" : 0.9895794912976746,
+    "evaluatorResults" : [ {
+      "evaluatorName" : "contract",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "trajectory",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "efficiency",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "latencyMs" : 815,
+        "toolCallCount" : 0
+      }
+    }, {
+      "evaluatorName" : "outcome",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "note" : "Stub evaluator - real implementation in Iter2"
+      }
+    }, {
+      "evaluatorName" : "semantic",
+      "passed" : true,
+      "score" : 0.9374769477860478,
+      "violations" : [ ],
+      "details" : {
+        "similarityScore" : 0.875,
+        "similarityThreshold" : 0.65,
+        "judgeScores" : {
+          "correctness" : 5,
+          "completeness" : 5,
+          "tone" : 5,
+          "reasoning" : "实际回复与参考回复在语义上一致，都要求用户提供用户名以便处理数据删除请求。信息完整，语气礼貌且专业。"
+        },
+        "judgeCompositeScore" : 5.0,
+        "judgeScoreThreshold" : 3.5
+      }
+    }, {
+      "evaluatorName" : "rag_quality",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "note" : "No RAG quality checks configured for this episode"
+      }
+    } ]
+  }
+}

@@ -1,0 +1,144 @@
+{
+  "runResult" : {
+    "episodeId" : "post_query_002",
+    "finalReply" : "根据您的需求，我查询了系统中Bob的帖子信息。结果显示Bob目前没有任何帖子。如需进一步查找或有其他问题，请随时告诉我。",
+    "actions" : [ {
+      "name" : "post_query",
+      "args" : {
+        "username" : "bob"
+      },
+      "status" : "ok",
+      "resultSummary" : "{\"success\":true,\"data\":{\"posts\":[]},\"error\":\"\"}",
+      "timestampMs" : 1772335397317
+    } ],
+    "artifacts" : {
+      "identityArtifacts" : {
+        "intent" : "POST_QUERY",
+        "confidence" : 0.95,
+        "risk" : "low"
+      },
+      "executionArtifacts" : {
+        "toolCallCount" : 1,
+        "retrievedContextCount" : 0
+      },
+      "composerArtifacts" : {
+        "replyLength" : 60
+      }
+    },
+    "metrics" : {
+      "latencyMs" : 1781,
+      "tokenIn" : null,
+      "tokenOut" : null,
+      "cost" : null,
+      "toolCallCount" : 1
+    },
+    "trace" : {
+      "spans" : [ {
+        "spanName" : "intent_recognition",
+        "startMs" : 1772335396431,
+        "endMs" : 1772335397317,
+        "attributes" : {
+          "intent" : "POST_QUERY",
+          "confidence" : 0.95,
+          "risk" : "low"
+        }
+      }, {
+        "spanName" : "tool_call",
+        "startMs" : 1772335397317,
+        "endMs" : 1772335397319,
+        "attributes" : {
+          "round" : "0",
+          "success" : "true",
+          "tool" : "post_query"
+        }
+      }, {
+        "spanName" : "response_composition",
+        "startMs" : 1772335397319,
+        "endMs" : 1772335398212,
+        "attributes" : {
+          "replyLength" : "60"
+        }
+      } ]
+    },
+    "version" : {
+      "modelId" : "moonshot-v1-8k",
+      "promptHashes" : {
+        "intent_system_prompt" : "33a24afedf2b",
+        "evidence_system_prompt" : "6b3324dcfd96"
+      },
+      "workflowVersion" : "7545f2315ea8",
+      "toolSchemaVersion" : "c063b959a923",
+      "kbSnapshot" : "unknown",
+      "gitCommit" : "70d8fbf4c54bba1993987904694dd9b76fe87ed6",
+      "compositeHash" : "ed3546d1f2c8"
+    },
+    "retrievedContexts" : [ ]
+  },
+  "score" : {
+    "episodeId" : "post_query_002",
+    "overallPass" : false,
+    "overallScore" : 0.9491217399966474,
+    "evaluatorResults" : [ {
+      "evaluatorName" : "contract",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "trajectory",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "efficiency",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "latencyMs" : 1781,
+        "toolCallCount" : 1
+      }
+    }, {
+      "evaluatorName" : "outcome",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "note" : "Stub evaluator - real implementation in Iter2"
+      }
+    }, {
+      "evaluatorName" : "semantic",
+      "passed" : false,
+      "score" : 0.6947304399798845,
+      "violations" : [ "Judge composite score 2.80 below threshold 3.50" ],
+      "details" : {
+        "similarityScore" : 0.677,
+        "similarityThreshold" : 0.65,
+        "judgeScores" : {
+          "correctness" : 3,
+          "completeness" : 1,
+          "tone" : 5,
+          "reasoning" : "实际回复中没有提供具体的帖子信息，与参考回复中列出的帖子信息不符，因此正确性得分为3。完整性得分为1，因为实际回复中没有包含任何帖子的具体信息，与参考回复中列出的帖子信息相比严重遗漏。语气得分为5，因为实际回复礼貌且专业，符合客服场景的要求。"
+        },
+        "judgeCompositeScore" : 2.8,
+        "judgeScoreThreshold" : 3.5,
+        "toolArgResults" : [ {
+          "tool" : "post_query",
+          "expectedArgs" : {
+            "username" : "bob"
+          },
+          "passed" : true
+        } ]
+      }
+    }, {
+      "evaluatorName" : "rag_quality",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "note" : "No RAG quality checks configured for this episode"
+      }
+    } ]
+  }
+}

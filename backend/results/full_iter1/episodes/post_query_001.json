@@ -1,0 +1,144 @@
+{
+  "runResult" : {
+    "episodeId" : "post_query_001",
+    "finalReply" : "您好，查询结果显示系统中没有找到alice的帖子。可能是alice没有发表过帖子，或者帖子已经被删除。如果您需要进一步查找相关信息，请提供更多信息或者联系人工客服帮您处理。",
+    "actions" : [ {
+      "name" : "post_query",
+      "args" : {
+        "username" : "alice"
+      },
+      "status" : "ok",
+      "resultSummary" : "{\"error\":\"\",\"data\":{\"posts\":[]},\"success\":true}",
+      "timestampMs" : 1772334833580
+    } ],
+    "artifacts" : {
+      "identityArtifacts" : {
+        "intent" : "POST_QUERY",
+        "confidence" : 0.95,
+        "risk" : "low"
+      },
+      "executionArtifacts" : {
+        "toolCallCount" : 1,
+        "retrievedContextCount" : 0
+      },
+      "composerArtifacts" : {
+        "replyLength" : 86
+      }
+    },
+    "metrics" : {
+      "latencyMs" : 3278,
+      "tokenIn" : null,
+      "tokenOut" : null,
+      "cost" : null,
+      "toolCallCount" : 1
+    },
+    "trace" : {
+      "spans" : [ {
+        "spanName" : "intent_recognition",
+        "startMs" : 1772334831505,
+        "endMs" : 1772334833580,
+        "attributes" : {
+          "risk" : "low",
+          "confidence" : 0.95,
+          "intent" : "POST_QUERY"
+        }
+      }, {
+        "spanName" : "tool_call",
+        "startMs" : 1772334833580,
+        "endMs" : 1772334833593,
+        "attributes" : {
+          "tool" : "post_query",
+          "success" : "true",
+          "round" : "0"
+        }
+      }, {
+        "spanName" : "response_composition",
+        "startMs" : 1772334833595,
+        "endMs" : 1772334834782,
+        "attributes" : {
+          "replyLength" : "86"
+        }
+      } ]
+    },
+    "version" : {
+      "modelId" : "moonshot-v1-8k",
+      "promptHashes" : {
+        "intent_system_prompt" : "33a24afedf2b",
+        "evidence_system_prompt" : "6b3324dcfd96"
+      },
+      "workflowVersion" : "7545f2315ea8",
+      "toolSchemaVersion" : "c063b959a923",
+      "kbSnapshot" : "unknown",
+      "gitCommit" : "70d8fbf4c54bba1993987904694dd9b76fe87ed6",
+      "compositeHash" : "ed3546d1f2c8"
+    },
+    "retrievedContexts" : [ ]
+  },
+  "score" : {
+    "episodeId" : "post_query_001",
+    "overallPass" : false,
+    "overallScore" : 0.9387534323389799,
+    "evaluatorResults" : [ {
+      "evaluatorName" : "contract",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "trajectory",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "efficiency",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "latencyMs" : 3278,
+        "toolCallCount" : 1
+      }
+    }, {
+      "evaluatorName" : "outcome",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "note" : "Stub evaluator - real implementation in Iter2"
+      }
+    }, {
+      "evaluatorName" : "semantic",
+      "passed" : false,
+      "score" : 0.632520594033879,
+      "violations" : [ "Similarity 0.721 below threshold 0.750", "Judge composite score 1.80 below threshold 3.50" ],
+      "details" : {
+        "similarityScore" : 0.721,
+        "similarityThreshold" : 0.75,
+        "judgeScores" : {
+          "correctness" : 1,
+          "completeness" : 1,
+          "tone" : 5,
+          "reasoning" : "实际回复与参考回复不一致，因为参考回复提供了具体的帖子信息，而实际回复则表示没有找到alice的帖子。这表明实际回复在正确性上存在问题，没有提供正确的帖子信息。同时，实际回复没有包含任何帖子的具体信息，因此完整性得分也较低。尽管如此，实际回复的语气仍然保持了专业和礼貌，因此语气得分较高。"
+        },
+        "judgeCompositeScore" : 1.8,
+        "judgeScoreThreshold" : 3.5,
+        "toolArgResults" : [ {
+          "tool" : "post_query",
+          "expectedArgs" : {
+            "username" : "alice"
+          },
+          "passed" : true
+        } ]
+      }
+    }, {
+      "evaluatorName" : "rag_quality",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "note" : "No RAG quality checks configured for this episode"
+      }
+    } ]
+  }
+}

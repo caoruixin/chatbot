@@ -1,0 +1,71 @@
+{
+  "runResult" : {
+    "episodeId" : "faq_001",
+    "finalReply" : "很抱歉，我没有找到关于退款政策的详细信息。建议您联系我们的人工客服，他们会为您详细解释退款流程和相关政策。感谢您的理解！",
+    "actions" : [ {
+      "name" : "faq_search",
+      "args" : {
+        "query" : "你们的退款政策是什么"
+      },
+      "status" : "ok",
+      "resultSummary" : "{\"success\":true,\"data\":{\"question\":\"\",\"answer\":\"未找到与用户问题相关的FAQ\",\"score\":0.0},\"error\":\"\"}",
+      "timestampMs" : 1771859222417
+    } ],
+    "artifacts" : null,
+    "metrics" : {
+      "latencyMs" : 1676,
+      "tokenIn" : null,
+      "tokenOut" : null,
+      "cost" : null,
+      "toolCallCount" : 1
+    },
+    "trace" : null,
+    "version" : {
+      "modelId" : "moonshot-v1-8k",
+      "promptHashes" : {
+        "intent_system_prompt" : "33a24afedf2b",
+        "evidence_system_prompt" : "6b3324dcfd96"
+      },
+      "workflowVersion" : "7545f2315ea8",
+      "toolSchemaVersion" : "c063b959a923",
+      "kbSnapshot" : "unknown",
+      "gitCommit" : "70d8fbf4c54bba1993987904694dd9b76fe87ed6",
+      "compositeHash" : "ed3546d1f2c8"
+    }
+  },
+  "score" : {
+    "episodeId" : "faq_001",
+    "overallPass" : true,
+    "overallScore" : 1.0,
+    "evaluatorResults" : [ {
+      "evaluatorName" : "contract",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "trajectory",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "efficiency",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "latencyMs" : 1676,
+        "toolCallCount" : 1
+      }
+    }, {
+      "evaluatorName" : "outcome",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "note" : "Stub evaluator - real implementation in Iter2"
+      }
+    } ]
+  }
+}

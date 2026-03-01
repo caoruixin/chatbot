@@ -1,0 +1,120 @@
+{
+  "runResult" : {
+    "episodeId" : "chat_003",
+    "finalReply" : "祝您有美好的一天，再见！如果以后有任何问题，欢迎随时联系我。",
+    "actions" : [ ],
+    "artifacts" : {
+      "identityArtifacts" : {
+        "intent" : "GENERAL_CHAT",
+        "confidence" : 0.9,
+        "risk" : "low"
+      },
+      "executionArtifacts" : {
+        "toolCallCount" : 0,
+        "retrievedContextCount" : 0
+      },
+      "composerArtifacts" : {
+        "replyLength" : 30
+      }
+    },
+    "metrics" : {
+      "latencyMs" : 1667,
+      "tokenIn" : null,
+      "tokenOut" : null,
+      "cost" : null,
+      "toolCallCount" : 0
+    },
+    "trace" : {
+      "spans" : [ {
+        "spanName" : "intent_recognition",
+        "startMs" : 1772339184000,
+        "endMs" : 1772339184885,
+        "attributes" : {
+          "risk" : "low",
+          "confidence" : 0.9,
+          "intent" : "GENERAL_CHAT"
+        }
+      }, {
+        "spanName" : "response_composition",
+        "startMs" : 1772339184886,
+        "endMs" : 1772339185667,
+        "attributes" : {
+          "replyLength" : "30"
+        }
+      } ]
+    },
+    "version" : {
+      "modelId" : "moonshot-v1-8k",
+      "promptHashes" : {
+        "intent_system_prompt" : "33a24afedf2b",
+        "evidence_system_prompt" : "6b3324dcfd96"
+      },
+      "workflowVersion" : "7545f2315ea8",
+      "toolSchemaVersion" : "c063b959a923",
+      "kbSnapshot" : "unknown",
+      "gitCommit" : "70d8fbf4c54bba1993987904694dd9b76fe87ed6",
+      "compositeHash" : "ed3546d1f2c8"
+    },
+    "retrievedContexts" : [ ]
+  },
+  "score" : {
+    "episodeId" : "chat_003",
+    "overallPass" : true,
+    "overallScore" : 0.9861658744490253,
+    "evaluatorResults" : [ {
+      "evaluatorName" : "contract",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "trajectory",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "efficiency",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "latencyMs" : 1667,
+        "toolCallCount" : 0
+      }
+    }, {
+      "evaluatorName" : "outcome",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "note" : "Stub evaluator - real implementation in Iter2"
+      }
+    }, {
+      "evaluatorName" : "semantic",
+      "passed" : true,
+      "score" : 0.9169952466941514,
+      "violations" : [ ],
+      "details" : {
+        "similarityScore" : 0.834,
+        "similarityThreshold" : 0.65,
+        "judgeScores" : {
+          "correctness" : 5,
+          "completeness" : 5,
+          "tone" : 5,
+          "reasoning" : "实际回复与参考回复都传达了对用户的祝福和愿意提供进一步帮助的意愿，语义一致，正确性高。实际回复包含了所有关键信息点，包括祝福、再见和随时联系的承诺，完整性高。语气礼貌、专业，符合客服场景，因此语气得分也高。"
+        },
+        "judgeCompositeScore" : 5.0,
+        "judgeScoreThreshold" : 3.5
+      }
+    }, {
+      "evaluatorName" : "rag_quality",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "note" : "No RAG quality checks configured for this episode"
+      }
+    } ]
+  }
+}

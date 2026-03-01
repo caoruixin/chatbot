@@ -1,0 +1,71 @@
+{
+  "runResult" : {
+    "episodeId" : "faq_002",
+    "finalReply" : "对于重置密码，您可以通过以下步骤操作：\n\n1. 打开对应应用或网站的登录页面。\n2. 点击“忘记密码”或“重置密码”按钮。\n3. 输入您的注册邮箱或手机号，点击下一步。\n4. 根据提示，您可能会收到一封邮件或短信验证码。\n5. 将收到的验证码输入网页或应用中，然后设置新密码。\n6. 提交新密码后，您的密码就重置成功了。\n\n如果您在操作过程中遇到问题，建议联系应用或网站的客服寻求帮助。希望这些信息对您有所帮助！",
+    "actions" : [ {
+      "name" : "faq_search",
+      "args" : {
+        "query" : "怎么重置密码"
+      },
+      "status" : "ok",
+      "resultSummary" : "{\"success\":true,\"data\":{\"question\":\"\",\"answer\":\"未找到相关问题\",\"score\":0.0},\"error\":\"\"}",
+      "timestampMs" : 1771859224086
+    } ],
+    "artifacts" : null,
+    "metrics" : {
+      "latencyMs" : 3310,
+      "tokenIn" : null,
+      "tokenOut" : null,
+      "cost" : null,
+      "toolCallCount" : 1
+    },
+    "trace" : null,
+    "version" : {
+      "modelId" : "moonshot-v1-8k",
+      "promptHashes" : {
+        "intent_system_prompt" : "33a24afedf2b",
+        "evidence_system_prompt" : "6b3324dcfd96"
+      },
+      "workflowVersion" : "7545f2315ea8",
+      "toolSchemaVersion" : "c063b959a923",
+      "kbSnapshot" : "unknown",
+      "gitCommit" : "70d8fbf4c54bba1993987904694dd9b76fe87ed6",
+      "compositeHash" : "ed3546d1f2c8"
+    }
+  },
+  "score" : {
+    "episodeId" : "faq_002",
+    "overallPass" : true,
+    "overallScore" : 1.0,
+    "evaluatorResults" : [ {
+      "evaluatorName" : "contract",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "trajectory",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "efficiency",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "latencyMs" : 3310,
+        "toolCallCount" : 1
+      }
+    }, {
+      "evaluatorName" : "outcome",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "note" : "Stub evaluator - real implementation in Iter2"
+      }
+    } ]
+  }
+}

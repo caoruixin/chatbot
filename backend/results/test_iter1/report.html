@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eval Report</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #333; line-height: 1.6; }
+.container { max-width: 1100px; margin: 0 auto; padding: 20px; }
+h1 { margin-bottom: 5px; }
+h2 { margin: 25px 0 10px; color: #444; }
+.timestamp { color: #888; margin-bottom: 20px; font-size: 0.9em; }
+.card { background: #fff; border-radius: 8px; padding: 20px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.metrics { display: flex; gap: 20px; flex-wrap: wrap; }
+.metric { text-align: center; min-width: 100px; }
+.metric .value { font-size: 2em; font-weight: bold; }
+.metric .label { font-size: 0.85em; color: #888; }
+.pass { color: #2d8a4e; }
+.fail { color: #d32f2f; }
+table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+th, td { padding: 8px 12px; text-align: left; border-bottom: 1px solid #eee; }
+th { background: #fafafa; font-weight: 600; }
+.episode-header { cursor: pointer; padding: 10px 15px; background: #fff; border-radius: 6px; margin: 5px 0; box-shadow: 0 1px 2px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; }
+.episode-header:hover { background: #f8f8f8; }
+.episode-body { display: none; padding: 15px; background: #fff; border-radius: 0 0 6px 6px; margin-top: -5px; margin-bottom: 5px; }
+.episode-body.open { display: block; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.8em; font-weight: 600; }
+.badge-pass { background: #e6f4ea; color: #2d8a4e; }
+.badge-fail { background: #fce8e6; color: #d32f2f; }
+.reply-box { background: #f8f9fa; padding: 10px; border-radius: 4px; margin: 8px 0; white-space: pre-wrap; font-size: 0.95em; }
+.violation { color: #d32f2f; font-size: 0.9em; margin: 2px 0; }
+.fingerprint { font-family: monospace; font-size: 0.85em; color: #666; }
+</style>
+</head>
+<body>
+<div class="container">
+<h1>AI Agent Eval Report</h1>
+<p class="timestamp">Generated: 2026-03-01 11:08:28</p>
+<h2>Summary</h2>
+<div class="card">
+<div class="metrics">
+<div class="metric"><div class="value ">1</div><div class="label">Total Episodes</div></div>
+<div class="metric"><div class="value fail">0%</div><div class="label">Pass Rate</div></div>
+<div class="metric"><div class="value pass">0</div><div class="label">Passed</div></div>
+<div class="metric"><div class="value fail">1</div><div class="label">Failed</div></div>
+<div class="metric"><div class="value ">4950ms</div><div class="label">p50 Latency</div></div>
+<div class="metric"><div class="value ">4950ms</div><div class="label">p95 Latency</div></div>
+</div>
+<h3 style="margin-top:15px">Per-Evaluator Pass Rate</h3>
+<table><tr><th>Evaluator</th><th>Pass Rate</th></tr>
+<tr><td>contract</td><td>100%</td></tr>
+<tr><td>trajectory</td><td>100%</td></tr>
+<tr><td>efficiency</td><td>100%</td></tr>
+<tr><td>outcome</td><td>100%</td></tr>
+<tr><td>semantic</td><td>0%</td></tr>
+<tr><td>rag_quality</td><td>0%</td></tr>
+</table>
+<div class="fingerprint" style="margin-top:10px">Version: ed3546d1f2c8 | Model: moonshot-v1-8k | Git: 70d8fbf4c54bba1993987904694dd9b76fe87ed6</div>
+</div>
+<h2>Suite Breakdown</h2>
+<div class="card">
+<table>
+<tr><th>Name</th><th>Total</th><th>Pass</th><th>Fail</th><th>Pass Rate</th><th>Avg Latency</th></tr>
+<tr><td>faq</td><td>1</td><td class="pass">0</td><td class="fail">1</td><td>0%</td><td>4950ms</td></tr>
+</table>
+</div>
+<h2>Tag Breakdown</h2>
+<div class="card">
+<table>
+<tr><th>Name</th><th>Total</th><th>Pass</th><th>Fail</th><th>Pass Rate</th><th>Avg Latency</th></tr>
+<tr><td>kb_question</td><td>1</td><td class="pass">0</td><td class="fail">1</td><td>0%</td><td>4950ms</td></tr>
+</table>
+</div>
+<h2>Episode Details</h2>
+<div class="episode-header" onclick="toggle('faq_001')">
+<span>faq_001</span>
+<span class="badge badge-fail">FAIL</span>
+</div>
+<div class="episode-body" id="faq_001">
+<strong>Reply:</strong>
+<div class="reply-box">非常抱歉，目前没有找到关于退款政策的具体信息。建议您联系我们的人工客服，会有专人为您解答退款政策相关问题。非常感谢您的理解与支持！</div>
+<strong>Tool Actions:</strong>
+<table><tr><th>Tool</th><th>Status</th><th>Summary</th></tr>
+<tr><td>faq_search</td><td>ok</td><td>{&quot;error&quot;:&quot;&quot;,&quot;data&quot;:{&quot;question&quot;:&quot;&quot;,&quot;answer&quot;:&quot;未找到与用户问题相关的FAQ&quot;,&quot;score&quot;:0.0},&quot;success&quot;:true}</td></tr>
+</table>
+<strong>Evaluator Results:</strong>
+<div style="margin:5px 0"><span class="badge badge-pass">contract</span> score=1.00</div>
+<div style="margin:5px 0"><span class="badge badge-pass">trajectory</span> score=1.00</div>
+<div style="margin:5px 0"><span class="badge badge-pass">efficiency</span> score=1.00</div>
+<div style="margin:5px 0"><span class="badge badge-pass">outcome</span> score=1.00</div>
+<div style="margin:5px 0"><span class="badge badge-fail">semantic</span> score=0.50<div class="violation">- Similarity 0.646 below threshold 0.750</div><div class="violation">- Judge composite score 1.80 below threshold 3.50</div></div>
+<div style="margin:5px 0"><span class="badge badge-fail">rag_quality</span> score=0.00<div class="violation">- Context recall 0.000 is below 0.5 (retrieved 0 of 1 expected)</div></div>
+<div style="margin:8px 0;padding:8px;background:#f0f7ff;border-radius:4px;font-size:0.9em"><strong>Semantic Scores:</strong> Similarity=0.646 Judge=1.8/5 (C:1 Cm:1 T:5) </div>
+<div style="margin:8px 0;padding:8px;background:#f0fff0;border-radius:4px;font-size:0.9em"><strong>RAG Quality:</strong> Precision=0.0 Recall=0.0 </div>
+<div style="margin-top:8px; font-size:0.9em; color:#888">Latency: 4950ms | Tool calls: 1</div>
+<details style="margin-top:8px"><summary style="cursor:pointer;font-size:0.9em;color:#666">Trace Spans (3)</summary><table style="font-size:0.85em"><tr><th>Span</th><th>Duration</th><th>Details</th></tr>
+<tr><td>intent_recognition</td><td>2066ms</td><td>{risk=low, confidence=0.95, intent=KB_QUESTION}</td></tr>
+<tr><td>tool_call</td><td>1815ms</td><td>{tool=faq_search, success=true, round=0}</td></tr>
+<tr><td>response_composition</td><td>1065ms</td><td>{replyLength=65}</td></tr>
+</table></details>
+</div>
+</div>
+<script>
+function toggle(id) {
+  var el = document.getElementById(id);
+  el.classList.toggle('open');
+}
+</script>
+</body>
+</html>

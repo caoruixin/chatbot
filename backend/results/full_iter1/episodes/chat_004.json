@@ -1,0 +1,120 @@
+{
+  "runResult" : {
+    "episodeId" : "chat_004",
+    "finalReply" : "您好，我是您的人工智能助手，可以帮助您解答问题和提供信息。有什么可以帮助您的吗？",
+    "actions" : [ ],
+    "artifacts" : {
+      "identityArtifacts" : {
+        "intent" : "GENERAL_CHAT",
+        "confidence" : 0.9,
+        "risk" : "low"
+      },
+      "executionArtifacts" : {
+        "toolCallCount" : 0,
+        "retrievedContextCount" : 0
+      },
+      "composerArtifacts" : {
+        "replyLength" : 40
+      }
+    },
+    "metrics" : {
+      "latencyMs" : 1824,
+      "tokenIn" : null,
+      "tokenOut" : null,
+      "cost" : null,
+      "toolCallCount" : 0
+    },
+    "trace" : {
+      "spans" : [ {
+        "spanName" : "intent_recognition",
+        "startMs" : 1772334914708,
+        "endMs" : 1772334915699,
+        "attributes" : {
+          "risk" : "low",
+          "confidence" : 0.9,
+          "intent" : "GENERAL_CHAT"
+        }
+      }, {
+        "spanName" : "response_composition",
+        "startMs" : 1772334915699,
+        "endMs" : 1772334916532,
+        "attributes" : {
+          "replyLength" : "40"
+        }
+      } ]
+    },
+    "version" : {
+      "modelId" : "moonshot-v1-8k",
+      "promptHashes" : {
+        "intent_system_prompt" : "33a24afedf2b",
+        "evidence_system_prompt" : "6b3324dcfd96"
+      },
+      "workflowVersion" : "7545f2315ea8",
+      "toolSchemaVersion" : "c063b959a923",
+      "kbSnapshot" : "unknown",
+      "gitCommit" : "70d8fbf4c54bba1993987904694dd9b76fe87ed6",
+      "compositeHash" : "ed3546d1f2c8"
+    },
+    "retrievedContexts" : [ ]
+  },
+  "score" : {
+    "episodeId" : "chat_004",
+    "overallPass" : false,
+    "overallScore" : 0.9558549518824577,
+    "evaluatorResults" : [ {
+      "evaluatorName" : "contract",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "trajectory",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "efficiency",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "latencyMs" : 1824,
+        "toolCallCount" : 0
+      }
+    }, {
+      "evaluatorName" : "outcome",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "note" : "Stub evaluator - real implementation in Iter2"
+      }
+    }, {
+      "evaluatorName" : "semantic",
+      "passed" : false,
+      "score" : 0.7351297112947466,
+      "violations" : [ "Similarity 0.530 below threshold 0.750" ],
+      "details" : {
+        "similarityScore" : 0.53,
+        "similarityThreshold" : 0.75,
+        "judgeScores" : {
+          "correctness" : 5,
+          "completeness" : 4,
+          "tone" : 5,
+          "reasoning" : "实际回复正确地介绍了自己为AI助手，并询问用户需要什么帮助，与参考回复语义一致，但缺少了提及用户可以发送'转人工'来联系人工客服的信息，因此完整性略低于参考回复。语气礼貌且专业，符合客服场景。"
+        },
+        "judgeCompositeScore" : 4.7,
+        "judgeScoreThreshold" : 3.5
+      }
+    }, {
+      "evaluatorName" : "rag_quality",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "note" : "No RAG quality checks configured for this episode"
+      }
+    } ]
+  }
+}

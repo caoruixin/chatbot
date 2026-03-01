@@ -44,3 +44,38 @@ dependencies {
 test {
     useJUnitPlatform()
 }
+
+sourceSets {
+    eval {
+        java.srcDir 'src/eval/java'
+        resources.srcDir 'src/eval/resources'
+        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+    }
+}
+
+processEvalResources {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+
+task evalRun(type: JavaExec) {
+    mainClass = 'com.chatbot.eval.EvalApplication'
+    classpath = sourceSets.eval.runtimeClasspath
+    // Load env vars from ../.env.local if present, then overlay current env
+    doFirst {
+        def envFile = file("${rootDir}/../.env.local")
+        if (envFile.exists()) {
+            envFile.eachLine { line ->
+                line = line.trim()
+                if (line && !line.startsWith('#') && line.contains('=')) {
+                    def idx = line.indexOf('=')
+                    def key = line.substring(0, idx)
+                    def val = line.substring(idx + 1)
+                    environment key, val
+                }
+            }
+        }
+        // Current process env overrides file values
+        System.getenv().each { k, v -> environment k, v }
+    }
+}

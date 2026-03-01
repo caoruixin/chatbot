@@ -62,6 +62,10 @@ public class IntentRouter {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
+    public static String getSystemPrompt() {
+        return INTENT_SYSTEM_PROMPT;
+    }
+
     private final KimiClient kimiClient;
 
     public IntentRouter(KimiClient kimiClient) {

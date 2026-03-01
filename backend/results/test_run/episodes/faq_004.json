@@ -1,0 +1,71 @@
+{
+  "runResult" : {
+    "episodeId" : "faq_004",
+    "finalReply" : "帖子审核通常需要2-4小时。如果是在高峰期，审核时间可能会延长至12小时。建议耐心等待，如果超过12小时还未通过审核，可以联系客服咨询。",
+    "actions" : [ {
+      "name" : "faq_search",
+      "args" : {
+        "query" : "帖子审核需要多久"
+      },
+      "status" : "ok",
+      "resultSummary" : "{\"success\":true,\"data\":{\"question\":\"帖子审核需要多久？\",\"answer\":\"帖子通常在发布后2-4小时内完成审核。高峰期可能延长至12小时。\",\"score\":0.9922618260696855},\"error\":\"\"}",
+      "timestampMs" : 1771857989103
+    } ],
+    "artifacts" : null,
+    "metrics" : {
+      "latencyMs" : 2084,
+      "tokenIn" : null,
+      "tokenOut" : null,
+      "cost" : null,
+      "toolCallCount" : 1
+    },
+    "trace" : null,
+    "version" : {
+      "modelId" : "moonshot-v1-8k",
+      "promptHashes" : {
+        "intent_system_prompt" : "33a24afedf2b",
+        "evidence_system_prompt" : "6b3324dcfd96"
+      },
+      "workflowVersion" : "7545f2315ea8",
+      "toolSchemaVersion" : "c063b959a923",
+      "kbSnapshot" : "unknown",
+      "gitCommit" : "70d8fbf4c54bba1993987904694dd9b76fe87ed6",
+      "compositeHash" : "ed3546d1f2c8"
+    }
+  },
+  "score" : {
+    "episodeId" : "faq_004",
+    "overallPass" : true,
+    "overallScore" : 1.0,
+    "evaluatorResults" : [ {
+      "evaluatorName" : "contract",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "trajectory",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "efficiency",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "latencyMs" : 2084,
+        "toolCallCount" : 1
+      }
+    }, {
+      "evaluatorName" : "outcome",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "note" : "Stub evaluator - real implementation in Iter2"
+      }
+    } ]
+  }
+}

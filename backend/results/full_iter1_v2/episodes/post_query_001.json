@@ -1,0 +1,144 @@
+{
+  "runResult" : {
+    "episodeId" : "post_query_001",
+    "finalReply" : "根据查询结果，系统中没有找到Alice发布的帖子。可能Alice还没有发过帖子，或者帖子数量为0。您可以直接联系Alice了解情况。如果有其他问题，欢迎随时问我。",
+    "actions" : [ {
+      "name" : "post_query",
+      "args" : {
+        "username" : "alice"
+      },
+      "status" : "ok",
+      "resultSummary" : "{\"error\":\"\",\"data\":{\"posts\":[]},\"success\":true}",
+      "timestampMs" : 1772339099876
+    } ],
+    "artifacts" : {
+      "identityArtifacts" : {
+        "intent" : "POST_QUERY",
+        "confidence" : 0.95,
+        "risk" : "low"
+      },
+      "executionArtifacts" : {
+        "toolCallCount" : 1,
+        "retrievedContextCount" : 0
+      },
+      "composerArtifacts" : {
+        "replyLength" : 81
+      }
+    },
+    "metrics" : {
+      "latencyMs" : 3256,
+      "tokenIn" : null,
+      "tokenOut" : null,
+      "cost" : null,
+      "toolCallCount" : 1
+    },
+    "trace" : {
+      "spans" : [ {
+        "spanName" : "intent_recognition",
+        "startMs" : 1772339097650,
+        "endMs" : 1772339099876,
+        "attributes" : {
+          "risk" : "low",
+          "confidence" : 0.95,
+          "intent" : "POST_QUERY"
+        }
+      }, {
+        "spanName" : "tool_call",
+        "startMs" : 1772339099876,
+        "endMs" : 1772339099886,
+        "attributes" : {
+          "tool" : "post_query",
+          "success" : "true",
+          "round" : "0"
+        }
+      }, {
+        "spanName" : "response_composition",
+        "startMs" : 1772339099888,
+        "endMs" : 1772339100904,
+        "attributes" : {
+          "replyLength" : "81"
+        }
+      } ]
+    },
+    "version" : {
+      "modelId" : "moonshot-v1-8k",
+      "promptHashes" : {
+        "intent_system_prompt" : "33a24afedf2b",
+        "evidence_system_prompt" : "6b3324dcfd96"
+      },
+      "workflowVersion" : "7545f2315ea8",
+      "toolSchemaVersion" : "c063b959a923",
+      "kbSnapshot" : "unknown",
+      "gitCommit" : "70d8fbf4c54bba1993987904694dd9b76fe87ed6",
+      "compositeHash" : "ed3546d1f2c8"
+    },
+    "retrievedContexts" : [ ]
+  },
+  "score" : {
+    "episodeId" : "post_query_001",
+    "overallPass" : false,
+    "overallScore" : 0.9572263013576864,
+    "evaluatorResults" : [ {
+      "evaluatorName" : "contract",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "trajectory",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "efficiency",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "latencyMs" : 3256,
+        "toolCallCount" : 1
+      }
+    }, {
+      "evaluatorName" : "outcome",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "note" : "Stub evaluator - real implementation in Iter2"
+      }
+    }, {
+      "evaluatorName" : "semantic",
+      "passed" : false,
+      "score" : 0.7433578081461187,
+      "violations" : [ "Judge composite score 3.10 below threshold 3.50" ],
+      "details" : {
+        "similarityScore" : 0.738,
+        "similarityThreshold" : 0.65,
+        "judgeScores" : {
+          "correctness" : 3,
+          "completeness" : 2,
+          "tone" : 5,
+          "reasoning" : "实际回复正确地指出了系统中没有找到Alice的帖子，这与参考回复中提供Alice帖子信息的语义不一致，因此正确性得分为3。完整性方面，实际回复没有提供任何帖子的具体信息，因此得分为2。语气方面，实际回复礼貌且专业，提供了进一步的行动建议，因此得分为5。"
+        },
+        "judgeCompositeScore" : 3.1,
+        "judgeScoreThreshold" : 3.5,
+        "toolArgResults" : [ {
+          "tool" : "post_query",
+          "expectedArgs" : {
+            "username" : "alice"
+          },
+          "passed" : true
+        } ]
+      }
+    }, {
+      "evaluatorName" : "rag_quality",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "note" : "No RAG quality checks configured for this episode"
+      }
+    } ]
+  }
+}

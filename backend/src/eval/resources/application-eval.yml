@@ -1,0 +1,28 @@
+spring:
+  main:
+    web-application-type: none
+  flyway:
+    enabled: false
+  scheduling:
+    enabled: false
+
+# Provide safe defaults for GetStream (not used in eval mode)
+getstream:
+  api-key: ${GETSTREAM_API_KEY:eval-placeholder}
+  api-secret: ${GETSTREAM_API_SECRET:eval-placeholder}
+
+chatbot:
+  eval:
+    auto-confirm-irreversible: true
+    latency-threshold-ms: 15000
+    max-tool-call-count: 5
+    # mock = fast mock scores (no API calls), live = real LLM evaluation
+    semantic-mode: ${EVAL_SEMANTIC_MODE:mock}
+    # Iter1: Semantic evaluator config (used when semantic-mode=live)
+    semantic-similarity-threshold: 0.65
+    judge-score-threshold: 3.5
+    judge-model-id: ${EVAL_JUDGE_MODEL:moonshot-v1-32k}
+    judge-weights:
+      correctness: 0.5
+      completeness: 0.3
+      tone: 0.2

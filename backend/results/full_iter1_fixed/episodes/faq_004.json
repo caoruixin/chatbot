@@ -1,0 +1,141 @@
+{
+  "runResult" : {
+    "episodeId" : "faq_004",
+    "finalReply" : "帖子审核通常需要2-4小时，高峰期可能会延长至12小时。审核时间取决于帖子内容的复杂性和审核人员的工作效率。请耐心等待审核结果。如有疑问，可随时联系客服咨询。",
+    "actions" : [ {
+      "name" : "faq_search",
+      "args" : {
+        "query" : "帖子审核需要多久"
+      },
+      "status" : "ok",
+      "resultSummary" : "{\"success\":true,\"data\":{\"question\":\"帖子审核需要多久？\",\"answer\":\"帖子通常在发布后2-4小时内完成审核。高峰期可能延长至12小时。\",\"score\":0.9922618260696855},\"error\":\"\"}",
+      "timestampMs" : 1772335437095
+    } ],
+    "artifacts" : {
+      "identityArtifacts" : {
+        "intent" : "KB_QUESTION",
+        "confidence" : 0.85,
+        "risk" : "low"
+      },
+      "executionArtifacts" : {
+        "toolCallCount" : 1,
+        "retrievedContextCount" : 0
+      },
+      "composerArtifacts" : {
+        "replyLength" : 79
+      }
+    },
+    "metrics" : {
+      "latencyMs" : 2303,
+      "tokenIn" : null,
+      "tokenOut" : null,
+      "cost" : null,
+      "toolCallCount" : 1
+    },
+    "trace" : {
+      "spans" : [ {
+        "spanName" : "intent_recognition",
+        "startMs" : 1772335436177,
+        "endMs" : 1772335437095,
+        "attributes" : {
+          "intent" : "KB_QUESTION",
+          "confidence" : 0.85,
+          "risk" : "low"
+        }
+      }, {
+        "spanName" : "tool_call",
+        "startMs" : 1772335437095,
+        "endMs" : 1772335437365,
+        "attributes" : {
+          "round" : "0",
+          "success" : "true",
+          "tool" : "faq_search"
+        }
+      }, {
+        "spanName" : "response_composition",
+        "startMs" : 1772335437365,
+        "endMs" : 1772335438480,
+        "attributes" : {
+          "replyLength" : "79"
+        }
+      } ]
+    },
+    "version" : {
+      "modelId" : "moonshot-v1-8k",
+      "promptHashes" : {
+        "intent_system_prompt" : "33a24afedf2b",
+        "evidence_system_prompt" : "6b3324dcfd96"
+      },
+      "workflowVersion" : "7545f2315ea8",
+      "toolSchemaVersion" : "c063b959a923",
+      "kbSnapshot" : "unknown",
+      "gitCommit" : "70d8fbf4c54bba1993987904694dd9b76fe87ed6",
+      "compositeHash" : "ed3546d1f2c8"
+    },
+    "retrievedContexts" : [ ]
+  },
+  "score" : {
+    "episodeId" : "faq_004",
+    "overallPass" : false,
+    "overallScore" : 0.8271776523828612,
+    "evaluatorResults" : [ {
+      "evaluatorName" : "contract",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "trajectory",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "efficiency",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "latencyMs" : 2303,
+        "toolCallCount" : 1
+      }
+    }, {
+      "evaluatorName" : "outcome",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "note" : "Stub evaluator - real implementation in Iter2"
+      }
+    }, {
+      "evaluatorName" : "semantic",
+      "passed" : true,
+      "score" : 0.9630659142971668,
+      "violations" : [ ],
+      "details" : {
+        "similarityScore" : 0.926,
+        "similarityThreshold" : 0.65,
+        "judgeScores" : {
+          "correctness" : 5,
+          "completeness" : 5,
+          "tone" : 5,
+          "reasoning" : "实际回复与参考回复在内容上基本一致，都提到了帖子审核的常规时间是2-4小时，高峰期可能延长至12小时。此外，实际回复还额外提供了关于审核时间取决于帖子内容复杂性和审核人员工作效率的信息，并提供了客服咨询的选项，这增加了回答的完整性和专业性。语气礼貌且专业，符合客服场景的要求。"
+        },
+        "judgeCompositeScore" : 5.0,
+        "judgeScoreThreshold" : 3.5
+      }
+    }, {
+      "evaluatorName" : "rag_quality",
+      "passed" : false,
+      "score" : 0.0,
+      "violations" : [ "Context recall 0.000 is below 0.5 (retrieved 0 of 1 expected)" ],
+      "details" : {
+        "contextPrecision" : 0.0,
+        "contextRecall" : 0.0,
+        "expectedContexts" : [ "帖子审核需要多久？" ],
+        "retrievedContexts" : [ ],
+        "faithfulnessNote" : "Skipped: no retrieved contexts available"
+      }
+    } ]
+  }
+}
