@@ -80,11 +80,14 @@ public class ListFailuresCommand {
     }
 
     private boolean matchesEvaluatorFilter(EvalResult result, String filter) {
-        // Support both "contract" and "contract_fail" style filters
-        String evalName = result.getEvaluatorName();
-        return filter.equals(evalName)
-                || filter.equals(evalName + "_fail")
-                || filter.startsWith(evalName);
+        // Support multiple filter styles:
+        // "L1_Gate", "gate_fail", "outcome_fail", "L2_Outcome", etc.
+        String evalName = result.getEvaluatorName().toLowerCase();
+        String filterLower = filter.toLowerCase();
+        return filterLower.equals(evalName)
+                || filterLower.equals(evalName + "_fail")
+                || evalName.contains(filterLower.replace("_fail", ""))
+                || filterLower.startsWith(evalName);
     }
 
     private String getArg(String[] args, String flag, String defaultValue) {

@@ -1,5 +1,6 @@
 package com.chatbot.service.agent;
 
+import com.chatbot.config.PromptConfig;
 import com.chatbot.service.llm.KimiChatResponse;
 import com.chatbot.service.llm.KimiClient;
 import com.chatbot.service.llm.KimiMessage;
@@ -21,25 +22,16 @@ public class ResponseComposer {
 
     private static final Logger log = LoggerFactory.getLogger(ResponseComposer.class);
 
-    private static final String EVIDENCE_SYSTEM_PROMPT = """
-            你是一个友好的客服助手。根据工具调用结果，用自然、友好的语言回复用户的问题。
+    private final KimiClient kimiClient;
+    private final PromptConfig promptConfig;
 
-            规则：
-            1. 直接回答用户的问题，不要编造信息
-            2. 如果工具返回了数据，基于数据进行回复
-            3. 如果工具调用失败，礼貌地告知用户并建议转人工
-            4. 保持回复简洁，不超过 200 字
-            5. 使用中文回复
-            """;
-
-    public static String getSystemPrompt() {
-        return EVIDENCE_SYSTEM_PROMPT;
+    public ResponseComposer(KimiClient kimiClient, PromptConfig promptConfig) {
+        this.kimiClient = kimiClient;
+        this.promptConfig = promptConfig;
     }
 
-    private final KimiClient kimiClient;
-
-    public ResponseComposer(KimiClient kimiClient) {
-        this.kimiClient = kimiClient;
+    public String getSystemPrompt() {
+        return promptConfig.getResponseComposerPrompt();
     }
 
     /**
@@ -100,7 +92,7 @@ public class ResponseComposer {
                     "我查询了系统，以下是查询结果：\n" + toolContext + "\n请根据以上结果回复用户。"));
 
             KimiChatResponse response = kimiClient.chatCompletion(
-                    EVIDENCE_SYSTEM_PROMPT, messages, 0.7);
+                    promptConfig.getResponseComposerPrompt(), messages, 0.7);
 
             String content = response.getContent();
             if (content != null && !content.isBlank()) {

@@ -13,7 +13,7 @@ getstream:
 
 chatbot:
   eval:
-    auto-confirm-irreversible: true
+    auto-confirm-irreversible: false
     latency-threshold-ms: 15000
     max-tool-call-count: 5
     # mock = fast mock scores (no API calls), live = real LLM evaluation
@@ -26,3 +26,8 @@ chatbot:
       correctness: 0.5
       completeness: 0.3
       tone: 0.2
+    # Phase 1: layered evaluation config
+    overall-score-weights:
+      L2_Outcome: 0.5
+      L3_Trajectory: 0.3
+      L4_ReplyQuality: 0.2

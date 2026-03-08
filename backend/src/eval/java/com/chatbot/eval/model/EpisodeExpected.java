@@ -4,6 +4,7 @@ import java.util.List;
 
 public class EpisodeExpected {
 
+    // ── Phase 0 扁平字段（保留，向后兼容）──
     private List<MustCallConstraint> mustCall;
     private List<String> mustNot;
     private String outcome;
@@ -14,8 +15,16 @@ public class EpisodeExpected {
     private List<String> expectedContexts;
     private Boolean faithfulnessCheck;
 
+    // ── Phase 1 分层字段（新增）──
+    private GateExpected gate;
+    private OutcomeExpected outcomeExpected;
+    private TrajectoryExpected trajectory;
+    private ReplyQualityExpected replyQuality;
+
     public EpisodeExpected() {
     }
+
+    // Phase 0 getters/setters
 
     public List<MustCallConstraint> getMustCall() {
         return mustCall;
@@ -87,5 +96,39 @@ public class EpisodeExpected {
 
     public void setFaithfulnessCheck(Boolean faithfulnessCheck) {
         this.faithfulnessCheck = faithfulnessCheck;
+    }
+
+    // Phase 1 getters/setters
+
+    public GateExpected getGate() {
+        return gate;
+    }
+
+    public void setGate(GateExpected gate) {
+        this.gate = gate;
+    }
+
+    public OutcomeExpected getOutcomeExpected() {
+        return outcomeExpected;
+    }
+
+    public void setOutcomeExpected(OutcomeExpected outcomeExpected) {
+        this.outcomeExpected = outcomeExpected;
+    }
+
+    public TrajectoryExpected getTrajectory() {
+        return trajectory;
+    }
+
+    public void setTrajectory(TrajectoryExpected trajectory) {
+        this.trajectory = trajectory;
+    }
+
+    public ReplyQualityExpected getReplyQuality() {
+        return replyQuality;
+    }
+
+    public void setReplyQuality(ReplyQualityExpected replyQuality) {
+        this.replyQuality = replyQuality;
     }
 }

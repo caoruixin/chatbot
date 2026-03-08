@@ -1,9 +1,8 @@
 package com.chatbot.eval.discovery;
 
 import com.chatbot.config.KimiConfig;
+import com.chatbot.config.PromptConfig;
 import com.chatbot.eval.fingerprint.FingerprintGenerator;
-import com.chatbot.service.agent.IntentRouter;
-import com.chatbot.service.agent.ResponseComposer;
 import com.chatbot.service.tool.ToolDefinition;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -23,11 +22,14 @@ public class DiscoveryExporter {
     private static final Logger log = LoggerFactory.getLogger(DiscoveryExporter.class);
 
     private final KimiConfig kimiConfig;
+    private final PromptConfig promptConfig;
     private final int maxReactRounds;
     private final double confidenceThreshold;
 
-    public DiscoveryExporter(KimiConfig kimiConfig, int maxReactRounds, double confidenceThreshold) {
+    public DiscoveryExporter(KimiConfig kimiConfig, PromptConfig promptConfig,
+                             int maxReactRounds, double confidenceThreshold) {
         this.kimiConfig = kimiConfig;
+        this.promptConfig = promptConfig;
         this.maxReactRounds = maxReactRounds;
         this.confidenceThreshold = confidenceThreshold;
     }
@@ -49,11 +51,11 @@ public class DiscoveryExporter {
 
         // Prompts
         Map<String, Object> prompts = new LinkedHashMap<>();
-        String intentPrompt = IntentRouter.getSystemPrompt();
+        String intentPrompt = promptConfig.getIntentRouterPrompt();
         prompts.put("intent_system_prompt", Map.of(
                 "hash", FingerprintGenerator.sha256(intentPrompt),
                 "length", intentPrompt.length()));
-        String evidencePrompt = ResponseComposer.getSystemPrompt();
+        String evidencePrompt = promptConfig.getResponseComposerPrompt();
         prompts.put("evidence_system_prompt", Map.of(
                 "hash", FingerprintGenerator.sha256(evidencePrompt),
                 "length", evidencePrompt.length()));

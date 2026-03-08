@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eval Compare Report — Layered</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #333; line-height: 1.6; }
+.container { max-width: 900px; margin: 0 auto; padding: 20px; }
+h1 { margin-bottom: 5px; }
+h2 { margin: 25px 0 10px; color: #444; }
+.timestamp { color: #888; margin-bottom: 20px; font-size: 0.9em; }
+.timestamp code { background: #e2e8f0; padding: 1px 6px; border-radius: 3px; }
+.subtitle { color: #666; margin-bottom: 10px; }
+.card { background: #fff; border-radius: 8px; padding: 20px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.compare-row { display: flex; gap: 30px; justify-content: center; }
+.compare-metric { text-align: center; min-width: 120px; }
+.compare-metric .value { font-size: 2em; font-weight: bold; }
+.compare-metric .label { font-size: 0.85em; color: #888; }
+.positive { color: #2d8a4e; }
+.negative { color: #d32f2f; }
+table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+th, td { padding: 8px 12px; text-align: left; border-bottom: 1px solid #eee; }
+th { background: #fafafa; font-weight: 600; }
+.regression { color: #d32f2f; }
+.new-pass { color: #2d8a4e; }
+ul { list-style: none; padding-left: 10px; }
+li { padding: 4px 0; }
+li::before { content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; }
+.regression::before { background: #d32f2f; }
+.new-pass::before { background: #2d8a4e; }
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Eval Compare Report — Layered Assessment</h1>
+<p class="timestamp">Generated: 2026-03-08 18:33:03</p>
+<p class="timestamp">Baseline: <code>454057ea47f5</code> vs Candidate: <code>c4f0b2d6524a</code></p>
+<h2>Overall Comparison</h2>
+<div class="card">
+<div class="compare-row">
+<div class="compare-metric"><div class="value ">67%</div><div class="label">Baseline</div></div>
+<div class="compare-metric"><div class="value ">89%</div><div class="label">Candidate</div></div>
+<div class="compare-metric"><div class="value positive">+22.2%</div><div class="label">Delta</div></div>
+</div>
+</div>
+<h2>Per-Layer Comparison</h2>
+<div class="card">
+<table>
+<tr><th>Layer</th><th>Baseline</th><th>Candidate</th><th>Delta</th></tr>
+<tr><td><strong>L1_Gate</strong></td><td>78%</td><td>89%</td><td class="positive">+11.1% &#9650;</td></tr>
+<tr><td><strong>L2_Outcome</strong></td><td>78%</td><td>100%</td><td class="positive">+22.2% &#9650;</td></tr>
+<tr><td><strong>L3_Trajectory</strong></td><td>89%</td><td>89%</td><td class="positive">+0.0%</td></tr>
+<tr><td><strong>L4_ReplyQuality</strong></td><td>100%</td><td>100%</td><td class="positive">+0.0%</td></tr>
+</table>
+</div>
+<h2>Improvements (2)</h2>
+<div class="card">
+<p class="subtitle">Episodes that failed in baseline but passed in candidate:</p>
+<ul>
+<li class="new-pass">delete_001</li>
+<li class="new-pass">delete_003</li>
+</ul>
+</div>
+<h2>Per-Suite Delta</h2>
+<div class="card">
+<table>
+<tr><th>Suite</th><th>Baseline</th><th>Candidate</th><th>Delta</th></tr>
+<tr><td>data_deletion</td><td>33%</td><td>100%</td><td class="positive">+66.7%</td></tr>
+<tr><td>faq</td><td>67%</td><td>67%</td><td class="positive">+0.0%</td></tr>
+<tr><td>post_query</td><td>100%</td><td>100%</td><td class="positive">+0.0%</td></tr>
+</table>
+</div>
+</div>
+</body>
+</html>

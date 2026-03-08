@@ -1,5 +1,6 @@
 package com.chatbot.service.agent;
 
+import com.chatbot.config.PromptConfig;
 import com.chatbot.exception.LlmCallException;
 import com.chatbot.service.llm.KimiChatResponse;
 import com.chatbot.service.llm.KimiClient;
@@ -23,11 +24,15 @@ class IntentRouterTest {
     @Mock
     private KimiClient kimiClient;
 
+    @Mock
+    private PromptConfig promptConfig;
+
     private IntentRouter intentRouter;
 
     @BeforeEach
     void setUp() {
-        intentRouter = new IntentRouter(kimiClient);
+        when(promptConfig.getIntentRouterPrompt()).thenReturn("test intent prompt");
+        intentRouter = new IntentRouter(kimiClient, promptConfig);
     }
 
     @Test

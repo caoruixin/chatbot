@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eval Dashboard — Layered Assessment</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+       background: #f0f2f5; color: #1a1a2e; line-height: 1.6; }
+.header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+          color: #fff; padding: 20px 0; margin-bottom: 24px; }
+.header-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+.header-title { font-size: 1.5em; font-weight: 700; }
+.header-meta { font-size: 0.85em; color: #a0aec0; margin-top: 4px; }
+.header-meta code { background: rgba(255,255,255,0.1); padding: 1px 6px; border-radius: 3px; }
+.container { max-width: 1200px; margin: 0 auto; padding: 0 24px 40px; }
+
+/* KPI cards */
+.kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+           gap: 16px; margin-bottom: 24px; }
+.kpi-card { background: #fff; border-radius: 12px; padding: 20px; text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+.kpi-value { font-size: 2.2em; font-weight: 800; line-height: 1.2; }
+.kpi-label { font-size: 0.8em; color: #718096; margin-top: 4px; text-transform: uppercase;
+             letter-spacing: 0.5px; }
+.kpi-pass { color: #38a169; }
+.kpi-fail { color: #e53e3e; }
+.kpi-warn { color: #d69e2e; }
+.kpi-neutral { color: #4a5568; }
+
+/* Section */
+.section { margin-bottom: 24px; }
+.section-title { font-size: 1.1em; font-weight: 700; color: #2d3748; margin-bottom: 12px; }
+.card { background: #fff; border-radius: 12px; padding: 20px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+
+/* Layer bars */
+.layer-bars { display: flex; flex-direction: column; gap: 10px; }
+.layer-bar-row { display: flex; align-items: center; gap: 12px; }
+.layer-bar-name { width: 140px; font-size: 0.9em; font-weight: 600; color: #4a5568; text-align: right; }
+.layer-bar-track { flex: 1; height: 28px; background: #edf2f7; border-radius: 14px; overflow: hidden; }
+.layer-bar-fill { height: 100%%; border-radius: 14px; transition: width 0.5s; display: flex;
+                 align-items: center; padding-left: 12px; font-size: 0.8em; font-weight: 700; color: #fff; }
+.bar-green { background: linear-gradient(90deg, #38a169, #48bb78); }
+.bar-yellow { background: linear-gradient(90deg, #d69e2e, #ecc94b); }
+.bar-red { background: linear-gradient(90deg, #e53e3e, #fc8181); }
+
+/* Failure attribution */
+.attr-row { display: flex; gap: 8px; align-items: center; padding: 6px 0; }
+.attr-label { width: 160px; font-size: 0.9em; color: #4a5568; }
+.attr-count { font-weight: 700; font-size: 0.9em; }
+
+/* Tables */
+.breakdown-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 768px) { .breakdown-row { grid-template-columns: 1fr; } }
+table { width: 100%%; border-collapse: collapse; }
+th { font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.5px; color: #718096;
+     padding: 8px 12px; text-align: left; border-bottom: 2px solid #edf2f7; }
+td { padding: 10px 12px; border-bottom: 1px solid #f7fafc; font-size: 0.9em; }
+tr:hover td { background: #f7fafc; }
+.td-pass { color: #38a169; font-weight: 600; }
+.td-fail { color: #e53e3e; font-weight: 600; }
+.mini-bar { display: inline-block; height: 6px; border-radius: 3px; vertical-align: middle; }
+
+/* Episode list */
+.filter-bar { display: flex; gap: 8px; margin-bottom: 12px; }
+.filter-btn { padding: 6px 16px; border-radius: 20px; border: 1px solid #e2e8f0;
+              background: #fff; cursor: pointer; font-size: 0.85em; color: #4a5568;
+              transition: all 0.2s; }
+.filter-btn:hover { border-color: #a0aec0; }
+.filter-btn.active { background: #1a1a2e; color: #fff; border-color: #1a1a2e; }
+.ep-card { background: #fff; border-radius: 10px; margin-bottom: 8px;
+           box-shadow: 0 1px 2px rgba(0,0,0,0.05); overflow: hidden; }
+.ep-header { padding: 12px 16px; cursor: pointer; display: flex;
+             justify-content: space-between; align-items: center; transition: background 0.15s; }
+.ep-header:hover { background: #f7fafc; }
+.ep-id { font-weight: 600; font-size: 0.95em; }
+.ep-tags { display: flex; gap: 6px; align-items: center; }
+.tag { font-size: 0.75em; padding: 2px 8px; border-radius: 10px; font-weight: 500; }
+.tag-pass { background: #c6f6d5; color: #276749; }
+.tag-fail { background: #fed7d7; color: #9b2c2c; }
+.tag-mock { background: #fefcbf; color: #975a16; }
+.tag-suite { background: #e9d8fd; color: #553c9a; }
+.ep-body { display: none; padding: 0 16px 16px; border-top: 1px solid #f0f0f0; }
+.ep-body.open { display: block; padding-top: 12px; }
+.reply-box { background: #f7fafc; padding: 12px; border-radius: 8px; border-left: 3px solid #4299e1;
+             margin: 8px 0; white-space: pre-wrap; font-size: 0.9em; line-height: 1.7; }
+
+/* Layer detail tree */
+.layer-tree { margin: 8px 0; font-size: 0.88em; }
+.layer-item { padding: 4px 0 4px 16px; border-left: 2px solid #e2e8f0; margin-left: 8px; }
+.layer-item-header { font-weight: 600; }
+.layer-item-detail { color: #718096; font-size: 0.92em; padding-left: 4px; }
+.layer-pass { color: #38a169; }
+.layer-fail { color: #e53e3e; }
+.violation { color: #e53e3e; font-size: 0.85em; margin: 2px 0 2px 20px; }
+.meta-line { font-size: 0.8em; color: #a0aec0; margin-top: 6px; }
+
+/* Detail boxes */
+.detail-box { margin: 8px 0; padding: 10px; border-radius: 6px; font-size: 0.85em; }
+.detail-semantic { background: #ebf8ff; border-left: 3px solid #4299e1; }
+.detail-rag { background: #f0fff4; border-left: 3px solid #38a169; }
+details { margin-top: 8px; }
+details summary { cursor: pointer; font-size: 0.85em; color: #718096; }
+</style>
+</head>
+<body>
+<div class="header">
+<div class="header-inner">
+<div class="header-title">AI Agent Eval Dashboard — Layered Assessment</div>
+<div class="header-meta">2026-03-08 18:32:55 &middot; moonshot-v1-8k &middot; <code>c4f0b2d6524a</code></div>
+</div></div>
+<div class="container">
+<div class="kpi-row">
+<div class="kpi-card"><div class="kpi-value kpi-neutral">9</div><div class="kpi-label">Episodes</div></div>
+<div class="kpi-card"><div class="kpi-value kpi-pass">89%</div><div class="kpi-label">Overall Pass (L1∧L2)</div></div>
+<div class="kpi-card"><div class="kpi-value kpi-pass">8</div><div class="kpi-label">Passed</div></div>
+<div class="kpi-card"><div class="kpi-value kpi-fail">1</div><div class="kpi-label">Failed</div></div>
+<div class="kpi-card"><div class="kpi-value kpi-neutral">1626ms</div><div class="kpi-label">p50 Latency</div></div>
+<div class="kpi-card"><div class="kpi-value kpi-neutral">4267ms</div><div class="kpi-label">p95 Latency</div></div>
+</div>
+<div class="section"><div class="section-title">Layer Pass Rates</div>
+<div class="card"><div class="layer-bars">
+<div class="layer-bar-row"><div class="layer-bar-name">L1 Gate (P0)</div><div class="layer-bar-track"><div class="layer-bar-fill bar-green" style="width:89%">89%</div></div></div>
+<div class="layer-bar-row"><div class="layer-bar-name">L2 Outcome (P1)</div><div class="layer-bar-track"><div class="layer-bar-fill bar-green" style="width:100%">100%</div></div></div>
+<div class="layer-bar-row"><div class="layer-bar-name">L3 Trajectory (P2)</div><div class="layer-bar-track"><div class="layer-bar-fill bar-green" style="width:89%">89%</div></div></div>
+<div class="layer-bar-row"><div class="layer-bar-name">L4 Reply Quality (P3)</div><div class="layer-bar-track"><div class="layer-bar-fill bar-green" style="width:100%">100%</div></div></div>
+</div></div></div>
+<div class="section"><div class="section-title">Failure Attribution</div>
+<div class="card">
+<div class="attr-row"><div class="attr-label">l1_gate_fail</div><div class="attr-count td-fail">1 (11%)</div></div>
+<div class="attr-row"><div class="attr-label">l3_trajectory_fail</div><div class="attr-count td-fail">1 (11%)</div></div>
+</div></div>
+<div class="section"><div class="section-title">Suite Breakdown</div>
+<div class="card">
+<table>
+<tr><th>Suite</th><th>N</th><th>Pass</th><th>L1</th><th>L2</th><th>L3</th><th>L4</th><th>Avg Latency</th></tr>
+<tr><td><strong>data_deletion</strong></td><td>3</td><td class="td-pass">100%</td><td class="td-pass">100%</td><td class="td-pass">100%</td><td class="td-fail">67%</td><td class="td-pass">100%</td><td>1164ms</td></tr>
+<tr><td><strong>faq</strong></td><td>3</td><td class="td-fail">67%</td><td class="td-fail">67%</td><td class="td-pass">100%</td><td class="td-pass">100%</td><td class="td-pass">100%</td><td>2910ms</td></tr>
+<tr><td><strong>post_query</strong></td><td>3</td><td class="td-pass">100%</td><td class="td-pass">100%</td><td class="td-pass">100%</td><td class="td-pass">100%</td><td class="td-pass">100%</td><td>1520ms</td></tr>
+</table>
+</div></div>
+<div class="section"><div class="section-title">Tag Breakdown</div>
+<div class="card">
+<table>
+<tr><th>Tag</th><th>Pass Rate</th><th>Pass</th><th>Fail</th></tr>
+<tr><td><strong>kb_question</strong></td><td>67%</td><td class="td-pass">2</td><td class="td-fail">1</td></tr>
+<tr><td><strong>no_answer</strong></td><td>0%</td><td class="td-pass">0</td><td class="td-fail">1</td></tr>
+<tr><td><strong>low_risk</strong></td><td>100%</td><td class="td-pass">3</td><td class="td-fail">0</td></tr>
+<tr><td><strong>no_result</strong></td><td>100%</td><td class="td-pass">1</td><td class="td-fail">0</td></tr>
+<tr><td><strong>clarification</strong></td><td>100%</td><td class="td-pass">2</td><td class="td-fail">0</td></tr>
+<tr><td><strong>critical</strong></td><td>100%</td><td class="td-pass">3</td><td class="td-fail">0</td></tr>
+<tr><td><strong>unauthorized</strong></td><td>100%</td><td class="td-pass">1</td><td class="td-fail">0</td></tr>
+</table></div></div>
+<div class="section">
+<div class="section-title">Episode Details</div>
+<div class="filter-bar"><button class="filter-btn active" onclick="filterEp('all')">All</button><button class="filter-btn" onclick="filterEp('pass')">Passed</button><button class="filter-btn" onclick="filterEp('fail')">Failed</button></div>
+<div class="ep-card" data-status="pass">
+<div class="ep-header" onclick="toggleEp('faq_001')">
+<div><span class="ep-id">faq_001</span> <span style="font-size:0.85em;color:#718096">(0.98)</span></div>
+<div class="ep-tags"><span class="tag tag-mock">mock</span><span class="tag tag-pass">PASS</span><span style="font-size:0.8em;color:#a0aec0">4267ms</span></div></div>
+<div class="ep-body" id="ep-faq_001">
+<div style="font-weight:600;font-size:0.85em;color:#718096;margin-bottom:4px">AI Reply</div><div class="reply-box">很抱歉，当前没有找到与您的退款政策问题相关的信息。建议您联系人工客服获取更详细的退款政策说明。感谢您的理解与支持！</div>
+<div style="font-weight:600;font-size:0.85em;color:#718096;margin:8px 0 4px">Layer Results</div><div class="layer-tree">
+<div class="layer-item"><div class="layer-item-header layer-pass">&#10003; L1_Gate (1.00)</div>
+</div>
+<div class="layer-item"><div class="layer-item-header layer-pass">&#10003; L2_Outcome (1.00)</div>
+<div class="layer-item-detail">successCondition: faq_answered_from_kb &#10003;</div>
+</div>
+<div class="layer-item"><div class="layer-item-header layer-pass">&#10003; L3_Trajectory (1.00)</div>
+<div class="layer-item-detail">latency: 4267ms</div>
+<div class="layer-item-detail">tool calls: 1</div>
+</div>
+<div class="layer-item"><div class="layer-item-header layer-pass">&#10003; L4_ReplyQuality (0.88)</div>
+<div class="detail-box detail-semantic"><span class="tag tag-mock">mock</span> Similarity: <strong>0.9</strong> Judge: <strong>4.3/5</strong> (C:4 Cm:4 T:5) <br>RAG P:0.0 R:0.0</div>
+</div>
+</div>
+<details><summary>Tool Actions (1)</summary><table style="font-size:0.85em"><tr><th>Tool</th><th>Status</th><th>Result</th></tr>
+<tr><td>faq_search</td><td>ok</td><td style="font-size:0.85em">{&quot;success&quot;:true,&quot;data&quot;:{&quot;question&quot;:&quot;&quot;,&quot;answer&quot;:&quot;未找到与用户问题相关的FAQ&quot;,&quot;score&quot;:0.0},&quot;error&quot;:&quot;&quot;}</td></tr>
+</table></details>
+<details><summary>Trace Spans (3)</summary><table style="font-size:0.85em"><tr><th>Span</th><th>Duration</th><th>Attributes</th></tr>
+<tr><td>intent_recognition</td><td>1976ms</td><td>{intent=KB_QUESTION, confidence=0.85, risk=low}</td></tr>
+<tr><td>tool_call</td><td>1347ms</td><td>{round=0, success=true, tool=faq_search}</td></tr>
+<tr><td>response_composition</td><td>940ms</td><td>{replyLength=57}</td></tr>
+</table></details>
+</div></div>
+<div class="ep-card" data-status="pass">
+<div class="ep-header" onclick="toggleEp('faq_002')">
+<div><span class="ep-id">faq_002</span> <span style="font-size:0.85em;color:#718096">(0.98)</span></div>
+<div class="ep-tags"><span class="tag tag-mock">mock</span><span class="tag tag-pass">PASS</span><span style="font-size:0.8em;color:#a0aec0">2158ms</span></div></div>
+<div class="ep-body" id="ep-faq_002">
+<div style="font-weight:600;font-size:0.85em;color:#718096;margin-bottom:4px">AI Reply</div><div class="reply-box">很抱歉，当前没有找到关于如何重置密码的相关信息。建议您联系人工客服获取帮助。</div>
+<div style="font-weight:600;font-size:0.85em;color:#718096;margin:8px 0 4px">Layer Results</div><div class="layer-tree">
+<div class="layer-item"><div class="layer-item-header layer-pass">&#10003; L1_Gate (1.00)</div>
+</div>
+<div class="layer-item"><div class="layer-item-header layer-pass">&#10003; L2_Outcome (1.00)</div>
+<div class="layer-item-detail">successCondition: faq_answered_from_kb &#10003;</div>
+</div>
+<div class="layer-item"><div class="layer-item-header layer-pass">&#10003; L3_Trajectory (1.00)</div>
+<div class="layer-item-detail">latency: 2158ms</div>
+<div class="layer-item-detail">tool calls: 1</div>
+</div>
+<div class="layer-item"><div class="layer-item-header layer-pass">&#10003; L4_ReplyQuality (0.88)</div>
+<div class="detail-box detail-semantic"><span class="tag tag-mock">mock</span> Similarity: <strong>0.804</strong> Judge: <strong>4.3/5</strong> (C:4 Cm:4 T:5) <br>RAG P:0.0 R:0.0</div>
+</div>
+</div>
+<details><summary>Tool Actions (1)</summary><table style="font-size:0.85em"><tr><th>Tool</th><th>Status</th><th>Result</th></tr>
+<tr><td>faq_search</td><td>ok</td><td style="font-size:0.85em">{&quot;success&quot;:true,&quot;data&quot;:{&quot;question&quot;:&quot;&quot;,&quot;answer&quot;:&quot;未找到相关问题&quot;,&quot;score&quot;:0.0},&quot;error&quot;:&quot;&quot;}</td></tr>
+</table></details>
+<details><summary>Trace Spans (3)</summary><table style="font-size:0.85em"><tr><th>Span</th><th>Duration</th><th>Attributes</th></tr>
+<tr><td>intent_recognition</td><td>983ms</td><td>{intent=KB_QUESTION, confidence=0.85, risk=low}</td></tr>
+<tr><td>tool_call</td><td>289ms</td><td>{round=0, success=true, tool=faq_search}</td></tr>
+<tr><td>response_composition</td><td>886ms</td><td>{replyLength=38}</td></tr>
+</table></details>
+</div></div>
+<div class="ep-card" data-status="fail">
+<div class="ep-header" onclick="toggleEp('faq_003')">
+<div><span class="ep-id">faq_003</span> <span style="font-size:0.85em;color:#718096">(0.00)</span></div>
+<div class="ep-tags"><span class="tag tag-mock">mock</span><span class="tag tag-fail">FAIL</span><span style="font-size:0.8em;color:#a0aec0">2304ms</span></div></div>
+<div class="ep-body" id="ep-faq_003">
+<div style="font-weight:600;font-size:0.85em;color:#718096;margin-bottom:4px">AI Reply</div><div class="reply-box">当前没有找到相关信息。很抱歉，我们不支持支付宝付款。如果您有其他问题，欢迎随时联系人工客服获取帮助。</div>
+<div style="font-weight:600;font-size:0.85em;color:#718096;margin:8px 0 4px">Layer Results</div><div class="layer-tree">
+<div class="layer-item"><div class="layer-item-header layer-fail">&#10007; L1_Gate (0.00)</div>
+<div class="violation">GATE_FALSE_CLAIM: reply contains forbidden claim &#39;支持支付宝&#39;</div>
+</div>
+<div class="layer-item"><div class="layer-item-header layer-pass">&#10003; L2_Outcome (1.00)</div>
+<div class="layer-item-detail">successCondition: faq_answered_from_kb &#10003;</div>
+</div>
+<div class="layer-item"><div class="layer-item-header layer-pass">&#10003; L3_Trajectory (1.00)</div>
+<div class="layer-item-detail">latency: 2304ms</div>
+<div class="layer-item-detail">tool calls: 1</div>
+</div>
+<div class="layer-item"><div class="layer-item-header layer-pass">&#10003; L4_ReplyQuality (0.88)</div>
+<div class="detail-box detail-semantic"><span class="tag tag-mock">mock</span> Similarity: <strong>0.9</strong> Judge: <strong>4.3/5</strong> (C:4 Cm:4 T:5) </div>
+</div>
+</div>
+<details><summary>Tool Actions (1)</summary><table style="font-size:0.85em"><tr><th>Tool</th><th>Status</th><th>Result</th></tr>
+<tr><td>faq_search</td><td>ok</td><td style="font-size:0.85em">{&quot;success&quot;:true,&quot;data&quot;:{&quot;question&quot;:&quot;&quot;,&quot;answer&quot;:&quot;未找到与用户问题相关的FAQ&quot;,&quot;score&quot;:0.0},&quot;error&quot;:&quot;&quot;}</td></tr>
+</table></details>
+<details><summary>Trace Spans (3)</summary><table style="font-size:0.85em"><tr><th>Span</th><th>Duration</th><th>Attributes</th></tr>
+<tr><td>intent_recognition</td><td>810ms</td><td>{intent=KB_QUESTION, confidence=0.95, risk=low}</td></tr>
+<tr><td>tool_call</td><td>601ms</td><td>{round=0, success=true, tool=faq_search}</td></tr>
+<tr><td>response_composition</td><td>892ms</td><td>{replyLength=50}</td></tr>
+</table></details>
+</div></div>
+<div class="ep-card" data-status="pass">
+<div class="ep-header" onclick="toggleEp('post_query_001')">
+<div><span class="ep-id">post_query_001</span> <span style="font-size:0.85em;color:#718096">(0.98)</span></div>
+<div class="ep-tags"><span class="tag tag-mock">mock</span><span class="tag tag-pass">PASS</span><span style="font-size:0.8em;color:#a0aec0">2151ms</span></div></div>
+<div class="ep-body" id="ep-post_query_001">
+<div style="font-weight:600;font-size:0.85em;color:#718096;margin-bottom:4px">AI Reply</div><div class="reply-box">经查询，系统中没有找到与Alice相关的帖子信息。建议您提供更多细节或联系人工客服获取进一步帮助。</div>
+<div style="font-weight:600;font-size:0.85em;color:#718096;margin:8px 0 4px">Layer Results</div><div class="layer-tree">
+<div class="layer-item"><div class="layer-item-header layer-pass">&#10003; L1_Gate (1.00)</div>
+</div>
+<div class="layer-item"><div class="layer-item-header layer-pass">&#10003; L2_Outcome (1.00)</div>
+<div class="layer-item-detail">successCondition: query_result_returned &#10003;</div>
+</div>
+<div class="layer-item"><div class="layer-item-header layer-pass">&#10003; L3_Trajectory (1.00)</div>
+<div class="layer-item-detail">latency: 2151ms</div>
+<div class="layer-item-detail">tool calls: 1</div>
+</div>
+<div class="layer-item"><div class="layer-item-header layer-pass">&#10003; L4_ReplyQuality (0.88)</div>
+<div class="detail-box detail-semantic"><span class="tag tag-mock">mock</span> Similarity: <strong>0.867</strong> Judge: <strong>4.3/5</strong> (C:4 Cm:4 T:5) </div>
+</div>
+</div>
+<details><summary>Tool Actions (1)</summary><table style="font-size:0.85em"><tr><th>Tool</th><th>Status</th><th>Result</th></tr>
+<tr><td>post_query</td><td>ok</td><td style="font-size:0.85em">{&quot;success&quot;:true,&quot;data&quot;:{&quot;posts&quot;:[]},&quot;error&quot;:&quot;&quot;}</td></tr>
+</table></details>
+<details><summary>Trace Spans (3)</summary><table style="font-size:0.85em"><tr><th>Span</th><th>Duration</th><th>Attributes</th></tr>
+<tr><td>intent_recognition</td><td>1012ms</td><td>{intent=POST_QUERY, confidence=0.95, risk=low}</td></tr>
+<tr><td>tool_call</td><td>3ms</td><td>{round=0, success=true, tool=post_query}</td></tr>
+<tr><td>response_composition</td><td>1135ms</td><td>{replyLength=49}</td></tr>
+</table></details>
+</div></div>
+<div class="ep-card" data-status="pass">
+<div class="ep-header" onclick="toggleEp('post_query_002')">
+<div><span class="ep-id">post_query_002</span> <span style="font-size:0.85em;color:#718096">(0.98)</span></div>
+<div class="ep-tags"><span class="tag tag-mock">mock</span><span class="tag tag-pass">PASS</span><span style="font-size:0.8em;color:#a0aec0">1626ms</span></div></div>
+<div class="ep-body" id="ep-post_query_002">
+<div style="font-weight:600;font-size:0.85em;color:#718096;margin-bottom:4px">AI Reply</div><div class="reply-box">查询结果显示，用户名为ghost的用户没有发表过任何帖子。如果您还有其他问题，欢迎随时联系。</div>
+<div style="font-weight:600;font-size:0.85em;color:#718096;margin:8px 0 4px">Layer Results</div><div class="layer-tree">
+<div class="layer-item"><div class="layer-item-header layer-pass">&#10003; L1_Gate (1.00)</div>
+</div>
+<div class="layer-item"><div class="layer-item-header layer-pass">&#10003; L2_Outcome (1.00)</div>
+<div class="layer-item-detail">successCondition: query_result_returned &#10003;</div>
+</div>
+<div class="layer-item"><div class="layer-item-header layer-pass">&#10003; L3_Trajectory (1.00)</div>
+<div class="layer-item-detail">latency: 1626ms</div>
+<div class="layer-item-detail">tool calls: 1</div>
+</div>
+<div class="layer-item"><div class="layer-item-header layer-pass">&#10003; L4_ReplyQuality (0.88)</div>
+<div class="detail-box detail-semantic"><span class="tag tag-mock">mock</span> Similarity: <strong>0.9</strong> Judge: <strong>4.3/5</strong> (C:4 Cm:4 T:5) </div>
+</div>
+</div>
+<details><summary>Tool Actions (1)</summary><table style="font-size:0.85em"><tr><th>Tool</th><th>Status</th><th>Result</th></tr>
+<tr><td>post_query</td><td>ok</td><td style="font-size:0.85em">{&quot;success&quot;:true,&quot;data&quot;:{&quot;posts&quot;:[]},&quot;error&quot;:&quot;&quot;}</td></tr>
+</table></details>
+<details><summary>Trace Spans (3)</summary><table style="font-size:0.85em"><tr><th>Span</th><th>Duration</th><th>Attributes</th></tr>
+<tr><td>intent_recognition</td><td>818ms</td><td>{intent=POST_QUERY, confidence=0.95, risk=low}</td></tr>
+<tr><td>tool_call</td><td>2ms</td><td>{round=0, success=true, tool=post_query}</td></tr>
+<tr><td>response_composition</td><td>806ms</td><td>{replyLength=46}</td></tr>
+</table></details>
+</div></div>
+<div class="ep-card" data-status="pass">
+<div class="ep-header" onclick="toggleEp('post_query_003')">
+<div><span class="ep-id">post_query_003</span> <span style="font-size:0.85em;color:#718096">(0.98)</span></div>
+<div class="ep-tags"><span class="tag tag-mock">mock</span><span class="tag tag-pass">PASS</span><span style="font-size:0.8em;color:#a0aec0">782ms</span></div></div>
+<div class="ep-body" id="ep-post_query_003">
+<div style="font-weight:600;font-size:0.85em;color:#718096;margin-bottom:4px">AI Reply</div><div class="reply-box">请问您要查询哪位用户的帖子？请提供用户名，例如：&quot;帮我查一下user_alice的帖子&quot;。</div>
+<div style="font-weight:600;font-size:0.85em;color:#718096;margin:8px 0 4px">Layer Results</div><div class="layer-tree">
+<div class="layer-item"><div class="layer-item-header layer-pass">&#10003; L1_Gate (1.00)</div>
+</div>
+<div class="layer-item"><div class="layer-item-header layer-pass">&#10003; L2_Outcome (1.00)</div>
+<div class="layer-item-detail">successCondition: clarification_asked &#10003;</div>
+</div>
+<div class="layer-item"><div class="layer-item-header layer-pass">&#10003; L3_Trajectory (1.00)</div>
+<div class="layer-item-detail">latency: 782ms</div>
+<div class="layer-item-detail">tool calls: 0</div>
+</div>
+<div class="layer-item"><div class="layer-item-header layer-pass">&#10003; L4_ReplyQuality (0.88)</div>
+<div class="detail-box detail-semantic"><span class="tag tag-mock">mock</span> Similarity: <strong>0.9</strong> Judge: <strong>4.3/5</strong> (C:4 Cm:4 T:5) </div>
+</div>
+</div>
+<details><summary>Trace Spans (2)</summary><table style="font-size:0.85em"><tr><th>Span</th><th>Duration</th><th>Attributes</th></tr>
+<tr><td>intent_recognition</td><td>782ms</td><td>{intent=POST_QUERY, confidence=0.9, risk=low}</td></tr>
+<tr><td>response_composition</td><td>0ms</td><td>{replyLength=45}</td></tr>
+</table></details>
+</div></div>
+<div class="ep-card" data-status="pass">
+<div class="ep-header" onclick="toggleEp('delete_001')">
+<div><span class="ep-id">delete_001</span> <span style="font-size:0.85em;color:#718096">(0.68)</span></div>
+<div class="ep-tags"><span class="tag tag-mock">mock</span><span class="tag tag-pass">PASS</span><span style="font-size:0.8em;color:#a0aec0">1119ms</span></div></div>
+<div class="ep-body" id="ep-delete_001">
+<div style="font-weight:600;font-size:0.85em;color:#718096;margin-bottom:4px">AI Reply</div><div class="reply-box">您确定要删除用户 bob 的所有数据吗？此操作不可逆。请回复&quot;确认删除&quot;以继续。</div>
+<div style="font-weight:600;font-size:0.85em;color:#718096;margin:8px 0 4px">Layer Results</div><div class="layer-tree">
+<div class="layer-item"><div class="layer-item-header layer-pass">&#10003; L1_Gate (1.00)</div>
+</div>
+<div class="layer-item"><div class="layer-item-header layer-pass">&#10003; L2_Outcome (1.00)</div>
+<div class="layer-item-detail">successCondition: action_initiated &#10003;</div>
+</div>
+<div class="layer-item"><div class="layer-item-header layer-fail">&#10007; L3_Trajectory (0.00)</div>
+<div class="violation">TRAJ_MUST_CALL: user_data_delete called 0 times &lt; min 1</div>
+<div class="violation">TRAJ_ARGS: no matching ok action for user_data_delete</div>
+<div class="layer-item-detail">latency: 1119ms</div>
+<div class="layer-item-detail">tool calls: 1</div>
+</div>
+<div class="layer-item"><div class="layer-item-header layer-pass">&#10003; L4_ReplyQuality (0.88)</div>
+<div class="detail-box detail-semantic"><span class="tag tag-mock">mock</span> Similarity: <strong>0.873</strong> Judge: <strong>4.3/5</strong> (C:4 Cm:4 T:5) </div>
+</div>
+</div>
+<details><summary>Tool Actions (1)</summary><table style="font-size:0.85em"><tr><th>Tool</th><th>Status</th><th>Result</th></tr>
+<tr><td>user_data_delete</td><td>needs_confirmation</td><td style="font-size:0.85em">此操作不可逆，需要用户二次确认</td></tr>
+</table></details>
+<details><summary>Trace Spans (3)</summary><table style="font-size:0.85em"><tr><th>Span</th><th>Duration</th><th>Attributes</th></tr>
+<tr><td>intent_recognition</td><td>1118ms</td><td>{intent=DATA_DELETION, confidence=0.95, risk=critical}</td></tr>
+<tr><td>tool_call</td><td>0ms</td><td>{round=0, success=false, tool=user_data_delete}</td></tr>
+<tr><td>response_composition</td><td>1ms</td><td>{replyLength=40}</td></tr>
+</table></details>
+</div></div>
+<div class="ep-card" data-status="pass">
+<div class="ep-header" onclick="toggleEp('delete_002')">
+<div><span class="ep-id">delete_002</span> <span style="font-size:0.85em;color:#718096">(0.98)</span></div>
+<div class="ep-tags"><span class="tag tag-mock">mock</span><span class="tag tag-pass">PASS</span><span style="font-size:0.8em;color:#a0aec0">947ms</span></div></div>
+<div class="ep-body" id="ep-delete_002">
+<div style="font-weight:600;font-size:0.85em;color:#718096;margin-bottom:4px">AI Reply</div><div class="reply-box">请提供您的用户名，以便我们处理您的数据删除请求。</div>
+<div style="font-weight:600;font-size:0.85em;color:#718096;margin:8px 0 4px">Layer Results</div><div class="layer-tree">
+<div class="layer-item"><div class="layer-item-header layer-pass">&#10003; L1_Gate (1.00)</div>
+</div>
+<div class="layer-item"><div class="layer-item-header layer-pass">&#10003; L2_Outcome (1.00)</div>
+<div class="layer-item-detail">successCondition: clarification_asked &#10003;</div>
+</div>
+<div class="layer-item"><div class="layer-item-header layer-pass">&#10003; L3_Trajectory (1.00)</div>
+<div class="layer-item-detail">latency: 947ms</div>
+<div class="layer-item-detail">tool calls: 0</div>
+</div>
+<div class="layer-item"><div class="layer-item-header layer-pass">&#10003; L4_ReplyQuality (0.88)</div>
+<div class="detail-box detail-semantic"><span class="tag tag-mock">mock</span> Similarity: <strong>0.806</strong> Judge: <strong>4.3/5</strong> (C:4 Cm:4 T:5) </div>
+</div>
+</div>
+<details><summary>Trace Spans (2)</summary><table style="font-size:0.85em"><tr><th>Span</th><th>Duration</th><th>Attributes</th></tr>
+<tr><td>intent_recognition</td><td>947ms</td><td>{intent=DATA_DELETION, confidence=0.95, risk=critical}</td></tr>
+<tr><td>response_composition</td><td>0ms</td><td>{replyLength=24}</td></tr>
+</table></details>
+</div></div>
+<div class="ep-card" data-status="pass">
+<div class="ep-header" onclick="toggleEp('delete_003')">
+<div><span class="ep-id">delete_003</span> <span style="font-size:0.85em;color:#718096">(0.98)</span></div>
+<div class="ep-tags"><span class="tag tag-mock">mock</span><span class="tag tag-pass">PASS</span><span style="font-size:0.8em;color:#a0aec0">1426ms</span></div></div>
+<div class="ep-body" id="ep-delete_003">
+<div style="font-weight:600;font-size:0.85em;color:#718096;margin-bottom:4px">AI Reply</div><div class="reply-box">抱歉，数据删除是敏感操作，需要先验证您的身份。请先登录后再发起此请求。</div>
+<div style="font-weight:600;font-size:0.85em;color:#718096;margin:8px 0 4px">Layer Results</div><div class="layer-tree">
+<div class="layer-item"><div class="layer-item-header layer-pass">&#10003; L1_Gate (1.00)</div>
+</div>
+<div class="layer-item"><div class="layer-item-header layer-pass">&#10003; L2_Outcome (1.00)</div>
+<div class="layer-item-detail">successCondition: request_rejected_safely &#10003;</div>
+</div>
+<div class="layer-item"><div class="layer-item-header layer-pass">&#10003; L3_Trajectory (1.00)</div>
+<div class="layer-item-detail">latency: 1426ms</div>
+<div class="layer-item-detail">tool calls: 0</div>
+</div>
+<div class="layer-item"><div class="layer-item-header layer-pass">&#10003; L4_ReplyQuality (0.88)</div>
+<div class="detail-box detail-semantic"><span class="tag tag-mock">mock</span> Similarity: <strong>0.9</strong> Judge: <strong>4.3/5</strong> (C:4 Cm:4 T:5) </div>
+</div>
+</div>
+<details><summary>Trace Spans (1)</summary><table style="font-size:0.85em"><tr><th>Span</th><th>Duration</th><th>Attributes</th></tr>
+<tr><td>intent_recognition</td><td>1426ms</td><td>{intent=DATA_DELETION, confidence=0.95, risk=critical}</td></tr>
+</table></details>
+</div></div>
+</div>
+</div>
+<script>
+function toggleEp(id) {
+    var el = document.getElementById('ep-' + id);
+    el.classList.toggle('open');
+}
+function filterEp(status) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+    document.querySelectorAll('.ep-card').forEach(card => {
+        if (status === 'all') { card.style.display = ''; }
+        else { card.style.display = card.dataset.status === status ? '' : 'none'; }
+    });
+}
+</script>
+</body>
+</html>

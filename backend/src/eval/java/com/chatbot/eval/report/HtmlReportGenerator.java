@@ -12,8 +12,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 /**
- * Generates a static report.html dashboard with Summary, Evaluator bars,
- * Suite/Tag breakdown, and collapsible Episode details.
+ * Generates a static report.html dashboard with layered evaluation display.
+ * Phase 1: 分层总览 + Suite 切片（含层级 pass rate）+ 失败归因 + Episode 详情。
  */
 public class HtmlReportGenerator {
 
@@ -23,14 +23,14 @@ public class HtmlReportGenerator {
         html.append("<!DOCTYPE html>\n<html lang=\"zh-CN\">\n<head>\n");
         html.append("<meta charset=\"UTF-8\">\n");
         html.append("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n");
-        html.append("<title>Eval Dashboard</title>\n");
+        html.append("<title>Eval Dashboard — Layered Assessment</title>\n");
         appendStyles(html);
         html.append("</head>\n<body>\n");
 
         // Header bar
         html.append("<div class=\"header\">\n");
         html.append("<div class=\"header-inner\">\n");
-        html.append("<div class=\"header-title\">AI Agent Eval Dashboard</div>\n");
+        html.append("<div class=\"header-title\">AI Agent Eval Dashboard — Layered Assessment</div>\n");
         html.append("<div class=\"header-meta\">");
         html.append(formatTimestamp(summary.getTimestamp()));
         if (summary.getFingerprint() != null) {
@@ -45,13 +45,19 @@ public class HtmlReportGenerator {
         // Row 1: KPI cards
         appendKpiCards(html, summary);
 
-        // Row 2: Evaluator pass rate bars
-        appendEvaluatorBars(html, summary);
+        // Row 2: Layer pass rate bars (L1 → L2 → L3 → L4)
+        appendLayerBars(html, summary);
 
-        // Row 3: Suite & Tag breakdown side by side
-        appendBreakdownRow(html, summary);
+        // Row 3: Failure attribution
+        appendFailureAttribution(html, summary);
 
-        // Row 4: Episode list with filter
+        // Row 4: Suite breakdown with layer pass rates
+        appendSuiteBreakdown(html, summary);
+
+        // Row 5: Tag breakdown
+        appendTagBreakdown(html, summary);
+
+        // Row 6: Episode list with filter
         appendEpisodeList(html, runResults, scores);
 
         html.append("</div>\n");
@@ -94,19 +100,23 @@ public class HtmlReportGenerator {
             .card { background: #fff; border-radius: 12px; padding: 20px;
                     box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
 
-            /* Evaluator bars */
-            .eval-bars { display: flex; flex-direction: column; gap: 10px; }
-            .eval-bar-row { display: flex; align-items: center; gap: 12px; }
-            .eval-bar-name { width: 110px; font-size: 0.9em; font-weight: 600; color: #4a5568; text-align: right; }
-            .eval-bar-track { flex: 1; height: 28px; background: #edf2f7; border-radius: 14px; overflow: hidden;
-                              position: relative; }
-            .eval-bar-fill { height: 100%%; border-radius: 14px; transition: width 0.5s; display: flex;
+            /* Layer bars */
+            .layer-bars { display: flex; flex-direction: column; gap: 10px; }
+            .layer-bar-row { display: flex; align-items: center; gap: 12px; }
+            .layer-bar-name { width: 140px; font-size: 0.9em; font-weight: 600; color: #4a5568; text-align: right; }
+            .layer-bar-track { flex: 1; height: 28px; background: #edf2f7; border-radius: 14px; overflow: hidden; }
+            .layer-bar-fill { height: 100%%; border-radius: 14px; transition: width 0.5s; display: flex;
                              align-items: center; padding-left: 12px; font-size: 0.8em; font-weight: 700; color: #fff; }
             .bar-green { background: linear-gradient(90deg, #38a169, #48bb78); }
             .bar-yellow { background: linear-gradient(90deg, #d69e2e, #ecc94b); }
             .bar-red { background: linear-gradient(90deg, #e53e3e, #fc8181); }
 
-            /* Breakdown grid */
+            /* Failure attribution */
+            .attr-row { display: flex; gap: 8px; align-items: center; padding: 6px 0; }
+            .attr-label { width: 160px; font-size: 0.9em; color: #4a5568; }
+            .attr-count { font-weight: 700; font-size: 0.9em; }
+
+            /* Tables */
             .breakdown-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
             @media (max-width: 768px) { .breakdown-row { grid-template-columns: 1fr; } }
             table { width: 100%%; border-collapse: collapse; }
@@ -141,16 +151,21 @@ public class HtmlReportGenerator {
             .ep-body.open { display: block; padding-top: 12px; }
             .reply-box { background: #f7fafc; padding: 12px; border-radius: 8px; border-left: 3px solid #4299e1;
                          margin: 8px 0; white-space: pre-wrap; font-size: 0.9em; line-height: 1.7; }
-            .eval-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
-            .eval-chip { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px;
-                         border-radius: 6px; font-size: 0.8em; font-weight: 600; }
-            .chip-pass { background: #c6f6d5; color: #276749; }
-            .chip-fail { background: #fed7d7; color: #9b2c2c; }
+
+            /* Layer detail tree */
+            .layer-tree { margin: 8px 0; font-size: 0.88em; }
+            .layer-item { padding: 4px 0 4px 16px; border-left: 2px solid #e2e8f0; margin-left: 8px; }
+            .layer-item-header { font-weight: 600; }
+            .layer-item-detail { color: #718096; font-size: 0.92em; padding-left: 4px; }
+            .layer-pass { color: #38a169; }
+            .layer-fail { color: #e53e3e; }
+            .violation { color: #e53e3e; font-size: 0.85em; margin: 2px 0 2px 20px; }
+            .meta-line { font-size: 0.8em; color: #a0aec0; margin-top: 6px; }
+
+            /* Detail boxes */
             .detail-box { margin: 8px 0; padding: 10px; border-radius: 6px; font-size: 0.85em; }
             .detail-semantic { background: #ebf8ff; border-left: 3px solid #4299e1; }
             .detail-rag { background: #f0fff4; border-left: 3px solid #38a169; }
-            .violation { color: #e53e3e; font-size: 0.85em; margin: 2px 0 2px 8px; }
-            .meta-line { font-size: 0.8em; color: #a0aec0; margin-top: 6px; }
             details { margin-top: 8px; }
             details summary { cursor: pointer; font-size: 0.85em; color: #718096; }
             """);
@@ -161,8 +176,9 @@ public class HtmlReportGenerator {
         html.append("<div class=\"kpi-row\">\n");
         appendKpi(html, String.valueOf(summary.getTotalEpisodes()), "Episodes", "kpi-neutral");
         String prClass = summary.getOverallPassRate() >= 0.8 ? "kpi-pass" :
-                          summary.getOverallPassRate() >= 0.5 ? "kpi-warn" : "kpi-fail";
-        appendKpi(html, String.format("%.0f%%", summary.getOverallPassRate() * 100), "Pass Rate", prClass);
+                summary.getOverallPassRate() >= 0.5 ? "kpi-warn" : "kpi-fail";
+        appendKpi(html, String.format("%.0f%%", summary.getOverallPassRate() * 100),
+                "Overall Pass (L1∧L2)", prClass);
         appendKpi(html, String.valueOf(summary.getTotalPass()), "Passed", "kpi-pass");
         appendKpi(html, String.valueOf(summary.getTotalFail()), "Failed", "kpi-fail");
         if (summary.getLatencyStats() != null) {
@@ -179,62 +195,110 @@ public class HtmlReportGenerator {
         html.append("</div>\n");
     }
 
-    private void appendEvaluatorBars(StringBuilder html, EvalSummary summary) {
+    private void appendLayerBars(StringBuilder html, EvalSummary summary) {
         if (summary.getPassRateByEvaluator() == null || summary.getPassRateByEvaluator().isEmpty()) return;
 
-        html.append("<div class=\"section\"><div class=\"section-title\">Evaluator Pass Rates</div>\n");
-        html.append("<div class=\"card\"><div class=\"eval-bars\">\n");
-        for (Map.Entry<String, Double> entry : summary.getPassRateByEvaluator().entrySet()) {
-            double rate = entry.getValue();
+        html.append("<div class=\"section\"><div class=\"section-title\">Layer Pass Rates</div>\n");
+        html.append("<div class=\"card\"><div class=\"layer-bars\">\n");
+        String[] layerOrder = {"L1_Gate", "L2_Outcome", "L3_Trajectory", "L4_ReplyQuality"};
+        String[] layerLabels = {"L1 Gate (P0)", "L2 Outcome (P1)", "L3 Trajectory (P2)", "L4 Reply Quality (P3)"};
+
+        for (int i = 0; i < layerOrder.length; i++) {
+            Double rate = summary.getPassRateByEvaluator().get(layerOrder[i]);
+            if (rate == null) continue;
             int pct = (int) Math.round(rate * 100);
             String barClass = pct >= 80 ? "bar-green" : pct >= 50 ? "bar-yellow" : "bar-red";
-            html.append("<div class=\"eval-bar-row\">");
-            html.append("<div class=\"eval-bar-name\">").append(esc(entry.getKey())).append("</div>");
-            html.append("<div class=\"eval-bar-track\">");
-            html.append("<div class=\"eval-bar-fill ").append(barClass).append("\" style=\"width:")
+            html.append("<div class=\"layer-bar-row\">");
+            html.append("<div class=\"layer-bar-name\">").append(esc(layerLabels[i])).append("</div>");
+            html.append("<div class=\"layer-bar-track\">");
+            html.append("<div class=\"layer-bar-fill ").append(barClass).append("\" style=\"width:")
                     .append(Math.max(pct, 8)).append("%\">").append(pct).append("%</div>");
             html.append("</div></div>\n");
         }
         html.append("</div></div></div>\n");
     }
 
-    private void appendBreakdownRow(StringBuilder html, EvalSummary summary) {
-        boolean hasSuite = summary.getSuiteBreakdown() != null && !summary.getSuiteBreakdown().isEmpty();
-        boolean hasTag = summary.getTagBreakdown() != null && !summary.getTagBreakdown().isEmpty();
-        if (!hasSuite && !hasTag) return;
+    private void appendFailureAttribution(StringBuilder html, EvalSummary summary) {
+        if (summary.getFailureAttribution() == null || summary.getFailureAttribution().isEmpty()) return;
 
-        html.append("<div class=\"section\"><div class=\"breakdown-row\">\n");
-        if (hasSuite) {
-            html.append("<div><div class=\"section-title\">Suite Breakdown</div><div class=\"card\">");
-            appendStatsTable(html, summary.getSuiteBreakdown());
-            html.append("</div></div>\n");
-        }
-        if (hasTag) {
-            html.append("<div><div class=\"section-title\">Tag Breakdown</div><div class=\"card\">");
-            appendStatsTable(html, summary.getTagBreakdown());
-            html.append("</div></div>\n");
+        html.append("<div class=\"section\"><div class=\"section-title\">Failure Attribution</div>\n");
+        html.append("<div class=\"card\">\n");
+        int total = summary.getTotalEpisodes();
+        for (Map.Entry<String, Integer> entry : summary.getFailureAttribution().entrySet()) {
+            int count = entry.getValue();
+            double pct = total > 0 ? (double) count / total * 100 : 0;
+            html.append("<div class=\"attr-row\">");
+            html.append("<div class=\"attr-label\">").append(esc(entry.getKey())).append("</div>");
+            html.append("<div class=\"attr-count td-fail\">").append(count);
+            html.append(" (").append(String.format("%.0f%%", pct)).append(")</div>");
+            html.append("</div>\n");
         }
         html.append("</div></div>\n");
     }
 
-    private void appendStatsTable(StringBuilder html, Map<String, EvalSummary.SuiteStats> stats) {
+    private void appendSuiteBreakdown(StringBuilder html, EvalSummary summary) {
+        if (summary.getSuiteBreakdown() == null || summary.getSuiteBreakdown().isEmpty()) return;
+
+        html.append("<div class=\"section\"><div class=\"section-title\">Suite Breakdown</div>\n");
+        html.append("<div class=\"card\">\n");
         html.append("<table>\n");
-        html.append("<tr><th>Name</th><th>Pass Rate</th><th>Pass</th><th>Fail</th><th>Avg Latency</th></tr>\n");
-        for (Map.Entry<String, EvalSummary.SuiteStats> entry : stats.entrySet()) {
+        html.append("<tr><th>Suite</th><th>N</th><th>Pass</th>");
+        html.append("<th>L1</th><th>L2</th><th>L3</th><th>L4</th><th>Avg Latency</th></tr>\n");
+
+        for (Map.Entry<String, EvalSummary.SuiteStats> entry : summary.getSuiteBreakdown().entrySet()) {
             EvalSummary.SuiteStats s = entry.getValue();
             int pct = (int) Math.round(s.getPassRate() * 100);
-            String barColor = pct >= 80 ? "#38a169" : pct >= 50 ? "#d69e2e" : "#e53e3e";
             html.append("<tr><td><strong>").append(esc(entry.getKey())).append("</strong></td>");
-            html.append("<td>");
-            html.append("<span class=\"mini-bar\" style=\"width:").append(Math.max(pct, 4))
-                    .append("px;background:").append(barColor).append("\"></span> ");
-            html.append(pct).append("%</td>");
-            html.append("<td class=\"td-pass\">").append(s.getPass()).append("</td>");
-            html.append("<td class=\"td-fail\">").append(s.getFail()).append("</td>");
+            html.append("<td>").append(s.getTotal()).append("</td>");
+            html.append("<td class=\"").append(pct >= 80 ? "td-pass" : "td-fail").append("\">")
+                    .append(pct).append("%</td>");
+
+            // Layer pass rates
+            Map<String, Map<String, Double>> slpr = summary.getSuiteLayerPassRates();
+            if (slpr != null && slpr.containsKey(entry.getKey())) {
+                Map<String, Double> lr = slpr.get(entry.getKey());
+                appendLayerCell(html, lr.get("L1_Gate"));
+                appendLayerCell(html, lr.get("L2_Outcome"));
+                appendLayerCell(html, lr.get("L3_Trajectory"));
+                appendLayerCell(html, lr.get("L4_ReplyQuality"));
+            } else {
+                html.append("<td>-</td><td>-</td><td>-</td><td>-</td>");
+            }
+
             html.append("<td>").append(String.format("%.0fms", s.getAvgLatencyMs())).append("</td>");
             html.append("</tr>\n");
         }
         html.append("</table>\n");
+        html.append("</div></div>\n");
+    }
+
+    private void appendLayerCell(StringBuilder html, Double rate) {
+        if (rate == null) {
+            html.append("<td>-</td>");
+            return;
+        }
+        int pct = (int) Math.round(rate * 100);
+        String css = pct >= 80 ? "td-pass" : "td-fail";
+        html.append("<td class=\"").append(css).append("\">").append(pct).append("%</td>");
+    }
+
+    private void appendTagBreakdown(StringBuilder html, EvalSummary summary) {
+        if (summary.getTagBreakdown() == null || summary.getTagBreakdown().isEmpty()) return;
+
+        html.append("<div class=\"section\"><div class=\"section-title\">Tag Breakdown</div>\n");
+        html.append("<div class=\"card\">\n");
+        html.append("<table>\n");
+        html.append("<tr><th>Tag</th><th>Pass Rate</th><th>Pass</th><th>Fail</th></tr>\n");
+        for (Map.Entry<String, EvalSummary.SuiteStats> entry : summary.getTagBreakdown().entrySet()) {
+            EvalSummary.SuiteStats s = entry.getValue();
+            int pct = (int) Math.round(s.getPassRate() * 100);
+            html.append("<tr><td><strong>").append(esc(entry.getKey())).append("</strong></td>");
+            html.append("<td>").append(pct).append("%</td>");
+            html.append("<td class=\"td-pass\">").append(s.getPass()).append("</td>");
+            html.append("<td class=\"td-fail\">").append(s.getFail()).append("</td>");
+            html.append("</tr>\n");
+        }
+        html.append("</table></div></div>\n");
     }
 
     private void appendEpisodeList(StringBuilder html, Map<String, RunResult> runResults,
@@ -252,17 +316,20 @@ public class HtmlReportGenerator {
             RunResult rr = entry.getValue();
             EvalScore score = scores.get(episodeId);
             boolean passed = score != null && score.isOverallPass();
+            double overallScore = score != null ? score.getOverallScore() : 0;
 
             html.append("<div class=\"ep-card\" data-status=\"").append(passed ? "pass" : "fail").append("\">\n");
             html.append("<div class=\"ep-header\" onclick=\"toggleEp('").append(esc(episodeId)).append("')\">\n");
-            html.append("<div><span class=\"ep-id\">").append(esc(episodeId)).append("</span></div>\n");
+            html.append("<div><span class=\"ep-id\">").append(esc(episodeId)).append("</span>");
+            html.append(" <span style=\"font-size:0.85em;color:#718096\">(")
+                    .append(String.format("%.2f", overallScore)).append(")</span>");
+            html.append("</div>\n");
             html.append("<div class=\"ep-tags\">");
 
             // Check for mock mode
             if (score != null) {
                 for (EvalResult er : score.getEvaluatorResults()) {
-                    if (er.getDetails() != null && er.getDetails().containsKey("mode")
-                            && "mock".equals(er.getDetails().get("mode"))) {
+                    if (er.getDetails() != null && "mock".equals(er.getDetails().get("mode"))) {
                         html.append("<span class=\"tag tag-mock\">mock</span>");
                         break;
                     }
@@ -284,26 +351,32 @@ public class HtmlReportGenerator {
             html.append("<div style=\"font-weight:600;font-size:0.85em;color:#718096;margin-bottom:4px\">AI Reply</div>");
             html.append("<div class=\"reply-box\">").append(esc(rr.getFinalReply())).append("</div>\n");
 
-            // Evaluator chips
+            // Layer tree (Phase 1 style)
             if (score != null) {
-                html.append("<div style=\"font-weight:600;font-size:0.85em;color:#718096;margin:8px 0 4px\">Evaluators</div>");
-                html.append("<div class=\"eval-chips\">\n");
+                html.append("<div style=\"font-weight:600;font-size:0.85em;color:#718096;margin:8px 0 4px\">Layer Results</div>");
+                html.append("<div class=\"layer-tree\">\n");
                 for (EvalResult er : score.getEvaluatorResults()) {
-                    html.append("<span class=\"eval-chip ").append(er.isPassed() ? "chip-pass" : "chip-fail").append("\">");
-                    html.append(esc(er.getEvaluatorName())).append(" ");
-                    html.append(String.format("%.0f%%", er.getScore() * 100));
-                    html.append("</span>\n");
+                    String lClass = er.isPassed() ? "layer-pass" : "layer-fail";
+                    String icon = er.isPassed() ? "&#10003;" : "&#10007;";
+                    html.append("<div class=\"layer-item\">");
+                    html.append("<div class=\"layer-item-header ").append(lClass).append("\">");
+                    html.append(icon).append(" ").append(esc(er.getEvaluatorName()));
+                    html.append(" (").append(String.format("%.2f", er.getScore())).append(")</div>\n");
+
+                    // Violations
                     if (!er.getViolations().isEmpty()) {
                         for (String v : er.getViolations()) {
-                            html.append("<div class=\"violation\">").append(esc(v)).append("</div>");
+                            html.append("<div class=\"violation\">").append(esc(v)).append("</div>\n");
                         }
                     }
+
+                    // Key details
+                    appendLayerDetails(html, er);
+
+                    html.append("</div>\n");
                 }
                 html.append("</div>\n");
             }
-
-            // Semantic & RAG detail boxes
-            appendDetailBoxes(html, score);
 
             // Tool actions
             if (!rr.getActions().isEmpty()) {
@@ -337,62 +410,59 @@ public class HtmlReportGenerator {
     }
 
     @SuppressWarnings("unchecked")
-    private void appendDetailBoxes(StringBuilder html, EvalScore score) {
-        if (score == null) return;
+    private void appendLayerDetails(StringBuilder html, EvalResult er) {
+        Map<String, Object> details = er.getDetails();
+        if (details == null || details.isEmpty()) return;
 
-        for (EvalResult er : score.getEvaluatorResults()) {
-            Map<String, Object> details = er.getDetails();
-            if (details == null || details.isEmpty()) continue;
-
-            if ("semantic".equals(er.getEvaluatorName()) && !details.containsKey("note")) {
-                html.append("<div class=\"detail-box detail-semantic\">");
-                html.append("<strong>Semantic</strong>");
-                if (details.containsKey("mode")) {
-                    html.append(" <span class=\"tag tag-mock\">mock</span>");
-                }
-                html.append("<br>");
-                if (details.containsKey("similarityScore")) {
-                    html.append("Similarity: <strong>").append(details.get("similarityScore")).append("</strong> ");
-                }
-                if (details.containsKey("judgeCompositeScore")) {
-                    html.append("Judge: <strong>").append(details.get("judgeCompositeScore")).append("/5</strong> ");
-                }
-                if (details.containsKey("judgeScores")) {
-                    Map<String, Object> js = (Map<String, Object>) details.get("judgeScores");
-                    html.append("(C:").append(js.getOrDefault("correctness", "-"));
-                    html.append(" Cm:").append(js.getOrDefault("completeness", "-"));
-                    html.append(" T:").append(js.getOrDefault("tone", "-")).append(") ");
-                }
-                if (details.containsKey("toolArgResults")) {
-                    html.append("<br>Tool args: ");
-                    var results = (java.util.List<Map<String, Object>>) details.get("toolArgResults");
-                    for (var r : results) {
-                        boolean p = Boolean.TRUE.equals(r.get("passed"));
-                        html.append("<span class=\"tag ").append(p ? "tag-pass" : "tag-fail").append("\">");
-                        html.append(esc(String.valueOf(r.get("tool")))).append(p ? " OK" : " FAIL").append("</span> ");
-                    }
-                }
-                html.append("</div>\n");
+        // L2 Outcome details
+        if ("L2_Outcome".equals(er.getEvaluatorName())) {
+            if (details.containsKey("successCondition")) {
+                boolean met = Boolean.TRUE.equals(details.get("successConditionMet"));
+                html.append("<div class=\"layer-item-detail\">successCondition: ")
+                        .append(esc(String.valueOf(details.get("successCondition"))))
+                        .append(" ").append(met ? "&#10003;" : "&#10007;").append("</div>\n");
             }
+        }
 
-            if ("rag_quality".equals(er.getEvaluatorName()) && !details.containsKey("note")) {
-                html.append("<div class=\"detail-box detail-rag\">");
-                html.append("<strong>RAG Quality</strong>");
-                if (details.containsKey("faithfulnessMode")) {
-                    html.append(" <span class=\"tag tag-mock\">mock</span>");
-                }
-                html.append("<br>");
-                if (details.containsKey("contextPrecision")) {
-                    html.append("Precision: <strong>").append(details.get("contextPrecision")).append("</strong> ");
-                }
-                if (details.containsKey("contextRecall")) {
-                    html.append("Recall: <strong>").append(details.get("contextRecall")).append("</strong> ");
-                }
-                if (details.containsKey("faithfulnessScore")) {
-                    html.append("Faithfulness: <strong>").append(details.get("faithfulnessScore")).append("</strong>");
-                }
-                html.append("</div>\n");
+        // L3 Trajectory details
+        if ("L3_Trajectory".equals(er.getEvaluatorName())) {
+            if (details.containsKey("latencyMs")) {
+                html.append("<div class=\"layer-item-detail\">latency: ")
+                        .append(details.get("latencyMs")).append("ms</div>\n");
             }
+            if (details.containsKey("totalToolCalls")) {
+                html.append("<div class=\"layer-item-detail\">tool calls: ")
+                        .append(details.get("totalToolCalls")).append("</div>\n");
+            }
+        }
+
+        // L4 ReplyQuality details
+        if ("L4_ReplyQuality".equals(er.getEvaluatorName()) && !details.containsKey("note")) {
+            html.append("<div class=\"detail-box detail-semantic\">");
+            if (details.containsKey("mode")) {
+                html.append("<span class=\"tag tag-mock\">mock</span> ");
+            }
+            if (details.containsKey("similarityScore")) {
+                html.append("Similarity: <strong>").append(details.get("similarityScore")).append("</strong> ");
+            }
+            if (details.containsKey("judgeCompositeScore")) {
+                html.append("Judge: <strong>").append(details.get("judgeCompositeScore")).append("/5</strong> ");
+            }
+            if (details.containsKey("judgeScores")) {
+                Map<String, Object> js = (Map<String, Object>) details.get("judgeScores");
+                html.append("(C:").append(js.getOrDefault("correctness", "-"));
+                html.append(" Cm:").append(js.getOrDefault("completeness", "-"));
+                html.append(" T:").append(js.getOrDefault("tone", "-")).append(") ");
+            }
+            if (details.containsKey("ragScores")) {
+                Map<String, Object> rs = (Map<String, Object>) details.get("ragScores");
+                html.append("<br>RAG P:").append(rs.getOrDefault("precision", "-"));
+                html.append(" R:").append(rs.getOrDefault("recall", "-"));
+                if (rs.containsKey("faithfulness")) {
+                    html.append(" F:").append(rs.get("faithfulness"));
+                }
+            }
+            html.append("</div>\n");
         }
     }
 

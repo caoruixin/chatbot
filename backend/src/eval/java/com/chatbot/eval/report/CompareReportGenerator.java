@@ -13,6 +13,7 @@ import java.util.*;
 
 /**
  * Generates a static compare.html for baseline vs candidate comparison.
+ * Phase 1: 按层对比 delta + regressions/improvements。
  */
 public class CompareReportGenerator {
 
@@ -22,13 +23,20 @@ public class CompareReportGenerator {
         html.append("<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n");
         html.append("<meta charset=\"UTF-8\">\n");
         html.append("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n");
-        html.append("<title>Eval Compare Report</title>\n");
+        html.append("<title>Eval Compare Report — Layered</title>\n");
         appendStyles(html);
         html.append("</head>\n<body>\n");
 
         html.append("<div class=\"container\">\n");
-        html.append("<h1>Eval Compare Report</h1>\n");
+        html.append("<h1>Eval Compare Report — Layered Assessment</h1>\n");
         html.append("<p class=\"timestamp\">Generated: ").append(formatTimestamp(Instant.now())).append("</p>\n");
+
+        // Fingerprints
+        if (delta.getBaselineFingerprint() != null && delta.getCandidateFingerprint() != null) {
+            html.append("<p class=\"timestamp\">Baseline: <code>").append(esc(delta.getBaselineFingerprint().getCompositeHash()));
+            html.append("</code> vs Candidate: <code>").append(esc(delta.getCandidateFingerprint().getCompositeHash()));
+            html.append("</code></p>\n");
+        }
 
         // Overall comparison
         html.append("<h2>Overall Comparison</h2>\n");
@@ -42,27 +50,25 @@ public class CompareReportGenerator {
         html.append("</div>\n");
         html.append("</div>\n");
 
-        // Per-Evaluator comparison
+        // Per-Layer comparison
         if (baseline.getPassRateByEvaluator() != null && candidate.getPassRateByEvaluator() != null) {
-            html.append("<h2>Per-Evaluator Comparison</h2>\n");
+            html.append("<h2>Per-Layer Comparison</h2>\n");
             html.append("<div class=\"card\">\n");
             html.append("<table>\n");
-            html.append("<tr><th>Evaluator</th><th>Baseline</th><th>Candidate</th><th>Delta</th></tr>\n");
+            html.append("<tr><th>Layer</th><th>Baseline</th><th>Candidate</th><th>Delta</th></tr>\n");
 
-            Set<String> allEvaluators = new LinkedHashSet<>();
-            allEvaluators.addAll(baseline.getPassRateByEvaluator().keySet());
-            allEvaluators.addAll(candidate.getPassRateByEvaluator().keySet());
-
-            for (String evalName : allEvaluators) {
-                double bRate = baseline.getPassRateByEvaluator().getOrDefault(evalName, 0.0);
-                double cRate = candidate.getPassRateByEvaluator().getOrDefault(evalName, 0.0);
+            String[] layerOrder = {"L1_Gate", "L2_Outcome", "L3_Trajectory", "L4_ReplyQuality"};
+            for (String layer : layerOrder) {
+                double bRate = baseline.getPassRateByEvaluator().getOrDefault(layer, 0.0);
+                double cRate = candidate.getPassRateByEvaluator().getOrDefault(layer, 0.0);
                 double d = cRate - bRate;
                 String dc = d >= 0 ? "positive" : "negative";
-                html.append("<tr><td>").append(esc(evalName)).append("</td>");
+                String arrow = d > 0 ? " &#9650;" : d < 0 ? " &#9660;" : "";
+                html.append("<tr><td><strong>").append(esc(layer)).append("</strong></td>");
                 html.append("<td>").append(String.format("%.0f%%", bRate * 100)).append("</td>");
                 html.append("<td>").append(String.format("%.0f%%", cRate * 100)).append("</td>");
                 html.append("<td class=\"").append(dc).append("\">");
-                html.append(String.format("%+.1f%%", d * 100)).append("</td></tr>\n");
+                html.append(String.format("%+.1f%%", d * 100)).append(arrow).append("</td></tr>\n");
             }
             html.append("</table>\n");
             html.append("</div>\n");
@@ -70,7 +76,7 @@ public class CompareReportGenerator {
 
         // Regressions
         if (delta.getRegressions() != null && !delta.getRegressions().isEmpty()) {
-            html.append("<h2>Regressions</h2>\n");
+            html.append("<h2>Regressions (").append(delta.getRegressions().size()).append(")</h2>\n");
             html.append("<div class=\"card\">\n");
             html.append("<p class=\"subtitle\">Episodes that passed in baseline but failed in candidate:</p>\n");
             html.append("<ul>\n");
@@ -83,7 +89,7 @@ public class CompareReportGenerator {
 
         // New passes
         if (delta.getNewPasses() != null && !delta.getNewPasses().isEmpty()) {
-            html.append("<h2>New Passes</h2>\n");
+            html.append("<h2>Improvements (").append(delta.getNewPasses().size()).append(")</h2>\n");
             html.append("<div class=\"card\">\n");
             html.append("<p class=\"subtitle\">Episodes that failed in baseline but passed in candidate:</p>\n");
             html.append("<ul>\n");
@@ -128,6 +134,7 @@ public class CompareReportGenerator {
         html.append("h1 { margin-bottom: 5px; }\n");
         html.append("h2 { margin: 25px 0 10px; color: #444; }\n");
         html.append(".timestamp { color: #888; margin-bottom: 20px; font-size: 0.9em; }\n");
+        html.append(".timestamp code { background: #e2e8f0; padding: 1px 6px; border-radius: 3px; }\n");
         html.append(".subtitle { color: #666; margin-bottom: 10px; }\n");
         html.append(".card { background: #fff; border-radius: 8px; padding: 20px; margin-bottom: 15px; ");
         html.append("box-shadow: 0 1px 3px rgba(0,0,0,0.1); }\n");

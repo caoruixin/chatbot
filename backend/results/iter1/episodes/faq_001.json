@@ -1,0 +1,129 @@
+{
+  "runResult" : {
+    "episodeId" : "faq_001",
+    "finalReply" : "您好，当前没有找到具体的退款政策相关信息。建议您联系人工客服获取详细的退款政策。我们会尽快为您解决问题，谢谢您的理解！",
+    "actions" : [ {
+      "name" : "faq_search",
+      "args" : {
+        "query" : "你们的退款政策是什么"
+      },
+      "status" : "ok",
+      "resultSummary" : "{\"data\":{\"question\":\"\",\"answer\":\"未找到与用户问题相关的FAQ\",\"score\":0.0},\"error\":\"\",\"success\":true}",
+      "timestampMs" : 1772964277805
+    } ],
+    "artifacts" : {
+      "identityArtifacts" : {
+        "intent" : "KB_QUESTION",
+        "confidence" : 0.95,
+        "risk" : "low"
+      },
+      "executionArtifacts" : {
+        "toolCallCount" : 1,
+        "retrievedContextCount" : 0
+      },
+      "composerArtifacts" : {
+        "replyLength" : 59
+      }
+    },
+    "metrics" : {
+      "latencyMs" : 5119,
+      "tokenIn" : null,
+      "tokenOut" : null,
+      "cost" : null,
+      "toolCallCount" : 1
+    },
+    "trace" : {
+      "spans" : [ {
+        "spanName" : "intent_recognition",
+        "startMs" : 1772964275179,
+        "endMs" : 1772964277805,
+        "attributes" : {
+          "risk" : "low",
+          "intent" : "KB_QUESTION",
+          "confidence" : 0.95
+        }
+      }, {
+        "spanName" : "tool_call",
+        "startMs" : 1772964277805,
+        "endMs" : 1772964279338,
+        "attributes" : {
+          "tool" : "faq_search",
+          "round" : "0",
+          "success" : "true"
+        }
+      }, {
+        "spanName" : "response_composition",
+        "startMs" : 1772964279341,
+        "endMs" : 1772964280297,
+        "attributes" : {
+          "replyLength" : "59"
+        }
+      } ]
+    },
+    "version" : {
+      "modelId" : "moonshot-v1-8k",
+      "promptHashes" : {
+        "intent_system_prompt" : "2ca76527f1e0",
+        "evidence_system_prompt" : "1216a72c495b"
+      },
+      "workflowVersion" : "7545f2315ea8",
+      "toolSchemaVersion" : "c063b959a923",
+      "kbSnapshot" : "unknown",
+      "gitCommit" : "d43711352425c1ab99ecb1235acc69dd761952b8",
+      "compositeHash" : "c4f0b2d6524a"
+    },
+    "retrievedContexts" : [ ]
+  },
+  "score" : {
+    "episodeId" : "faq_001",
+    "overallPass" : true,
+    "overallScore" : 0.9760000000000001,
+    "evaluatorResults" : [ {
+      "evaluatorName" : "L1_Gate",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "L2_Outcome",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "successConditionMet" : true,
+        "successCondition" : "faq_answered_from_kb"
+      }
+    }, {
+      "evaluatorName" : "L3_Trajectory",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "totalToolCalls" : 1,
+        "latencyMs" : 5119,
+        "toolCallCount" : 1
+      }
+    }, {
+      "evaluatorName" : "L4_ReplyQuality",
+      "passed" : true,
+      "score" : 0.88,
+      "violations" : [ ],
+      "details" : {
+        "mode" : "mock",
+        "similarityScore" : 0.9,
+        "similarityThreshold" : 0.65,
+        "judgeScores" : {
+          "reasoning" : "[mock] 待人工评估补充",
+          "completeness" : 4,
+          "correctness" : 4,
+          "tone" : 5
+        },
+        "judgeCompositeScore" : 4.3,
+        "ragScores" : {
+          "precision" : 0.0,
+          "recall" : 0.0
+        }
+      }
+    } ]
+  }
+}

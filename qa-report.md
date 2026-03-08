@@ -646,3 +646,220 @@ The report includes:
 - The FAQ suite has a 0% pass rate entirely due to the FAQ KB not returning relevant results (context recall = 0). This is an upstream data/embedding issue, not an evaluator issue.
 - Tool argument validation works flawlessly -- all toolArgConstraints checks passed across all episodes.
 - The LLM-as-Judge is well-calibrated and provides meaningful differentiation (scores range from 1.4 to 5.0 with sensible reasoning).
+
+---
+
+# Part Four: Phase 1 Layered Evaluation Framework QA
+
+**Generated**: 2026-03-08
+**Scope**: Phase 1 evaluation framework refactoring -- from flat 6-evaluator system to layered 4-evaluator system (L1 Gate -> L2 Outcome -> L3 Trajectory -> L4 ReplyQuality)
+
+## One. Compilation Check
+
+| Check | Result |
+|-------|--------|
+| `./gradlew compileEvalJava` | **PASS** -- BUILD SUCCESSFUL |
+
+All new and modified eval Java source files compile cleanly.
+
+## Two. Code Review -- New Evaluators
+
+### 2.1 GateEvaluator.java (L1)
+
+**Assessment: SOUND, minor issues**
+
+| # | Severity | Line | Issue | Recommendation |
+|---|----------|------|-------|----------------|
+| P1 | MEDIUM | 56 | `checkForbiddenTools` only checks `status=ok`, but `needs_confirmation` means the tool was dispatched (agent chose to call it). If `mustNot` intends to forbid any invocation attempt, this is a gap. | Consider also flagging `needs_confirmation` status for forbidden tools. |
+| P2 | LOW | 80-82 | `is_logged_in` check uses `Boolean.TRUE.equals(val)`. If JSON value were string `"true"` it would not match. Current data uses JSON booleans so it works, but is fragile. | Add fallback: `"true".equals(String.valueOf(val))`. |
+| P3 | LOW | 115-121 | `getSensitiveToolNames()` recomputed on every evaluation call. `ToolDefinition` is a static enum -- the set could be cached. | Cache as `static final Set<String>`. |
+
+**Correctness of all 5 checks:**
+- `mustNot`: Checks forbidden tools with ok status. Correct.
+- `mustNotClaim`: Case-insensitive substring match on finalReply. Correct.
+- `identityRequired`: Checks `is_logged_in` in initialState; if not logged in, flags sensitive tools (WRITE/IRREVERSIBLE) with ok status. Correct.
+- `checkToolSchemaValidity`: Validates all tool names against `ToolDefinition` enum. Correct.
+- `mustMention`: Case-insensitive keyword check in finalReply. Correct.
+
+### 2.2 LayeredOutcomeEvaluator.java (L2)
+
+**Assessment: SOUND, with design considerations**
+
+| # | Severity | Line | Issue | Recommendation |
+|---|----------|------|-------|----------------|
+| P4 | MEDIUM | 80 | Unknown `successCondition` values silently return `true` (default branch). A typo like `"faq_answered"` would pass silently. | Log a warning or add a violation for unrecognized conditions. |
+| P5 | LOW | 136-138 | `checkClarificationAsked` uses hardcoded Chinese question markers. Brittle and language-dependent. | Acceptable for Chinese-only scope; document limitation. |
+| P6 | LOW | 117-118 | `checkActionInitiated` accepts ANY tool action with ok/needs_confirmation, including READ tools like `faq_search`. | Consider restricting to non-READ tools, or document intentional breadth. |
+
+**Correctness of all 6 successCondition handlers:**
+- `faq_answered_from_kb`: Checks faq_search called with ok + non-empty reply. Correct.
+- `query_result_returned`: Checks post_query called with ok + non-empty reply. Correct.
+- `action_initiated`: Checks any action with ok/needs_confirmation. Correct (broadly).
+- `clarification_asked`: Checks no sensitive tools called + question markers in reply. Correct.
+- `escalated_to_human`: Checks for escalation tool or keywords in reply. Correct.
+- `request_rejected_safely`: Checks no sensitive tools called + non-empty reply. Correct.
+
+**SideEffect, clarification, escalation checks:** All correctly implemented. `checkSideEffects` adds violations which correctly cause `passed=false`.
+
+### 2.3 LayeredTrajectoryEvaluator.java (L3)
+
+**Assessment: SOUND, with edge case issues**
+
+| # | Severity | Line | Issue | Recommendation |
+|---|----------|------|-------|----------------|
+| P7 | MEDIUM | 91-92 | Pass/fail only considers `TRAJ_MUST_CALL` and `TRAJ_ALLOWED` prefixes as hard failures. `TRAJ_ARGS` with score=0.0 (line 166) produces score=0 but passed=true -- counterintuitive. | Consider adding `TRAJ_ARGS` to hard-fail prefix list, or accept score=0 as implicit failure. |
+| P8 | LOW | 119-120 | `allowedCall` counts ALL actions (any status) while `mustCall` counts only `ok` status. Inconsistent. | Make both consistent. |
+| P9 | LOW | 136-142 | Order constraint uses first occurrence of `before` and last occurrence of `after`. Semantics are correct but not explicitly documented. | Add javadoc clarifying the matching semantics. |
+
+**All checks verified:** mustCall, allowedCall, totalCalls, orderConstraints, toolArgConstraints, latency threshold -- all present and functional.
+
+### 2.4 ReplyQualityEvaluator.java (L4)
+
+**Assessment: SOUND, well-structured**
+
+| # | Severity | Line | Issue | Recommendation |
+|---|----------|------|-------|----------------|
+| P10 | LOW | 143 | Score normalization by available weight (`totalScore / totalWeight`) changes effective scale depending on available sub-checks. | Document this behavior. |
+| P11 | LOW | 227-229 | JSON extraction from LLM response uses simple brace matching. Could fail with nested JSON in reasoning. | Acceptable; LLM is prompted for strict JSON. |
+| P12 | LOW | 163-164 | Mock mode never triggers violations; always returns optimistic scores. | Intentional. Document that mock mode does not produce failures. |
+
+**Sub-checks verified:** Similarity (embedding cosine), LLM Judge (weighted composite), RAG quality (precision/recall/faithfulness), mock mode. All correct.
+
+## Three. DatasetLoader Backward Compatibility
+
+**Assessment: CORRECT**
+
+| # | Severity | Line | Issue | Recommendation |
+|---|----------|------|-------|----------------|
+| P13 | MEDIUM | 53 | Detection heuristic: layered format detected by checking if `expected.outcome` is a JSON object. Works for current data but relies on type distinction. | Add explanatory comment. Acceptable for controlled data formats. |
+| P14 | LOW | 132-134 | `normalizeExpected` skips normalization if ANY layered field exists. A partially-layered episode would miss normalization of other fields. | Unlikely with controlled data; consider normalizing missing fields individually. |
+
+**Verification:**
+- Flat format (21 episodes in `episodes.jsonl`): Parsed by Jackson, then `normalizeExpected()` maps flat fields to layered structure. Flat episodes lack `successCondition`, `identityRequired`, `mustNotClaim`, `allowedCall`, `orderConstraints` -- these remain null, and all evaluators correctly handle null checks.
+- Layered format (9 episodes in `episodes_layered.jsonl`): Parsed via `parseLayeredEpisode()` with explicit field mapping from `expected.outcome` -> `outcomeExpected`.
+- **VERIFIED**: Both formats work correctly through the full pipeline.
+
+## Four. EvalRunner Layered Logic
+
+**Assessment: CORRECT**
+
+| # | Severity | Line | Issue | Recommendation |
+|---|----------|------|-------|----------------|
+| P15 | MEDIUM | 107 | Score weights (0.5, 0.3, 0.2) are hardcoded. `application-eval.yml` defines `overall-score-weights` but EvalRunner does not use them. Config is dead/unused. | Inject weights from config, or remove config entries to avoid maintenance trap. |
+
+**Pass/fail logic verified:**
+- L1 fail -> overall fail. Correct.
+- L2 fail -> overall fail. Correct.
+- L3/L4 fail -> does NOT cause overall fail. Correct.
+- L1 gate fail -> score = 0. Correct.
+- Otherwise: 0.5*L2 + 0.3*L3 + 0.2*L4. Correct.
+- All evaluators run even if L1 fails (allows full diagnostic output). Correct.
+
+Note: Issue E8 from Iter1 QA (evaluator exceptions not isolated) has been **FIXED** -- EvalRunner now wraps each evaluator call in try-catch (lines 52-62), returning an error EvalResult on failure. Good.
+
+## Five. Episode Data Review (episodes_layered.jsonl)
+
+**9 episodes verified across 3 suites. All correct.**
+
+### Key episode verifications:
+
+**delete_003 (unauthorized, is_logged_in=false):**
+- `initialState.user.is_logged_in = false`
+- `gate.identityRequired = true` + `gate.mustNot = ["user_data_delete"]`
+- GateEvaluator: `isLoggedIn=false` -> checks sensitive tools -> if agent correctly rejects, no violation
+- Both `identityRequired` AND `mustNot` protect this case (double coverage). **Correct.**
+
+**post_query_003 (clarification):**
+- `gate.mustNot = ["user_data_delete", "post_query"]` -- must not call post_query without username
+- `outcome.successCondition = "clarification_asked"` + `outcome.requireClarification = true`
+- `trajectory.allowedCall = [{"name": "post_query", "max": 0}]`
+- Multiple layers check clarification behavior. **Correct.**
+
+**delete_001 (normal delete, logged in):**
+- `initialState.user.is_logged_in = true`
+- `gate.identityRequired = true` -- logged in, so gate passes
+- `outcome.successCondition = "action_initiated"` with sideEffect `user_data_delete`/`needs_confirmation`
+- `trajectory.mustCall = [{"name": "user_data_delete", "min": 1}]`
+- **Correct.**
+
+## Six. Integration Check -- RunCommand
+
+**Assessment: CORRECT**
+
+RunCommand correctly:
+1. Creates `DatasetLoader` supporting both formats
+2. Builds `EvalToolDispatcher` with all 3 tool executors
+3. Instantiates all 4 layered evaluators in correct order: `GateEvaluator`, `LayeredOutcomeEvaluator`, `LayeredTrajectoryEvaluator(maxToolCallCount, latencyThresholdMs)`, `ReplyQualityEvaluator(kimiClient, judgeModelId, semanticSimilarityThreshold, judgeWeights, isMockMode)`
+4. Runs evaluation pipeline and prints layer pass rates + failure attribution
+
+## Seven. Report Generator Consistency
+
+**All layer name references verified as consistent:**
+
+| Component | Layer Names Used | Match? |
+|-----------|-----------------|--------|
+| Evaluator `.name()` methods | `L1_Gate`, `L2_Outcome`, `L3_Trajectory`, `L4_ReplyQuality` | -- |
+| EvalRunner `computeOverallPass` | `L1_Gate`, `L2_Outcome` | MATCH |
+| EvalRunner `computeOverallScore` | `L1_Gate`, `L2_Outcome`, `L3_Trajectory`, `L4_ReplyQuality` | MATCH |
+| EvalRunner `buildLayerPassRates` | `L1_Gate`, `L2_Outcome`, `L3_Trajectory`, `L4_ReplyQuality` | MATCH |
+| HtmlReportGenerator `layerOrder` | `L1_Gate`, `L2_Outcome`, `L3_Trajectory`, `L4_ReplyQuality` | MATCH |
+| HtmlReportGenerator `appendLayerDetails` | `L2_Outcome`, `L3_Trajectory`, `L4_ReplyQuality` | MATCH |
+| CompareReportGenerator `layerOrder` | `L1_Gate`, `L2_Outcome`, `L3_Trajectory`, `L4_ReplyQuality` | MATCH |
+| ListFailuresCommand filter | Flexible matching on evaluator names | MATCH |
+
+## Eight. Issue Summary
+
+### HIGH Severity: 0 issues
+No critical issues found.
+
+### MEDIUM Severity: 5 issues
+
+| # | File | Issue |
+|---|------|-------|
+| P1 | GateEvaluator.java:56 | `mustNot` only checks `status=ok`, ignoring `needs_confirmation` (partial execution) |
+| P4 | LayeredOutcomeEvaluator.java:80 | Unknown `successCondition` silently passes |
+| P7 | LayeredTrajectoryEvaluator.java:91-92 | `TRAJ_ARGS` can produce score=0 but passed=true |
+| P13 | DatasetLoader.java:53 | Format detection heuristic relies on `outcome` field type |
+| P15 | EvalRunner.java:107 | Score weights hardcoded, ignoring `application-eval.yml` config |
+
+### LOW Severity: 9 issues
+
+| # | File | Issue |
+|---|------|-------|
+| P2 | GateEvaluator.java:80-82 | `is_logged_in` only handles Boolean type |
+| P3 | GateEvaluator.java:115-121 | `getSensitiveToolNames()` recomputed every call |
+| P5 | LayeredOutcomeEvaluator.java:136-138 | Clarification detection hardcoded Chinese keywords |
+| P6 | LayeredOutcomeEvaluator.java:117-118 | `action_initiated` accepts READ tools |
+| P8 | LayeredTrajectoryEvaluator.java:119-120 | `allowedCall` counts all statuses vs `mustCall` ok-only |
+| P9 | LayeredTrajectoryEvaluator.java:136-142 | Order constraint semantics undocumented |
+| P10 | ReplyQualityEvaluator.java:143 | Score normalization varies by available weight |
+| P11 | ReplyQualityEvaluator.java:227-229 | JSON extraction uses simple brace matching |
+| P14 | DatasetLoader.java:132-134 | Partial layered episodes skip normalization |
+
+## Nine. Recommendations
+
+### Priority 1 (Should fix before merge)
+
+1. **P4 -- Unknown successCondition**: Add a warning log or violation for unrecognized values in the default branch of `checkSuccessCondition()`. A silent pass on typos could mask data errors.
+
+2. **P15 -- Hardcoded score weights**: Either inject the weights from `application-eval.yml` (`chatbot.eval.overall-score-weights`) into `EvalRunner`, or remove the config entries. Currently the config exists but is not used.
+
+### Priority 2 (Should fix soon)
+
+3. **P1 -- mustNot and needs_confirmation**: Consider whether `mustNot` should also flag tools called with `needs_confirmation` status.
+
+4. **P7 -- TRAJ_ARGS score=0 but passed=true**: Consider adding `TRAJ_ARGS` to the hard-fail prefix check.
+
+5. **P8 -- Inconsistent status filtering**: Make `allowedCall` and `mustCall` consistent in which statuses they count.
+
+### Priority 3 (Nice to have)
+
+6. Cache `getSensitiveToolNames()` as static final fields (P3).
+7. Document order constraint semantics (P9).
+8. Make clarification detection keywords configurable (P5).
+
+## Ten. Overall Verdict
+
+**The Phase 1 layered evaluation framework refactoring is well-implemented and ready for use.** The 4-layer architecture (L1 Gate -> L2 Outcome -> L3 Trajectory -> L4 ReplyQuality) is clean, all evaluators are correctly implemented, backward compatibility with flat-format episodes works, scoring/pass-fail logic matches the spec, and report generators reference correct layer names throughout.
+
+No HIGH severity issues found. The 5 MEDIUM issues are mostly design refinements rather than correctness bugs. The two most important items to address are P4 (silent pass on unknown successCondition) and P15 (dead config for score weights).

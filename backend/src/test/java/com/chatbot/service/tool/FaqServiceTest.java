@@ -1,5 +1,6 @@
 package com.chatbot.service.tool;
 
+import com.chatbot.config.PromptConfig;
 import com.chatbot.dto.response.FaqSearchResponse;
 import com.chatbot.exception.LlmCallException;
 import com.chatbot.mapper.FaqDocMapper;
@@ -29,11 +30,15 @@ class FaqServiceTest {
     @Mock
     private KimiClient kimiClient;
 
+    @Mock
+    private PromptConfig promptConfig;
+
     private FaqService faqService;
 
     @BeforeEach
     void setUp() {
-        faqService = new FaqService(faqDocMapper, kimiClient, 0.75);
+        lenient().when(promptConfig.getFaqMatcherPrompt()).thenReturn("test faq matcher prompt");
+        faqService = new FaqService(faqDocMapper, kimiClient, promptConfig, 0.75);
     }
 
     @Test
@@ -67,13 +72,14 @@ class FaqServiceTest {
     }
 
     @Test
-    void execute_embeddingThrowsLlmCallException_returnsError() {
+    void execute_embeddingThrowsLlmCallException_fallsBackToLlmSearch() {
         when(kimiClient.embeddingQuery(anyString()))
                 .thenThrow(new LlmCallException("Kimi embedding API returned empty embedding vector"));
 
+        // Fallback: faqDocMapper.findAll() returns empty list (Mockito default) → success with no match
         ToolResult result = faqService.execute(Map.of("query", "test"));
 
-        assertFalse(result.isSuccess());
+        assertTrue(result.isSuccess());
     }
 
     @Test
@@ -95,11 +101,12 @@ class FaqServiceTest {
     }
 
     @Test
-    void execute_embeddingApiFails_returnsError() {
+    void execute_embeddingApiFails_fallsBackToLlmSearch() {
         when(kimiClient.embeddingQuery(anyString())).thenThrow(new RuntimeException("API error"));
 
+        // Fallback: faqDocMapper.findAll() returns empty list (Mockito default) → success with no match
         ToolResult result = faqService.execute(Map.of("query", "test"));
 
-        assertFalse(result.isSuccess());
+        assertTrue(result.isSuccess());
     }
 }

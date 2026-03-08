@@ -13,6 +13,7 @@ import com.chatbot.eval.runner.DatasetLoader;
 import com.chatbot.eval.runner.EvalRunner;
 import com.chatbot.eval.runner.ResultWriter;
 import com.chatbot.config.KimiConfig;
+import com.chatbot.config.PromptConfig;
 import com.chatbot.service.agent.IntentRouter;
 import com.chatbot.service.agent.ReactPlanner;
 import com.chatbot.service.agent.ResponseComposer;
@@ -41,6 +42,7 @@ public class RunCommand {
     private final PostQueryService postQueryService;
     private final UserDataDeletionService userDataDeletionService;
     private final KimiConfig kimiConfig;
+    private final PromptConfig promptConfig;
     private final KimiClient kimiClient;
     private final int maxReactRounds;
     private final double confidenceThreshold;
@@ -48,7 +50,6 @@ public class RunCommand {
     private final long latencyThresholdMs;
     private final int maxToolCallCount;
     private final double semanticSimilarityThreshold;
-    private final double judgeScoreThreshold;
     private final String judgeModelId;
     private final double judgeWeightCorrectness;
     private final double judgeWeightCompleteness;
@@ -62,6 +63,7 @@ public class RunCommand {
                       PostQueryService postQueryService,
                       UserDataDeletionService userDataDeletionService,
                       KimiConfig kimiConfig,
+                      PromptConfig promptConfig,
                       KimiClient kimiClient,
                       @Value("${chatbot.ai.max-react-rounds:3}") int maxReactRounds,
                       @Value("${chatbot.ai.confidence-threshold:0.7}") double confidenceThreshold,
@@ -69,7 +71,6 @@ public class RunCommand {
                       @Value("${chatbot.eval.latency-threshold-ms:15000}") long latencyThresholdMs,
                       @Value("${chatbot.eval.max-tool-call-count:5}") int maxToolCallCount,
                       @Value("${chatbot.eval.semantic-similarity-threshold:0.75}") double semanticSimilarityThreshold,
-                      @Value("${chatbot.eval.judge-score-threshold:3.5}") double judgeScoreThreshold,
                       @Value("${chatbot.eval.judge-model-id:moonshot-v1-32k}") String judgeModelId,
                       @Value("${chatbot.eval.judge-weights.correctness:0.5}") double judgeWeightCorrectness,
                       @Value("${chatbot.eval.judge-weights.completeness:0.3}") double judgeWeightCompleteness,
@@ -82,6 +83,7 @@ public class RunCommand {
         this.postQueryService = postQueryService;
         this.userDataDeletionService = userDataDeletionService;
         this.kimiConfig = kimiConfig;
+        this.promptConfig = promptConfig;
         this.kimiClient = kimiClient;
         this.maxReactRounds = maxReactRounds;
         this.confidenceThreshold = confidenceThreshold;
@@ -89,7 +91,6 @@ public class RunCommand {
         this.latencyThresholdMs = latencyThresholdMs;
         this.maxToolCallCount = maxToolCallCount;
         this.semanticSimilarityThreshold = semanticSimilarityThreshold;
-        this.judgeScoreThreshold = judgeScoreThreshold;
         this.judgeModelId = judgeModelId;
         this.judgeWeightCorrectness = judgeWeightCorrectness;
         this.judgeWeightCompleteness = judgeWeightCompleteness;
@@ -104,7 +105,7 @@ public class RunCommand {
         log.info("Eval run: dataset={}, output={}", datasetPath, outputDir);
 
         try {
-            // Load dataset
+            // Load dataset (supports both flat and layered formats)
             DatasetLoader loader = new DatasetLoader();
             List<Episode> episodes = loader.load(datasetPath);
 
@@ -126,7 +127,7 @@ public class RunCommand {
                     intentRouter, reactPlanner, responseComposer,
                     evalDispatcher, maxReactRounds, confidenceThreshold);
 
-            // Build evaluators
+            // Build layered evaluators (Phase 1)
             Map<String, Double> judgeWeights = Map.of(
                     "correctness", judgeWeightCorrectness,
                     "completeness", judgeWeightCompleteness,
@@ -136,17 +137,15 @@ public class RunCommand {
             log.info("Semantic evaluation mode: {} (mock={})", semanticMode, isMockMode);
 
             List<Evaluator> evaluators = List.of(
-                    new ContractEvaluator(),
-                    new TrajectoryEvaluator(maxToolCallCount),
-                    new EfficiencyEvaluator(latencyThresholdMs),
-                    new OutcomeEvaluator(),
-                    new SemanticEvaluator(kimiClient, judgeModelId,
-                            semanticSimilarityThreshold, judgeScoreThreshold, judgeWeights, isMockMode),
-                    new RagQualityEvaluator(kimiClient, isMockMode));
+                    new GateEvaluator(),
+                    new LayeredOutcomeEvaluator(),
+                    new LayeredTrajectoryEvaluator(maxToolCallCount, latencyThresholdMs),
+                    new ReplyQualityEvaluator(kimiClient, judgeModelId,
+                            semanticSimilarityThreshold, judgeWeights, isMockMode));
 
             // Generate fingerprint
             FingerprintGenerator fpGen = new FingerprintGenerator(
-                    kimiConfig, maxReactRounds, confidenceThreshold);
+                    kimiConfig, promptConfig, maxReactRounds, confidenceThreshold);
             VersionFingerprint fingerprint = fpGen.generate();
 
             // Run evaluation
@@ -157,10 +156,25 @@ public class RunCommand {
             EvalSummary summary = runner.run(episodes, Map.of(), fingerprint, outputDir);
 
             // Print summary
-            System.out.println("\n=== Eval Run Complete ===");
+            System.out.println("\n=== Eval Run Complete (Layered) ===");
             System.out.printf("Total: %d | Pass: %d | Fail: %d | Rate: %.0f%%%n",
                     summary.getTotalEpisodes(), summary.getTotalPass(),
                     summary.getTotalFail(), summary.getOverallPassRate() * 100);
+
+            if (summary.getPassRateByEvaluator() != null) {
+                System.out.println("Layer Pass Rates:");
+                for (Map.Entry<String, Double> e : summary.getPassRateByEvaluator().entrySet()) {
+                    System.out.printf("  %s: %.0f%%%n", e.getKey(), e.getValue() * 100);
+                }
+            }
+
+            if (summary.getFailureAttribution() != null && !summary.getFailureAttribution().isEmpty()) {
+                System.out.println("Failure Attribution:");
+                for (Map.Entry<String, Integer> e : summary.getFailureAttribution().entrySet()) {
+                    System.out.printf("  %s: %d%n", e.getKey(), e.getValue());
+                }
+            }
+
             System.out.println("Results: " + outputDir);
             System.out.println("Report: " + outputDir + "/report.html");
             System.out.println("Semantic mode: " + semanticMode);

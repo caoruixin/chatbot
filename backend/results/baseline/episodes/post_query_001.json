@@ -1,0 +1,125 @@
+{
+  "runResult" : {
+    "episodeId" : "post_query_001",
+    "finalReply" : "根据系统查询，我没有找到任何与Alice相关的帖子。可能是Alice没有发表过帖子，或者帖子被删除了。如果你有其他问题，欢迎随时问我。",
+    "actions" : [ {
+      "name" : "post_query",
+      "args" : {
+        "username" : "alice"
+      },
+      "status" : "ok",
+      "resultSummary" : "{\"success\":true,\"data\":{\"posts\":[]},\"error\":\"\"}",
+      "timestampMs" : 1772952190336
+    } ],
+    "artifacts" : {
+      "identityArtifacts" : {
+        "intent" : "POST_QUERY",
+        "confidence" : 0.95,
+        "risk" : "low"
+      },
+      "executionArtifacts" : {
+        "toolCallCount" : 1,
+        "retrievedContextCount" : 0
+      },
+      "composerArtifacts" : {
+        "replyLength" : 67
+      }
+    },
+    "metrics" : {
+      "latencyMs" : 2025,
+      "tokenIn" : null,
+      "tokenOut" : null,
+      "cost" : null,
+      "toolCallCount" : 1
+    },
+    "trace" : {
+      "spans" : [ {
+        "spanName" : "intent_recognition",
+        "startMs" : 1772952189296,
+        "endMs" : 1772952190336,
+        "attributes" : {
+          "intent" : "POST_QUERY",
+          "confidence" : 0.95,
+          "risk" : "low"
+        }
+      }, {
+        "spanName" : "tool_call",
+        "startMs" : 1772952190336,
+        "endMs" : 1772952190343,
+        "attributes" : {
+          "round" : "0",
+          "success" : "true",
+          "tool" : "post_query"
+        }
+      }, {
+        "spanName" : "response_composition",
+        "startMs" : 1772952190344,
+        "endMs" : 1772952191321,
+        "attributes" : {
+          "replyLength" : "67"
+        }
+      } ]
+    },
+    "version" : {
+      "modelId" : "moonshot-v1-8k",
+      "promptHashes" : {
+        "intent_system_prompt" : "33a24afedf2b",
+        "evidence_system_prompt" : "6b3324dcfd96"
+      },
+      "workflowVersion" : "7545f2315ea8",
+      "toolSchemaVersion" : "c063b959a923",
+      "kbSnapshot" : "unknown",
+      "gitCommit" : "d43711352425c1ab99ecb1235acc69dd761952b8",
+      "compositeHash" : "454057ea47f5"
+    },
+    "retrievedContexts" : [ ]
+  },
+  "score" : {
+    "episodeId" : "post_query_001",
+    "overallPass" : true,
+    "overallScore" : 0.9760000000000001,
+    "evaluatorResults" : [ {
+      "evaluatorName" : "L1_Gate",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "L2_Outcome",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "successConditionMet" : true,
+        "successCondition" : "query_result_returned"
+      }
+    }, {
+      "evaluatorName" : "L3_Trajectory",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "totalToolCalls" : 1,
+        "latencyMs" : 2025,
+        "toolCallCount" : 1
+      }
+    }, {
+      "evaluatorName" : "L4_ReplyQuality",
+      "passed" : true,
+      "score" : 0.88,
+      "violations" : [ ],
+      "details" : {
+        "mode" : "mock",
+        "similarityScore" : 0.9,
+        "similarityThreshold" : 0.65,
+        "judgeScores" : {
+          "reasoning" : "[mock] 待人工评估补充",
+          "completeness" : 4,
+          "correctness" : 4,
+          "tone" : 5
+        },
+        "judgeCompositeScore" : 4.3
+      }
+    } ]
+  }
+}

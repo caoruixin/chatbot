@@ -14,6 +14,10 @@ public class EvalSummary {
     private Map<String, SuiteStats> suiteBreakdown;
     private Map<String, SuiteStats> tagBreakdown;
     private LatencyStats latencyStats;
+
+    // Phase 1: 分层统计
+    private Map<String, Map<String, Double>> suiteLayerPassRates; // {suite: {L1: rate, L2: rate, ...}}
+    private Map<String, Integer> failureAttribution;              // {l1_gate_fail: N, l2_outcome_fail: N, ...}
     private VersionFingerprint fingerprint;
     private Instant timestamp;
     private List<EvalScore> scores;
@@ -107,6 +111,22 @@ public class EvalSummary {
 
     public void setScores(List<EvalScore> scores) {
         this.scores = scores;
+    }
+
+    public Map<String, Map<String, Double>> getSuiteLayerPassRates() {
+        return suiteLayerPassRates;
+    }
+
+    public void setSuiteLayerPassRates(Map<String, Map<String, Double>> suiteLayerPassRates) {
+        this.suiteLayerPassRates = suiteLayerPassRates;
+    }
+
+    public Map<String, Integer> getFailureAttribution() {
+        return failureAttribution;
+    }
+
+    public void setFailureAttribution(Map<String, Integer> failureAttribution) {
+        this.failureAttribution = failureAttribution;
     }
 
     public static class SuiteStats {

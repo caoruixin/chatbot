@@ -56,3 +56,7 @@ chatbot:
     max-react-rounds: 3
     confidence-threshold: 0.7
     faq-score-threshold: 0.75
+  prompts:
+    intent-router: classpath:prompts/intent-router.md
+    response-composer: classpath:prompts/response-composer.md
+    faq-matcher: classpath:prompts/faq-matcher.md

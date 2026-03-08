@@ -1,5 +1,6 @@
 package com.chatbot.service.tool;
 
+import com.chatbot.config.PromptConfig;
 import com.chatbot.dto.response.FaqSearchResponse;
 import com.chatbot.mapper.FaqDocMapper;
 import com.chatbot.model.FaqDoc;
@@ -28,13 +29,16 @@ public class FaqService implements ToolExecutor {
 
     private final FaqDocMapper faqDocMapper;
     private final KimiClient kimiClient;
+    private final PromptConfig promptConfig;
     private final double faqScoreThreshold;
 
     public FaqService(FaqDocMapper faqDocMapper,
                       KimiClient kimiClient,
+                      PromptConfig promptConfig,
                       @Value("${chatbot.ai.faq-score-threshold:0.75}") double faqScoreThreshold) {
         this.faqDocMapper = faqDocMapper;
         this.kimiClient = kimiClient;
+        this.promptConfig = promptConfig;
         this.faqScoreThreshold = faqScoreThreshold;
     }
 
@@ -93,12 +97,9 @@ public class FaqService implements ToolExecutor {
                         i + 1, allFaqs.get(i).getQuestion(), allFaqs.get(i).getAnswer()));
             }
 
-            String systemPrompt = "你是一个FAQ匹配助手。根据用户的问题，从FAQ列表中找到最匹配的一个。" +
-                    "只返回最匹配FAQ的编号（一个数字），如果没有任何匹配的返回0。不要返回任何其他内容。";
-
             String userMessage = String.format("FAQ列表:\n%s用户问题: %s", faqList, query);
 
-            KimiChatResponse response = kimiClient.chatCompletion(systemPrompt,
+            KimiChatResponse response = kimiClient.chatCompletion(promptConfig.getFaqMatcherPrompt(),
                     List.of(new KimiMessage("user", userMessage)), 0.1);
 
             String content = response.getContent();

@@ -1,8 +1,8 @@
 package com.chatbot.eval.runner;
 
-import com.chatbot.eval.adapter.AgentAdapter;
 import com.chatbot.eval.evaluator.EvalResult;
 import com.chatbot.eval.evaluator.Evaluator;
+import com.chatbot.eval.adapter.AgentAdapter;
 import com.chatbot.eval.model.*;
 import com.chatbot.eval.report.HtmlReportGenerator;
 import org.slf4j.Logger;
@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 
 /**
  * Orchestrates dataset -> adapter -> evaluators -> output.
+ * Phase 1: 分层评估逻辑 + 优先级判定。
  */
 public class EvalRunner {
 
@@ -46,7 +47,7 @@ public class EvalRunner {
             runResult.setVersion(fingerprint);
             runResults.put(episode.getId(), runResult);
 
-            // 2. Evaluate with all evaluators (isolated: one failure doesn't abort the run)
+            // 2. Evaluate with all evaluators (all layers run, even if L1 fails)
             List<EvalResult> evalResults = new ArrayList<>();
             for (Evaluator evaluator : evaluators) {
                 try {
@@ -56,22 +57,20 @@ public class EvalRunner {
                     log.error("Evaluator '{}' threw exception for episode {}: {}",
                             evaluator.name(), episode.getId(), e.getMessage());
                     EvalResult errorResult = new EvalResult(evaluator.name(), false, 0.0);
-                    errorResult.setViolations(List.of("Evaluator threw exception: " + e.getMessage()));
+                    errorResult.setViolations(List.of("EVALUATOR_ERROR: " + e.getMessage()));
                     evalResults.add(errorResult);
                 }
             }
 
-            // 3. Aggregate score
-            boolean overallPass = evalResults.stream().allMatch(EvalResult::isPassed);
-            double overallScore = evalResults.stream()
-                    .mapToDouble(EvalResult::getScore)
-                    .average()
-                    .orElse(0.0);
+            // 3. Layered pass/fail + score
+            boolean overallPass = computeOverallPass(evalResults);
+            double overallScore = computeOverallScore(evalResults);
 
             EvalScore score = new EvalScore(episode.getId(), overallPass, overallScore, evalResults);
             scores.put(episode.getId(), score);
 
-            log.info("Episode {} result: pass={}, score={}", episode.getId(), overallPass, String.format("%.2f", overallScore));
+            log.info("Episode {} result: pass={}, score={}", episode.getId(), overallPass,
+                    String.format("%.2f", overallScore));
         }
 
         // 4. Build summary
@@ -84,6 +83,49 @@ public class EvalRunner {
         htmlReportGenerator.generate(summary, runResults, scores, outputDir);
 
         return summary;
+    }
+
+    /**
+     * L1 fail → overall fail; L2 fail → overall fail.
+     * L3/L4 fail does not cause overall fail.
+     */
+    private boolean computeOverallPass(List<EvalResult> results) {
+        for (EvalResult r : results) {
+            if ("L1_Gate".equals(r.getEvaluatorName()) && !r.isPassed()) {
+                return false;
+            }
+            if ("L2_Outcome".equals(r.getEvaluatorName()) && !r.isPassed()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Overall score: L1 gate fail → 0; otherwise 0.5*L2 + 0.3*L3 + 0.2*L4.
+     */
+    private double computeOverallScore(List<EvalResult> results) {
+        EvalResult gate = findResult(results, "L1_Gate");
+        if (gate != null && !gate.isPassed()) return 0.0;
+
+        double score = 0.0;
+        EvalResult outcome = findResult(results, "L2_Outcome");
+        if (outcome != null) score += 0.5 * outcome.getScore();
+
+        EvalResult trajectory = findResult(results, "L3_Trajectory");
+        if (trajectory != null) score += 0.3 * trajectory.getScore();
+
+        EvalResult replyQuality = findResult(results, "L4_ReplyQuality");
+        if (replyQuality != null) score += 0.2 * replyQuality.getScore();
+
+        return score;
+    }
+
+    private EvalResult findResult(List<EvalResult> results, String name) {
+        return results.stream()
+                .filter(r -> name.equals(r.getEvaluatorName()))
+                .findFirst()
+                .orElse(null);
     }
 
     private EvalSummary buildSummary(List<Episode> episodes, Map<String, EvalScore> scores,
@@ -100,7 +142,7 @@ public class EvalRunner {
         summary.setTotalFail(totalFail);
         summary.setOverallPassRate(episodes.isEmpty() ? 0.0 : (double) totalPass / episodes.size());
 
-        // Pass rate by evaluator
+        // Pass rate by evaluator (layer)
         Map<String, Double> passRateByEvaluator = new LinkedHashMap<>();
         if (!scores.isEmpty()) {
             EvalScore first = scores.values().iterator().next();
@@ -115,14 +157,29 @@ public class EvalRunner {
         }
         summary.setPassRateByEvaluator(passRateByEvaluator);
 
-        // Suite breakdown
+        // Failure attribution
+        Map<String, Integer> failureAttribution = new LinkedHashMap<>();
+        for (EvalScore score : scores.values()) {
+            for (EvalResult er : score.getEvaluatorResults()) {
+                if (!er.isPassed()) {
+                    String key = er.getEvaluatorName().toLowerCase().replace(" ", "_") + "_fail";
+                    failureAttribution.merge(key, 1, Integer::sum);
+                }
+            }
+        }
+        summary.setFailureAttribution(failureAttribution);
+
+        // Suite breakdown with layer pass rates
         Map<String, List<Episode>> suiteMap = episodes.stream()
                 .collect(Collectors.groupingBy(Episode::getSuite));
         Map<String, EvalSummary.SuiteStats> suiteBreakdown = new LinkedHashMap<>();
+        Map<String, Map<String, Double>> suiteLayerPassRates = new LinkedHashMap<>();
         for (Map.Entry<String, List<Episode>> entry : suiteMap.entrySet()) {
             suiteBreakdown.put(entry.getKey(), buildSuiteStats(entry.getValue(), scores));
+            suiteLayerPassRates.put(entry.getKey(), buildLayerPassRates(entry.getValue(), scores));
         }
         summary.setSuiteBreakdown(suiteBreakdown);
+        summary.setSuiteLayerPassRates(suiteLayerPassRates);
 
         // Tag breakdown
         Map<String, List<Episode>> tagMap = new LinkedHashMap<>();
@@ -139,12 +196,11 @@ public class EvalRunner {
         }
         summary.setTagBreakdown(tagBreakdown);
 
-        // Latency stats
+        // Latency stats (from L3_Trajectory details)
         List<Long> latencies = scores.values().stream()
                 .map(s -> {
-                    // Find latency from evaluator details
                     return s.getEvaluatorResults().stream()
-                            .filter(r -> "efficiency".equals(r.getEvaluatorName()))
+                            .filter(r -> "L3_Trajectory".equals(r.getEvaluatorName()))
                             .findFirst()
                             .map(r -> {
                                 Object val = r.getDetails().get("latencyMs");
@@ -167,6 +223,21 @@ public class EvalRunner {
         return summary;
     }
 
+    private Map<String, Double> buildLayerPassRates(List<Episode> episodes, Map<String, EvalScore> scores) {
+        Map<String, Double> layerRates = new LinkedHashMap<>();
+        String[] layers = {"L1_Gate", "L2_Outcome", "L3_Trajectory", "L4_ReplyQuality"};
+        for (String layer : layers) {
+            long passed = episodes.stream()
+                    .map(ep -> scores.get(ep.getId()))
+                    .filter(Objects::nonNull)
+                    .flatMap(s -> s.getEvaluatorResults().stream())
+                    .filter(r -> layer.equals(r.getEvaluatorName()) && r.isPassed())
+                    .count();
+            layerRates.put(layer, episodes.isEmpty() ? 0.0 : (double) passed / episodes.size());
+        }
+        return layerRates;
+    }
+
     private EvalSummary.SuiteStats buildSuiteStats(List<Episode> episodes,
                                                     Map<String, EvalScore> scores) {
         int total = episodes.size();
@@ -179,7 +250,7 @@ public class EvalRunner {
             }
             if (score != null) {
                 for (EvalResult r : score.getEvaluatorResults()) {
-                    if ("efficiency".equals(r.getEvaluatorName())) {
+                    if ("L3_Trajectory".equals(r.getEvaluatorName())) {
                         Object val = r.getDetails().get("latencyMs");
                         if (val instanceof Number) totalLatency += ((Number) val).longValue();
                     }

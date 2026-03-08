@@ -1,9 +1,8 @@
 package com.chatbot.eval.fingerprint;
 
 import com.chatbot.config.KimiConfig;
+import com.chatbot.config.PromptConfig;
 import com.chatbot.eval.model.VersionFingerprint;
-import com.chatbot.service.agent.IntentRouter;
-import com.chatbot.service.agent.ResponseComposer;
 import com.chatbot.service.tool.ToolDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,11 +22,14 @@ public class FingerprintGenerator {
     private static final Logger log = LoggerFactory.getLogger(FingerprintGenerator.class);
 
     private final KimiConfig kimiConfig;
+    private final PromptConfig promptConfig;
     private final int maxReactRounds;
     private final double confidenceThreshold;
 
-    public FingerprintGenerator(KimiConfig kimiConfig, int maxReactRounds, double confidenceThreshold) {
+    public FingerprintGenerator(KimiConfig kimiConfig, PromptConfig promptConfig,
+                                int maxReactRounds, double confidenceThreshold) {
         this.kimiConfig = kimiConfig;
+        this.promptConfig = promptConfig;
         this.maxReactRounds = maxReactRounds;
         this.confidenceThreshold = confidenceThreshold;
     }
@@ -40,8 +42,8 @@ public class FingerprintGenerator {
 
         // Prompt hashes
         Map<String, String> promptHashes = new LinkedHashMap<>();
-        promptHashes.put("intent_system_prompt", sha256(IntentRouter.getSystemPrompt()));
-        promptHashes.put("evidence_system_prompt", sha256(ResponseComposer.getSystemPrompt()));
+        promptHashes.put("intent_system_prompt", sha256(promptConfig.getIntentRouterPrompt()));
+        promptHashes.put("evidence_system_prompt", sha256(promptConfig.getResponseComposerPrompt()));
         fp.setPromptHashes(promptHashes);
 
         // Workflow version

@@ -78,6 +78,13 @@ public class SyncAgentAdapter implements AgentAdapter {
                         retrievedContexts, trace, intent, startTime);
             }
 
+            // 3.5 Identity gate: reject sensitive operations for unauthenticated users
+            if ("critical".equals(intent.getRisk()) && !isUserLoggedIn(episode)) {
+                String rejectReply = "抱歉，数据删除是敏感操作，需要先验证您的身份。请先登录后再发起此请求。";
+                return buildResult(episode.getId(), rejectReply, actions,
+                        retrievedContexts, trace, intent, startTime);
+            }
+
             // 4. ReAct loop (mirrors AgentCore logic)
             ToolResult toolResult = null;
             for (int round = 0; round < maxReactRounds; round++) {
@@ -173,6 +180,14 @@ public class SyncAgentAdapter implements AgentAdapter {
         }
 
         return responseComposer.composeWithEvidence(userMessage, intent, toolResult, history);
+    }
+
+    private boolean isUserLoggedIn(Episode episode) {
+        if (episode.getInitialState() == null || episode.getInitialState().getUser() == null) {
+            return false;
+        }
+        Object loggedIn = episode.getInitialState().getUser().get("is_logged_in");
+        return Boolean.TRUE.equals(loggedIn);
     }
 
     private RunResult buildResult(String episodeId, String reply,

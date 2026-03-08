@@ -1,5 +1,6 @@
 package com.chatbot.service.agent;
 
+import com.chatbot.config.PromptConfig;
 import com.chatbot.exception.LlmCallException;
 import com.chatbot.service.llm.KimiChatResponse;
 import com.chatbot.service.llm.KimiClient;
@@ -26,11 +27,15 @@ class ResponseComposerTest {
     @Mock
     private KimiClient kimiClient;
 
+    @Mock
+    private PromptConfig promptConfig;
+
     private ResponseComposer responseComposer;
 
     @BeforeEach
     void setUp() {
-        responseComposer = new ResponseComposer(kimiClient);
+        lenient().when(promptConfig.getResponseComposerPrompt()).thenReturn("test response prompt");
+        responseComposer = new ResponseComposer(kimiClient, promptConfig);
     }
 
     // --- composeFromTemplate tests ---
