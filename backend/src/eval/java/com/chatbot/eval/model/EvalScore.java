@@ -11,6 +11,9 @@ public class EvalScore {
     private double overallScore;
     private List<EvalResult> evaluatorResults;
 
+    // Phase 2: 多轮诊断
+    private List<TurnDiagnostic> turnDiagnostics;
+
     public EvalScore() {
     }
 
@@ -52,5 +55,13 @@ public class EvalScore {
 
     public void setEvaluatorResults(List<EvalResult> evaluatorResults) {
         this.evaluatorResults = evaluatorResults;
+    }
+
+    public List<TurnDiagnostic> getTurnDiagnostics() {
+        return turnDiagnostics;
+    }
+
+    public void setTurnDiagnostics(List<TurnDiagnostic> turnDiagnostics) {
+        this.turnDiagnostics = turnDiagnostics;
     }
 }

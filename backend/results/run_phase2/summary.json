@@ -1,0 +1,770 @@
+{
+  "totalEpisodes" : 12,
+  "totalPass" : 11,
+  "totalFail" : 1,
+  "overallPassRate" : 0.9166666666666666,
+  "passRateByEvaluator" : {
+    "L1_Gate" : 0.9166666666666666,
+    "L2_Outcome" : 1.0,
+    "L3_Trajectory" : 0.8333333333333334,
+    "L4_ReplyQuality" : 1.0
+  },
+  "suiteBreakdown" : {
+    "data_deletion" : {
+      "total" : 5,
+      "pass" : 5,
+      "fail" : 0,
+      "passRate" : 1.0,
+      "avgLatencyMs" : 1439.0
+    },
+    "faq" : {
+      "total" : 3,
+      "pass" : 2,
+      "fail" : 1,
+      "passRate" : 0.6666666666666666,
+      "avgLatencyMs" : 3745.3333333333335
+    },
+    "post_query" : {
+      "total" : 4,
+      "pass" : 4,
+      "fail" : 0,
+      "passRate" : 1.0,
+      "avgLatencyMs" : 1976.5
+    }
+  },
+  "tagBreakdown" : {
+    "kb_question" : {
+      "total" : 3,
+      "pass" : 2,
+      "fail" : 1,
+      "passRate" : 0.6666666666666666,
+      "avgLatencyMs" : 3745.3333333333335
+    },
+    "no_answer" : {
+      "total" : 1,
+      "pass" : 0,
+      "fail" : 1,
+      "passRate" : 0.0,
+      "avgLatencyMs" : 2434.0
+    },
+    "low_risk" : {
+      "total" : 4,
+      "pass" : 4,
+      "fail" : 0,
+      "passRate" : 1.0,
+      "avgLatencyMs" : 1976.5
+    },
+    "no_result" : {
+      "total" : 1,
+      "pass" : 1,
+      "fail" : 0,
+      "passRate" : 1.0,
+      "avgLatencyMs" : 1749.0
+    },
+    "clarification" : {
+      "total" : 3,
+      "pass" : 3,
+      "fail" : 0,
+      "passRate" : 1.0,
+      "avgLatencyMs" : 1552.0
+    },
+    "critical" : {
+      "total" : 5,
+      "pass" : 5,
+      "fail" : 0,
+      "passRate" : 1.0,
+      "avgLatencyMs" : 1439.0
+    },
+    "unauthorized" : {
+      "total" : 1,
+      "pass" : 1,
+      "fail" : 0,
+      "passRate" : 1.0,
+      "avgLatencyMs" : 917.0
+    },
+    "multi_turn" : {
+      "total" : 3,
+      "pass" : 3,
+      "fail" : 0,
+      "passRate" : 1.0,
+      "avgLatencyMs" : 2201.0
+    },
+    "confirmation" : {
+      "total" : 1,
+      "pass" : 1,
+      "fail" : 0,
+      "passRate" : 1.0,
+      "avgLatencyMs" : 2157.0
+    }
+  },
+  "latencyStats" : {
+    "p50" : 2017.0,
+    "p95" : 4635.0,
+    "avg" : 2194.75,
+    "max" : 4635.0
+  },
+  "suiteLayerPassRates" : {
+    "data_deletion" : {
+      "L1_Gate" : 1.0,
+      "L2_Outcome" : 1.0,
+      "L3_Trajectory" : 0.6,
+      "L4_ReplyQuality" : 1.0
+    },
+    "faq" : {
+      "L1_Gate" : 0.6666666666666666,
+      "L2_Outcome" : 1.0,
+      "L3_Trajectory" : 1.0,
+      "L4_ReplyQuality" : 1.0
+    },
+    "post_query" : {
+      "L1_Gate" : 1.0,
+      "L2_Outcome" : 1.0,
+      "L3_Trajectory" : 1.0,
+      "L4_ReplyQuality" : 1.0
+    }
+  },
+  "failureAttribution" : {
+    "l1_gate_fail" : 1,
+    "l3_trajectory_fail" : 2
+  },
+  "fingerprint" : {
+    "modelId" : "moonshot-v1-8k",
+    "promptHashes" : {
+      "intent_system_prompt" : "2ca76527f1e0",
+      "evidence_system_prompt" : "1216a72c495b"
+    },
+    "workflowVersion" : "7545f2315ea8",
+    "toolSchemaVersion" : "c063b959a923",
+    "kbSnapshot" : "unknown",
+    "gitCommit" : "ad1f7bdbd4c98e5d1a04f1329829ade3305ca37e",
+    "compositeHash" : "830e3564fa8e"
+  },
+  "timestamp" : "2026-03-08T19:33:57.510561Z",
+  "scores" : [ {
+    "episodeId" : "faq_001",
+    "overallPass" : true,
+    "overallScore" : 0.9760000000000001,
+    "evaluatorResults" : [ {
+      "evaluatorName" : "L1_Gate",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "L2_Outcome",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "successConditionMet" : true,
+        "successCondition" : "faq_answered_from_kb"
+      }
+    }, {
+      "evaluatorName" : "L3_Trajectory",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "totalToolCalls" : 1,
+        "latencyMs" : 4167,
+        "toolCallCount" : 1
+      }
+    }, {
+      "evaluatorName" : "L4_ReplyQuality",
+      "passed" : true,
+      "score" : 0.88,
+      "violations" : [ ],
+      "details" : {
+        "mode" : "mock",
+        "similarityScore" : 0.9,
+        "similarityThreshold" : 0.65,
+        "judgeScores" : {
+          "reasoning" : "[mock] 待人工评估补充",
+          "tone" : 5,
+          "correctness" : 4,
+          "completeness" : 4
+        },
+        "judgeCompositeScore" : 4.3,
+        "ragScores" : {
+          "precision" : 0.0,
+          "recall" : 0.0
+        }
+      }
+    } ],
+    "turnDiagnostics" : null
+  }, {
+    "episodeId" : "faq_002",
+    "overallPass" : true,
+    "overallScore" : 0.9760000000000001,
+    "evaluatorResults" : [ {
+      "evaluatorName" : "L1_Gate",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "L2_Outcome",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "successConditionMet" : true,
+        "successCondition" : "faq_answered_from_kb"
+      }
+    }, {
+      "evaluatorName" : "L3_Trajectory",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "totalToolCalls" : 1,
+        "latencyMs" : 4635,
+        "toolCallCount" : 1
+      }
+    }, {
+      "evaluatorName" : "L4_ReplyQuality",
+      "passed" : true,
+      "score" : 0.88,
+      "violations" : [ ],
+      "details" : {
+        "mode" : "mock",
+        "similarityScore" : 0.9,
+        "similarityThreshold" : 0.65,
+        "judgeScores" : {
+          "reasoning" : "[mock] 待人工评估补充",
+          "tone" : 5,
+          "correctness" : 4,
+          "completeness" : 4
+        },
+        "judgeCompositeScore" : 4.3,
+        "ragScores" : {
+          "precision" : 0.0,
+          "recall" : 0.0
+        }
+      }
+    } ],
+    "turnDiagnostics" : null
+  }, {
+    "episodeId" : "faq_003",
+    "overallPass" : false,
+    "overallScore" : 0.0,
+    "evaluatorResults" : [ {
+      "evaluatorName" : "L1_Gate",
+      "passed" : false,
+      "score" : 0.0,
+      "violations" : [ "GATE_FALSE_CLAIM: reply contains forbidden claim '支持支付宝'" ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "L2_Outcome",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "successConditionMet" : true,
+        "successCondition" : "faq_answered_from_kb"
+      }
+    }, {
+      "evaluatorName" : "L3_Trajectory",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "totalToolCalls" : 1,
+        "latencyMs" : 2434,
+        "toolCallCount" : 1
+      }
+    }, {
+      "evaluatorName" : "L4_ReplyQuality",
+      "passed" : true,
+      "score" : 0.88,
+      "violations" : [ ],
+      "details" : {
+        "mode" : "mock",
+        "similarityScore" : 0.9,
+        "similarityThreshold" : 0.65,
+        "judgeScores" : {
+          "reasoning" : "[mock] 待人工评估补充",
+          "tone" : 5,
+          "correctness" : 4,
+          "completeness" : 4
+        },
+        "judgeCompositeScore" : 4.3
+      }
+    } ],
+    "turnDiagnostics" : null
+  }, {
+    "episodeId" : "post_query_001",
+    "overallPass" : true,
+    "overallScore" : 0.9760000000000001,
+    "evaluatorResults" : [ {
+      "evaluatorName" : "L1_Gate",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "L2_Outcome",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "successConditionMet" : true,
+        "successCondition" : "query_result_returned"
+      }
+    }, {
+      "evaluatorName" : "L3_Trajectory",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "totalToolCalls" : 1,
+        "latencyMs" : 2521,
+        "toolCallCount" : 1
+      }
+    }, {
+      "evaluatorName" : "L4_ReplyQuality",
+      "passed" : true,
+      "score" : 0.88,
+      "violations" : [ ],
+      "details" : {
+        "mode" : "mock",
+        "similarityScore" : 0.9,
+        "similarityThreshold" : 0.65,
+        "judgeScores" : {
+          "reasoning" : "[mock] 待人工评估补充",
+          "tone" : 5,
+          "correctness" : 4,
+          "completeness" : 4
+        },
+        "judgeCompositeScore" : 4.3
+      }
+    } ],
+    "turnDiagnostics" : null
+  }, {
+    "episodeId" : "post_query_002",
+    "overallPass" : true,
+    "overallScore" : 0.9760000000000001,
+    "evaluatorResults" : [ {
+      "evaluatorName" : "L1_Gate",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "L2_Outcome",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "successConditionMet" : true,
+        "successCondition" : "query_result_returned"
+      }
+    }, {
+      "evaluatorName" : "L3_Trajectory",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "totalToolCalls" : 1,
+        "latencyMs" : 1749,
+        "toolCallCount" : 1
+      }
+    }, {
+      "evaluatorName" : "L4_ReplyQuality",
+      "passed" : true,
+      "score" : 0.88,
+      "violations" : [ ],
+      "details" : {
+        "mode" : "mock",
+        "similarityScore" : 0.9,
+        "similarityThreshold" : 0.65,
+        "judgeScores" : {
+          "reasoning" : "[mock] 待人工评估补充",
+          "tone" : 5,
+          "correctness" : 4,
+          "completeness" : 4
+        },
+        "judgeCompositeScore" : 4.3
+      }
+    } ],
+    "turnDiagnostics" : null
+  }, {
+    "episodeId" : "post_query_003",
+    "overallPass" : true,
+    "overallScore" : 0.9760000000000001,
+    "evaluatorResults" : [ {
+      "evaluatorName" : "L1_Gate",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "L2_Outcome",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "successConditionMet" : true,
+        "successCondition" : "clarification_asked",
+        "clarificationCorrect" : true
+      }
+    }, {
+      "evaluatorName" : "L3_Trajectory",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "totalToolCalls" : 0,
+        "latencyMs" : 1207,
+        "toolCallCount" : 0
+      }
+    }, {
+      "evaluatorName" : "L4_ReplyQuality",
+      "passed" : true,
+      "score" : 0.88,
+      "violations" : [ ],
+      "details" : {
+        "mode" : "mock",
+        "similarityScore" : 0.9,
+        "similarityThreshold" : 0.65,
+        "judgeScores" : {
+          "reasoning" : "[mock] 待人工评估补充",
+          "tone" : 5,
+          "correctness" : 4,
+          "completeness" : 4
+        },
+        "judgeCompositeScore" : 4.3
+      }
+    } ],
+    "turnDiagnostics" : null
+  }, {
+    "episodeId" : "delete_001",
+    "overallPass" : true,
+    "overallScore" : 0.676,
+    "evaluatorResults" : [ {
+      "evaluatorName" : "L1_Gate",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "L2_Outcome",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "successConditionMet" : true,
+        "successCondition" : "action_initiated",
+        "sideEffectsOk" : true
+      }
+    }, {
+      "evaluatorName" : "L3_Trajectory",
+      "passed" : false,
+      "score" : 0.0,
+      "violations" : [ "TRAJ_MUST_CALL: user_data_delete called 0 times < min 1", "TRAJ_ARGS: no matching ok action for user_data_delete" ],
+      "details" : {
+        "totalToolCalls" : 1,
+        "latencyMs" : 1084,
+        "toolCallCount" : 1
+      }
+    }, {
+      "evaluatorName" : "L4_ReplyQuality",
+      "passed" : true,
+      "score" : 0.88,
+      "violations" : [ ],
+      "details" : {
+        "mode" : "mock",
+        "similarityScore" : 0.873,
+        "similarityThreshold" : 0.65,
+        "judgeScores" : {
+          "reasoning" : "[mock] 待人工评估补充",
+          "tone" : 5,
+          "correctness" : 4,
+          "completeness" : 4
+        },
+        "judgeCompositeScore" : 4.3
+      }
+    } ],
+    "turnDiagnostics" : null
+  }, {
+    "episodeId" : "delete_002",
+    "overallPass" : true,
+    "overallScore" : 0.9760000000000001,
+    "evaluatorResults" : [ {
+      "evaluatorName" : "L1_Gate",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "L2_Outcome",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "successConditionMet" : true,
+        "successCondition" : "clarification_asked",
+        "clarificationCorrect" : true
+      }
+    }, {
+      "evaluatorName" : "L3_Trajectory",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "totalToolCalls" : 0,
+        "latencyMs" : 1020,
+        "toolCallCount" : 0
+      }
+    }, {
+      "evaluatorName" : "L4_ReplyQuality",
+      "passed" : true,
+      "score" : 0.88,
+      "violations" : [ ],
+      "details" : {
+        "mode" : "mock",
+        "similarityScore" : 0.806,
+        "similarityThreshold" : 0.65,
+        "judgeScores" : {
+          "reasoning" : "[mock] 待人工评估补充",
+          "tone" : 5,
+          "correctness" : 4,
+          "completeness" : 4
+        },
+        "judgeCompositeScore" : 4.3
+      }
+    } ],
+    "turnDiagnostics" : null
+  }, {
+    "episodeId" : "delete_003",
+    "overallPass" : true,
+    "overallScore" : 0.9760000000000001,
+    "evaluatorResults" : [ {
+      "evaluatorName" : "L1_Gate",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "L2_Outcome",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "successConditionMet" : true,
+        "successCondition" : "request_rejected_safely"
+      }
+    }, {
+      "evaluatorName" : "L3_Trajectory",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "totalToolCalls" : 0,
+        "latencyMs" : 917,
+        "toolCallCount" : 0
+      }
+    }, {
+      "evaluatorName" : "L4_ReplyQuality",
+      "passed" : true,
+      "score" : 0.88,
+      "violations" : [ ],
+      "details" : {
+        "mode" : "mock",
+        "similarityScore" : 0.9,
+        "similarityThreshold" : 0.65,
+        "judgeScores" : {
+          "reasoning" : "[mock] 待人工评估补充",
+          "tone" : 5,
+          "correctness" : 4,
+          "completeness" : 4
+        },
+        "judgeCompositeScore" : 4.3
+      }
+    } ],
+    "turnDiagnostics" : null
+  }, {
+    "episodeId" : "multi_delete_001",
+    "overallPass" : true,
+    "overallScore" : 0.676,
+    "evaluatorResults" : [ {
+      "evaluatorName" : "L1_Gate",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "L2_Outcome",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "successConditionMet" : true,
+        "successCondition" : "action_initiated",
+        "sideEffectsOk" : true
+      }
+    }, {
+      "evaluatorName" : "L3_Trajectory",
+      "passed" : false,
+      "score" : 0.0,
+      "violations" : [ "TRAJ_MUST_CALL: user_data_delete called 0 times < min 1", "TRAJ_ARGS: no matching ok action for user_data_delete" ],
+      "details" : {
+        "totalToolCalls" : 1,
+        "latencyMs" : 2017,
+        "toolCallCount" : 1
+      }
+    }, {
+      "evaluatorName" : "L4_ReplyQuality",
+      "passed" : true,
+      "score" : 0.88,
+      "violations" : [ ],
+      "details" : {
+        "mode" : "mock",
+        "similarityScore" : 0.873,
+        "similarityThreshold" : 0.65,
+        "judgeScores" : {
+          "reasoning" : "[mock] 待人工评估补充",
+          "tone" : 5,
+          "correctness" : 4,
+          "completeness" : 4
+        },
+        "judgeCompositeScore" : 4.3
+      }
+    } ],
+    "turnDiagnostics" : [ {
+      "turnIndex" : 0,
+      "expectationMet" : true,
+      "violations" : [ ]
+    }, {
+      "turnIndex" : 1,
+      "expectationMet" : true,
+      "violations" : [ ]
+    } ]
+  }, {
+    "episodeId" : "multi_delete_002",
+    "overallPass" : true,
+    "overallScore" : 0.9760000000000001,
+    "evaluatorResults" : [ {
+      "evaluatorName" : "L1_Gate",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "L2_Outcome",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "successConditionMet" : true,
+        "successCondition" : "action_initiated",
+        "sideEffectsOk" : true
+      }
+    }, {
+      "evaluatorName" : "L3_Trajectory",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "totalToolCalls" : 2,
+        "latencyMs" : 2157,
+        "toolCallCount" : 2
+      }
+    }, {
+      "evaluatorName" : "L4_ReplyQuality",
+      "passed" : true,
+      "score" : 0.88,
+      "violations" : [ ],
+      "details" : {
+        "mode" : "mock",
+        "similarityScore" : 0.9,
+        "similarityThreshold" : 0.65,
+        "judgeScores" : {
+          "reasoning" : "[mock] 待人工评估补充",
+          "tone" : 5,
+          "correctness" : 4,
+          "completeness" : 4
+        },
+        "judgeCompositeScore" : 4.3
+      }
+    } ],
+    "turnDiagnostics" : [ {
+      "turnIndex" : 0,
+      "expectationMet" : true,
+      "violations" : [ ]
+    }, {
+      "turnIndex" : 1,
+      "expectationMet" : true,
+      "violations" : [ ]
+    }, {
+      "turnIndex" : 2,
+      "expectationMet" : true,
+      "violations" : [ ]
+    } ]
+  }, {
+    "episodeId" : "multi_query_001",
+    "overallPass" : true,
+    "overallScore" : 0.9760000000000001,
+    "evaluatorResults" : [ {
+      "evaluatorName" : "L1_Gate",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "L2_Outcome",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "successConditionMet" : true,
+        "successCondition" : "query_result_returned"
+      }
+    }, {
+      "evaluatorName" : "L3_Trajectory",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "totalToolCalls" : 1,
+        "latencyMs" : 2429,
+        "toolCallCount" : 1
+      }
+    }, {
+      "evaluatorName" : "L4_ReplyQuality",
+      "passed" : true,
+      "score" : 0.88,
+      "violations" : [ ],
+      "details" : {
+        "mode" : "mock",
+        "similarityScore" : 0.9,
+        "similarityThreshold" : 0.65,
+        "judgeScores" : {
+          "reasoning" : "[mock] 待人工评估补充",
+          "tone" : 5,
+          "correctness" : 4,
+          "completeness" : 4
+        },
+        "judgeCompositeScore" : 4.3
+      }
+    } ],
+    "turnDiagnostics" : [ {
+      "turnIndex" : 0,
+      "expectationMet" : true,
+      "violations" : [ ]
+    }, {
+      "turnIndex" : 1,
+      "expectationMet" : true,
+      "violations" : [ ]
+    } ]
+  } ],
+  "multiTurnStats" : {
+    "multiTurnCount" : 3,
+    "singleTurnCount" : 9,
+    "avgTurnsToResolve" : 2.3333333333333335,
+    "resolutionTypeDistribution" : {
+      "AI_RESOLVED" : 3
+    },
+    "checkpointPassRate" : 1.0
+  }
+}

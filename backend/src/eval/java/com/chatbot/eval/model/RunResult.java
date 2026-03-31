@@ -13,6 +13,9 @@ public class RunResult {
     private VersionFingerprint version;
     private List<RetrievedContext> retrievedContexts;
 
+    // Phase 2: 多轮对话支持
+    private List<TurnResult> turnResults;
+
     public RunResult() {
     }
 
@@ -78,5 +81,13 @@ public class RunResult {
 
     public void setRetrievedContexts(List<RetrievedContext> retrievedContexts) {
         this.retrievedContexts = retrievedContexts;
+    }
+
+    public List<TurnResult> getTurnResults() {
+        return turnResults;
+    }
+
+    public void setTurnResults(List<TurnResult> turnResults) {
+        this.turnResults = turnResults;
     }
 }

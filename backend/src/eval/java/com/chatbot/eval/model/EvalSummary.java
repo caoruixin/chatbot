@@ -22,6 +22,9 @@ public class EvalSummary {
     private Instant timestamp;
     private List<EvalScore> scores;
 
+    // Phase 2: 多轮统计
+    private MultiTurnStats multiTurnStats;
+
     public EvalSummary() {
     }
 
@@ -127,6 +130,36 @@ public class EvalSummary {
 
     public void setFailureAttribution(Map<String, Integer> failureAttribution) {
         this.failureAttribution = failureAttribution;
+    }
+
+    public MultiTurnStats getMultiTurnStats() {
+        return multiTurnStats;
+    }
+
+    public void setMultiTurnStats(MultiTurnStats multiTurnStats) {
+        this.multiTurnStats = multiTurnStats;
+    }
+
+    public static class MultiTurnStats {
+        private int multiTurnCount;
+        private int singleTurnCount;
+        private double avgTurnsToResolve;
+        private Map<String, Integer> resolutionTypeDistribution; // AI_RESOLVED: N, ESCALATED: N, ABANDONED: N
+        private double checkpointPassRate;
+
+        public MultiTurnStats() {
+        }
+
+        public int getMultiTurnCount() { return multiTurnCount; }
+        public void setMultiTurnCount(int multiTurnCount) { this.multiTurnCount = multiTurnCount; }
+        public int getSingleTurnCount() { return singleTurnCount; }
+        public void setSingleTurnCount(int singleTurnCount) { this.singleTurnCount = singleTurnCount; }
+        public double getAvgTurnsToResolve() { return avgTurnsToResolve; }
+        public void setAvgTurnsToResolve(double avgTurnsToResolve) { this.avgTurnsToResolve = avgTurnsToResolve; }
+        public Map<String, Integer> getResolutionTypeDistribution() { return resolutionTypeDistribution; }
+        public void setResolutionTypeDistribution(Map<String, Integer> resolutionTypeDistribution) { this.resolutionTypeDistribution = resolutionTypeDistribution; }
+        public double getCheckpointPassRate() { return checkpointPassRate; }
+        public void setCheckpointPassRate(double checkpointPassRate) { this.checkpointPassRate = checkpointPassRate; }
     }
 
     public static class SuiteStats {

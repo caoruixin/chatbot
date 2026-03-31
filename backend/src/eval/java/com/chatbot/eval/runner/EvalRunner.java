@@ -67,6 +67,27 @@ public class EvalRunner {
             double overallScore = computeOverallScore(evalResults);
 
             EvalScore score = new EvalScore(episode.getId(), overallPass, overallScore, evalResults);
+
+            // Phase 2: 提取多轮诊断信息
+            if (runResult.getTurnResults() != null && !runResult.getTurnResults().isEmpty()) {
+                List<TurnDiagnostic> diagnostics = new ArrayList<>();
+                for (TurnResult tr : runResult.getTurnResults()) {
+                    if (tr.getExpectation() != null) {
+                        TurnDiagnostic diag = new TurnDiagnostic();
+                        diag.setTurnIndex(tr.getTurnIndex());
+                        diag.setExpectationMet(
+                                tr.getExpectationViolations() == null
+                                        || tr.getExpectationViolations().isEmpty());
+                        diag.setViolations(tr.getExpectationViolations() != null
+                                ? tr.getExpectationViolations() : List.of());
+                        diagnostics.add(diag);
+                    }
+                }
+                if (!diagnostics.isEmpty()) {
+                    score.setTurnDiagnostics(diagnostics);
+                }
+            }
+
             scores.put(episode.getId(), score);
 
             log.info("Episode {} result: pass={}, score={}", episode.getId(), overallPass,
@@ -74,7 +95,7 @@ public class EvalRunner {
         }
 
         // 4. Build summary
-        EvalSummary summary = buildSummary(episodes, scores, fingerprint);
+        EvalSummary summary = buildSummary(episodes, runResults, scores, fingerprint);
 
         // 5. Write results
         resultWriter.writeResults(outputDir, summary, runResults, scores);
@@ -128,8 +149,8 @@ public class EvalRunner {
                 .orElse(null);
     }
 
-    private EvalSummary buildSummary(List<Episode> episodes, Map<String, EvalScore> scores,
-                                     VersionFingerprint fingerprint) {
+    private EvalSummary buildSummary(List<Episode> episodes, Map<String, RunResult> runResults,
+                                     Map<String, EvalScore> scores, VersionFingerprint fingerprint) {
         EvalSummary summary = new EvalSummary();
         summary.setTotalEpisodes(episodes.size());
         summary.setFingerprint(fingerprint);
@@ -196,6 +217,9 @@ public class EvalRunner {
         }
         summary.setTagBreakdown(tagBreakdown);
 
+        // Phase 2: Multi-turn stats
+        buildMultiTurnStats(summary, runResults, scores);
+
         // Latency stats (from L3_Trajectory details)
         List<Long> latencies = scores.values().stream()
                 .map(s -> {
@@ -261,6 +285,54 @@ public class EvalRunner {
         double passRate = total == 0 ? 0.0 : (double) pass / total;
         double avgLatency = total == 0 ? 0.0 : totalLatency / total;
         return new EvalSummary.SuiteStats(total, pass, fail, passRate, avgLatency);
+    }
+
+    private void buildMultiTurnStats(EvalSummary summary,
+                                       Map<String, RunResult> runResults,
+                                       Map<String, EvalScore> scores) {
+        int multiTurnCount = 0;
+        int singleTurnCount = 0;
+        int totalTurns = 0;
+        Map<String, Integer> resolutionDist = new LinkedHashMap<>();
+        int totalCheckpoints = 0;
+        int passedCheckpoints = 0;
+
+        for (RunResult rr : runResults.values()) {
+            if (rr.getTurnResults() != null && !rr.getTurnResults().isEmpty()) {
+                multiTurnCount++;
+                totalTurns += rr.getTurnResults().size();
+            } else {
+                singleTurnCount++;
+            }
+
+            // Resolution type distribution
+            if (rr.getMetrics() != null && rr.getMetrics().getResolutionType() != null) {
+                resolutionDist.merge(rr.getMetrics().getResolutionType(), 1, Integer::sum);
+            }
+        }
+
+        // Checkpoint pass rate from turn diagnostics
+        for (EvalScore score : scores.values()) {
+            if (score.getTurnDiagnostics() != null) {
+                for (TurnDiagnostic diag : score.getTurnDiagnostics()) {
+                    totalCheckpoints++;
+                    if (diag.isExpectationMet()) {
+                        passedCheckpoints++;
+                    }
+                }
+            }
+        }
+
+        if (multiTurnCount > 0) {
+            EvalSummary.MultiTurnStats mts = new EvalSummary.MultiTurnStats();
+            mts.setMultiTurnCount(multiTurnCount);
+            mts.setSingleTurnCount(singleTurnCount);
+            mts.setAvgTurnsToResolve(multiTurnCount > 0 ? (double) totalTurns / multiTurnCount : 0);
+            mts.setResolutionTypeDistribution(resolutionDist);
+            mts.setCheckpointPassRate(totalCheckpoints > 0
+                    ? (double) passedCheckpoints / totalCheckpoints : 1.0);
+            summary.setMultiTurnStats(mts);
+        }
     }
 
     private double percentile(List<Long> sorted, int pct) {

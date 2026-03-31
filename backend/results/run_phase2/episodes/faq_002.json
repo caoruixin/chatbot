@@ -1,0 +1,136 @@
+{
+  "runResult" : {
+    "episodeId" : "faq_002",
+    "finalReply" : "您好，目前系统没有找到相关问题的答案。关于重置密码，您可以按照以下步骤操作：\n\n1. 打开应用或网站，点击\"忘记密码\"或\"重置密码\"选项。\n\n2. 输入您的账户信息（如手机号、邮箱等），点击\"下一步\"。\n\n3. 根据提示，通过短信验证码或邮箱链接来验证您的身份。\n\n4. 验证成功后，设置新的密码，确保满足密码要求（如长度、包含字符等）。\n\n5. 完成密码修改后，使用新的密码登录即可。\n\n如果忘记账户信息或以上方法无法解决问题，请联系人工客服获取帮助。希望这些建议对您有帮助！",
+    "actions" : [ {
+      "name" : "faq_search",
+      "args" : {
+        "query" : "怎么重置密码"
+      },
+      "status" : "ok",
+      "resultSummary" : "{\"error\":\"\",\"data\":{\"question\":\"\",\"answer\":\"未找到相关问题\",\"score\":0.0},\"success\":true}",
+      "timestampMs" : 1772998416336
+    } ],
+    "artifacts" : {
+      "identityArtifacts" : {
+        "intent" : "KB_QUESTION",
+        "confidence" : 0.85,
+        "risk" : "low"
+      },
+      "executionArtifacts" : {
+        "toolCallCount" : 1,
+        "retrievedContextCount" : 0
+      },
+      "composerArtifacts" : {
+        "replyLength" : 239
+      }
+    },
+    "metrics" : {
+      "latencyMs" : 4635,
+      "tokenIn" : null,
+      "tokenOut" : null,
+      "cost" : null,
+      "toolCallCount" : 1,
+      "turnsToResolve" : null,
+      "resolutionType" : null
+    },
+    "trace" : {
+      "spans" : [ {
+        "spanName" : "intent_recognition",
+        "startMs" : 1772998415333,
+        "endMs" : 1772998416336,
+        "attributes" : {
+          "risk" : "low",
+          "confidence" : 0.85,
+          "intent" : "KB_QUESTION"
+        },
+        "turnIndex" : null
+      }, {
+        "spanName" : "tool_call",
+        "startMs" : 1772998416336,
+        "endMs" : 1772998416620,
+        "attributes" : {
+          "tool" : "faq_search",
+          "success" : "true",
+          "round" : "0"
+        },
+        "turnIndex" : null
+      }, {
+        "spanName" : "response_composition",
+        "startMs" : 1772998416621,
+        "endMs" : 1772998419968,
+        "attributes" : {
+          "replyLength" : "239"
+        },
+        "turnIndex" : null
+      } ]
+    },
+    "version" : {
+      "modelId" : "moonshot-v1-8k",
+      "promptHashes" : {
+        "intent_system_prompt" : "2ca76527f1e0",
+        "evidence_system_prompt" : "1216a72c495b"
+      },
+      "workflowVersion" : "7545f2315ea8",
+      "toolSchemaVersion" : "c063b959a923",
+      "kbSnapshot" : "unknown",
+      "gitCommit" : "ad1f7bdbd4c98e5d1a04f1329829ade3305ca37e",
+      "compositeHash" : "830e3564fa8e"
+    },
+    "retrievedContexts" : [ ],
+    "turnResults" : null
+  },
+  "score" : {
+    "episodeId" : "faq_002",
+    "overallPass" : true,
+    "overallScore" : 0.9760000000000001,
+    "evaluatorResults" : [ {
+      "evaluatorName" : "L1_Gate",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "L2_Outcome",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "successConditionMet" : true,
+        "successCondition" : "faq_answered_from_kb"
+      }
+    }, {
+      "evaluatorName" : "L3_Trajectory",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "totalToolCalls" : 1,
+        "latencyMs" : 4635,
+        "toolCallCount" : 1
+      }
+    }, {
+      "evaluatorName" : "L4_ReplyQuality",
+      "passed" : true,
+      "score" : 0.88,
+      "violations" : [ ],
+      "details" : {
+        "mode" : "mock",
+        "similarityScore" : 0.9,
+        "similarityThreshold" : 0.65,
+        "judgeScores" : {
+          "reasoning" : "[mock] 待人工评估补充",
+          "tone" : 5,
+          "correctness" : 4,
+          "completeness" : 4
+        },
+        "judgeCompositeScore" : 4.3,
+        "ragScores" : {
+          "precision" : 0.0,
+          "recall" : 0.0
+        }
+      }
+    } ],
+    "turnDiagnostics" : null
+  }
+}

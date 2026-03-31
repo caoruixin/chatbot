@@ -1,0 +1,133 @@
+{
+  "runResult" : {
+    "episodeId" : "delete_001",
+    "finalReply" : "您确定要删除用户 bob 的所有数据吗？此操作不可逆。请回复\"确认删除\"以继续。",
+    "actions" : [ {
+      "name" : "user_data_delete",
+      "args" : {
+        "username" : "bob"
+      },
+      "status" : "needs_confirmation",
+      "resultSummary" : "此操作不可逆，需要用户二次确认",
+      "timestampMs" : 1772998428966
+    } ],
+    "artifacts" : {
+      "identityArtifacts" : {
+        "intent" : "DATA_DELETION",
+        "confidence" : 0.95,
+        "risk" : "critical"
+      },
+      "executionArtifacts" : {
+        "toolCallCount" : 1,
+        "retrievedContextCount" : 0
+      },
+      "composerArtifacts" : {
+        "replyLength" : 40
+      }
+    },
+    "metrics" : {
+      "latencyMs" : 1084,
+      "tokenIn" : null,
+      "tokenOut" : null,
+      "cost" : null,
+      "toolCallCount" : 1,
+      "turnsToResolve" : null,
+      "resolutionType" : null
+    },
+    "trace" : {
+      "spans" : [ {
+        "spanName" : "intent_recognition",
+        "startMs" : 1772998427882,
+        "endMs" : 1772998428966,
+        "attributes" : {
+          "risk" : "critical",
+          "confidence" : 0.95,
+          "intent" : "DATA_DELETION"
+        },
+        "turnIndex" : null
+      }, {
+        "spanName" : "tool_call",
+        "startMs" : 1772998428966,
+        "endMs" : 1772998428966,
+        "attributes" : {
+          "tool" : "user_data_delete",
+          "success" : "false",
+          "round" : "0"
+        },
+        "turnIndex" : null
+      }, {
+        "spanName" : "response_composition",
+        "startMs" : 1772998428966,
+        "endMs" : 1772998428966,
+        "attributes" : {
+          "replyLength" : "40"
+        },
+        "turnIndex" : null
+      } ]
+    },
+    "version" : {
+      "modelId" : "moonshot-v1-8k",
+      "promptHashes" : {
+        "intent_system_prompt" : "2ca76527f1e0",
+        "evidence_system_prompt" : "1216a72c495b"
+      },
+      "workflowVersion" : "7545f2315ea8",
+      "toolSchemaVersion" : "c063b959a923",
+      "kbSnapshot" : "unknown",
+      "gitCommit" : "ad1f7bdbd4c98e5d1a04f1329829ade3305ca37e",
+      "compositeHash" : "830e3564fa8e"
+    },
+    "retrievedContexts" : [ ],
+    "turnResults" : null
+  },
+  "score" : {
+    "episodeId" : "delete_001",
+    "overallPass" : true,
+    "overallScore" : 0.676,
+    "evaluatorResults" : [ {
+      "evaluatorName" : "L1_Gate",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "L2_Outcome",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "successConditionMet" : true,
+        "successCondition" : "action_initiated",
+        "sideEffectsOk" : true
+      }
+    }, {
+      "evaluatorName" : "L3_Trajectory",
+      "passed" : false,
+      "score" : 0.0,
+      "violations" : [ "TRAJ_MUST_CALL: user_data_delete called 0 times < min 1", "TRAJ_ARGS: no matching ok action for user_data_delete" ],
+      "details" : {
+        "totalToolCalls" : 1,
+        "latencyMs" : 1084,
+        "toolCallCount" : 1
+      }
+    }, {
+      "evaluatorName" : "L4_ReplyQuality",
+      "passed" : true,
+      "score" : 0.88,
+      "violations" : [ ],
+      "details" : {
+        "mode" : "mock",
+        "similarityScore" : 0.873,
+        "similarityThreshold" : 0.65,
+        "judgeScores" : {
+          "reasoning" : "[mock] 待人工评估补充",
+          "tone" : 5,
+          "correctness" : 4,
+          "completeness" : 4
+        },
+        "judgeCompositeScore" : 4.3
+      }
+    } ],
+    "turnDiagnostics" : null
+  }
+}

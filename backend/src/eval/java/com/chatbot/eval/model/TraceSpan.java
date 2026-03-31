@@ -9,6 +9,9 @@ public class TraceSpan {
     private long endMs;
     private Map<String, Object> attributes;
 
+    // Phase 2: 所属轮次索引
+    private Integer turnIndex;
+
     public TraceSpan() {
     }
 
@@ -49,5 +52,13 @@ public class TraceSpan {
 
     public void setAttributes(Map<String, Object> attributes) {
         this.attributes = attributes;
+    }
+
+    public Integer getTurnIndex() {
+        return turnIndex;
+    }
+
+    public void setTurnIndex(Integer turnIndex) {
+        this.turnIndex = turnIndex;
     }
 }

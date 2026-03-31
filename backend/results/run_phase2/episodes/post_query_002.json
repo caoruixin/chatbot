@@ -1,0 +1,132 @@
+{
+  "runResult" : {
+    "episodeId" : "post_query_002",
+    "finalReply" : "经过查询，用户名为ghost的用户没有发表过任何帖子。您可以尝试联系人工客服获取更多帮助。",
+    "actions" : [ {
+      "name" : "post_query",
+      "args" : {
+        "username" : "ghost"
+      },
+      "status" : "ok",
+      "resultSummary" : "{\"error\":\"\",\"data\":{\"posts\":[]},\"success\":true}",
+      "timestampMs" : 1772998425932
+    } ],
+    "artifacts" : {
+      "identityArtifacts" : {
+        "intent" : "POST_QUERY",
+        "confidence" : 0.95,
+        "risk" : "low"
+      },
+      "executionArtifacts" : {
+        "toolCallCount" : 1,
+        "retrievedContextCount" : 0
+      },
+      "composerArtifacts" : {
+        "replyLength" : 45
+      }
+    },
+    "metrics" : {
+      "latencyMs" : 1749,
+      "tokenIn" : null,
+      "tokenOut" : null,
+      "cost" : null,
+      "toolCallCount" : 1,
+      "turnsToResolve" : null,
+      "resolutionType" : null
+    },
+    "trace" : {
+      "spans" : [ {
+        "spanName" : "intent_recognition",
+        "startMs" : 1772998424925,
+        "endMs" : 1772998425932,
+        "attributes" : {
+          "risk" : "low",
+          "confidence" : 0.95,
+          "intent" : "POST_QUERY"
+        },
+        "turnIndex" : null
+      }, {
+        "spanName" : "tool_call",
+        "startMs" : 1772998425932,
+        "endMs" : 1772998425934,
+        "attributes" : {
+          "tool" : "post_query",
+          "success" : "true",
+          "round" : "0"
+        },
+        "turnIndex" : null
+      }, {
+        "spanName" : "response_composition",
+        "startMs" : 1772998425934,
+        "endMs" : 1772998426674,
+        "attributes" : {
+          "replyLength" : "45"
+        },
+        "turnIndex" : null
+      } ]
+    },
+    "version" : {
+      "modelId" : "moonshot-v1-8k",
+      "promptHashes" : {
+        "intent_system_prompt" : "2ca76527f1e0",
+        "evidence_system_prompt" : "1216a72c495b"
+      },
+      "workflowVersion" : "7545f2315ea8",
+      "toolSchemaVersion" : "c063b959a923",
+      "kbSnapshot" : "unknown",
+      "gitCommit" : "ad1f7bdbd4c98e5d1a04f1329829ade3305ca37e",
+      "compositeHash" : "830e3564fa8e"
+    },
+    "retrievedContexts" : [ ],
+    "turnResults" : null
+  },
+  "score" : {
+    "episodeId" : "post_query_002",
+    "overallPass" : true,
+    "overallScore" : 0.9760000000000001,
+    "evaluatorResults" : [ {
+      "evaluatorName" : "L1_Gate",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : { }
+    }, {
+      "evaluatorName" : "L2_Outcome",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "successConditionMet" : true,
+        "successCondition" : "query_result_returned"
+      }
+    }, {
+      "evaluatorName" : "L3_Trajectory",
+      "passed" : true,
+      "score" : 1.0,
+      "violations" : [ ],
+      "details" : {
+        "totalToolCalls" : 1,
+        "latencyMs" : 1749,
+        "toolCallCount" : 1
+      }
+    }, {
+      "evaluatorName" : "L4_ReplyQuality",
+      "passed" : true,
+      "score" : 0.88,
+      "violations" : [ ],
+      "details" : {
+        "mode" : "mock",
+        "similarityScore" : 0.9,
+        "similarityThreshold" : 0.65,
+        "judgeScores" : {
+          "reasoning" : "[mock] 待人工评估补充",
+          "tone" : 5,
+          "correctness" : 4,
+          "completeness" : 4
+        },
+        "judgeCompositeScore" : 4.3
+      }
+    } ],
+    "turnDiagnostics" : null
+  }
+}

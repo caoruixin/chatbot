@@ -1,0 +1,16 @@
+{
+  "fingerprint" : {
+    "modelId" : "moonshot-v1-8k",
+    "promptHashes" : {
+      "intent_system_prompt" : "2ca76527f1e0",
+      "evidence_system_prompt" : "1216a72c495b"
+    },
+    "workflowVersion" : "7545f2315ea8",
+    "toolSchemaVersion" : "c063b959a923",
+    "kbSnapshot" : "unknown",
+    "gitCommit" : "ad1f7bdbd4c98e5d1a04f1329829ade3305ca37e",
+    "compositeHash" : "830e3564fa8e"
+  },
+  "timestamp" : "2026-03-08T19:33:57.510561Z",
+  "totalEpisodes" : 12
+}

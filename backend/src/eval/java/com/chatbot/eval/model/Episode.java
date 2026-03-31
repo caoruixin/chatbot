@@ -90,6 +90,7 @@ public class Episode {
     public static class ConversationTurn {
         private String role;
         private String content;
+        private TurnExpectation expectation;  // assistant only: 中间检查点
 
         public ConversationTurn() {
         }
@@ -108,6 +109,14 @@ public class Episode {
 
         public void setContent(String content) {
             this.content = content;
+        }
+
+        public TurnExpectation getExpectation() {
+            return expectation;
+        }
+
+        public void setExpectation(TurnExpectation expectation) {
+            this.expectation = expectation;
         }
     }
 }

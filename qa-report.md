@@ -1,3 +1,174 @@
+# QA Test Report -- Evaluation Framework Phase 2 (Multi-Turn Conversation Support)
+
+**Generated**: 2026-03-09
+**Scope**: Phase 2 implementation of the evaluation framework, covering multi-turn conversation support across model files, core logic (SyncAgentAdapter, EvalRunner, HtmlReportGenerator), and test data (episodes_layered.jsonl).
+
+---
+
+## 1. Compilation & Build Results
+
+| Check | Result |
+|-------|--------|
+| `./gradlew compileEvalJava` | **PASS** -- BUILD SUCCESSFUL |
+| `./gradlew build -x test` | **PASS** -- BUILD SUCCESSFUL |
+
+No compilation errors. All new and modified files compile cleanly against the existing codebase.
+
+---
+
+## 2. Code Review Results
+
+### 2.1 Issue Summary
+
+| # | Severity | File | Line | Description | Recommendation |
+|---|----------|------|------|-------------|----------------|
+| 1 | HIGH | `HtmlReportGenerator.java` | 111, 125 | CSS `%%` in text block renders as literal `%%` in browser, breaking `width` and `border-collapse` styles | Replace `100%%` with `100%` -- text block is appended via StringBuilder, not String.format |
+| 2 | MEDIUM | `SyncAgentAdapter.java` | 610 | Potential NPE: `reply.length()` called without null check in `buildSingleTurnResult` | Add null guard: `reply != null ? reply.length() : 0` |
+| 3 | MEDIUM | `SyncAgentAdapter.java` | 430-436 | `mustNotCall` only checks `"ok"` status; forbidden tool returning `"needs_confirmation"` passes silently | Consider checking all statuses, or document as deliberate |
+| 4 | LOW | `SyncAgentAdapter.java` | 272 | `String.valueOf(lastIntent.getRisk())` is redundant -- `getRisk()` already returns `String` | Remove unnecessary `String.valueOf()` |
+| 5 | LOW | `SyncAgentAdapter.java` | 269-273 | In confirmation turns, `lastIntent` retains previous turn's intent for IntentSummary | Correct behavior but add comment clarifying it is intentional |
+
+### 2.2 Detailed Analysis
+
+#### Issue #1 (HIGH): CSS double-percent in text block breaks HTML report layout
+
+- **File**: `/Users/caoruixin/projects/chatbot/backend/src/eval/java/com/chatbot/eval/report/HtmlReportGenerator.java`
+- **Lines**: 111 (`100%%` in `.layer-bar-fill`), 125 (`100%%` in `table`)
+- **Description**: The CSS styles are defined in a Java text block (triple-quoted string) and appended to a `StringBuilder` via `html.append(...)`. Since `StringBuilder.append()` does NOT interpret `%` as a format specifier, the double `%%` is passed through literally to the HTML output. In the browser, CSS `width: 100%%` is invalid and will be silently ignored, causing tables to not span full width and layer bars to not fill correctly.
+- **Impact**: The HTML report layout will be visually broken -- tables may not span full width and progress bars may not render correctly.
+- **Recommendation**: Replace every `100%%` with `100%` in the CSS text block. The `%%` escaping is only needed inside `String.format()` patterns, not in text blocks appended to `StringBuilder`.
+
+#### Issue #2 (MEDIUM): Potential NPE in buildSingleTurnResult
+
+- **File**: `/Users/caoruixin/projects/chatbot/backend/src/eval/java/com/chatbot/eval/adapter/SyncAgentAdapter.java:610`
+- **Description**: `composerArtifacts.put("replyLength", reply.length())` will throw NPE if `reply` is null. While all current call sites pass non-null strings, the `composeReply()` method delegates to `ResponseComposer.composeWithEvidence()` which calls an external LLM. If the LLM integration changes, null could propagate. Notably, the multi-turn `buildMultiTurnResult` at line 548 already uses the safe pattern: `lastReply != null ? lastReply.length() : 0`.
+- **Risk**: Low probability, high impact (NPE crashes the episode evaluation).
+- **Recommendation**: Use same null guard as `buildMultiTurnResult`.
+
+#### Issue #3 (MEDIUM): mustNotCall semantics gap
+
+- **File**: `/Users/caoruixin/projects/chatbot/backend/src/eval/java/com/chatbot/eval/adapter/SyncAgentAdapter.java:430-436`
+- **Description**: The `mustNotCall` check only flags tools whose status is `"ok"`. A tool that was called but returned `"needs_confirmation"` or `"failed"` would not be flagged. This means if Turn 0 has `mustNotCall: ["user_data_delete"]` but the identity gate is bypassed and the tool is called (returning `needs_confirmation`), the checkpoint will incorrectly pass.
+- **Contrast**: The `mustCall` check (lines 440-449) correctly accepts both `"ok"` and `"needs_confirmation"` statuses. The asymmetry between `mustCall` and `mustNotCall` behavior is inconsistent.
+- **Note**: The tech design specifies this same behavior, so the implementation matches the spec. This is a design-level concern.
+
+---
+
+## 3. Tech Design vs Implementation Verification
+
+### 3.1 Deliverable Checklist
+
+| Deliverable | Tech Design Section | Status | Notes |
+|------------|-------------------|--------|-------|
+| `ConversationTurn.expectation` field | 3.1 | IMPLEMENTED | Correctly added as `TurnExpectation` type |
+| `TurnExpectation` model | 3.2 | IMPLEMENTED | All 5 fields match spec |
+| `TurnResult` model (with `IntentSummary`) | 3.3 | IMPLEMENTED | All fields match; `IntentSummary` as static inner class |
+| `TurnDiagnostic` model | 3.7 | IMPLEMENTED | Separate file (tech design listed 2 new files but defined 3 models) |
+| `RunResult.turnResults` | 3.4 | IMPLEMENTED | `List<TurnResult>`, null for single-turn |
+| `EvalMetrics.turnsToResolve` | 3.5 | IMPLEMENTED | `Integer` (nullable) |
+| `EvalMetrics.resolutionType` | 3.5 | IMPLEMENTED | `String` (nullable) |
+| `TraceSpan.turnIndex` | 3.6 | IMPLEMENTED | `Integer` (nullable) |
+| `EvalScore.turnDiagnostics` | 3.7 | IMPLEMENTED | `List<TurnDiagnostic>` (nullable) |
+| `EvalSummary.MultiTurnStats` | 8.2 | IMPLEMENTED | All 5 stats fields present |
+| `SyncAgentAdapter.extractUserTurns` | 4.4 | IMPLEMENTED | Logic matches spec |
+| `SyncAgentAdapter.runMultiTurn` | 4.2 | IMPLEMENTED | Turn-by-turn engine complete |
+| `SyncAgentAdapter.checkTurnExpectation` | 4.5 | IMPLEMENTED | All 5 checks present |
+| `SyncAgentAdapter.handleConfirmation` | 4.3 | IMPLEMENTED | PendingConfirmation + keyword matching |
+| `EvalRunner` turn diagnostics | 5 | IMPLEMENTED | Does NOT affect overall pass/fail (per design) |
+| `EvalRunner.buildMultiTurnStats` | 8.2 | IMPLEMENTED | Stats correctly computed |
+| `HtmlReportGenerator` multi-turn view | 8.1 | IMPLEMENTED | Per-turn conversation display |
+| `HtmlReportGenerator` multi-turn stats | 8.2 | IMPLEMENTED | KPI cards + resolution distribution |
+| 3 multi-turn episodes | 7.1-7.3 | IMPLEMENTED | `multi_delete_001/002`, `multi_query_001` |
+
+### 3.2 Deviations from Tech Design
+
+| Aspect | Tech Design | Implementation | Assessment |
+|--------|------------|----------------|------------|
+| New file count | "New Files (2)" | 3 new files (`TurnExpectation`, `TurnResult`, `TurnDiagnostic`) | Minor spec discrepancy -- `TurnDiagnostic` defined in spec but not counted |
+| `mustCall` status check | Only `"ok"` | `"ok"` or `"needs_confirmation"` | Deliberate improvement for confirmation scenarios |
+| `clarification_asked` keywords | 5 keywords | 6 keywords (added `"请先提供"`) | Minor enhancement |
+
+---
+
+## 4. Backward Compatibility Verification
+
+### 4.1 Single-Turn Path Preservation
+
+| Aspect | Phase 1 Behavior | Phase 2 Single-Turn Path | Status |
+|--------|-----------------|------------------------|--------|
+| Entry point | Direct processing of first turn | `extractUserTurns()` -> detect 1 user turn -> `runSingleTurn()` | PRESERVED |
+| Intent recognition | Same | Same | PRESERVED |
+| Confidence check | Same | Same | PRESERVED |
+| Identity gate | Same | Same | PRESERVED |
+| ReAct loop | Same | Same | PRESERVED |
+| Response composition | Same | Same | PRESERVED |
+| `buildSingleTurnResult` | Same | Same method, same fields | PRESERVED |
+| `turnResults` | N/A | null (not set) | CORRECT |
+| `turnsToResolve` | N/A | null (not set) | CORRECT |
+| `resolutionType` | N/A | null (not set) | CORRECT |
+
+**Conclusion**: Single-turn backward compatibility fully preserved.
+
+### 4.2 Data Format Compatibility
+
+- 11 existing single-turn episodes have no `expectation` field -- Jackson handles missing field as null.
+- `DatasetLoader` requires no changes (confirmed in tech design Section 9.2).
+
+---
+
+## 5. JSONL Validation
+
+### 5.1 Format Check
+
+All 14 lines (11 existing + 3 new) parse as valid JSON. Comment lines are correctly separated.
+
+### 5.2 Multi-Turn Episode Structure
+
+| Episode | User Turns | Assistant Turns | Pattern | Valid |
+|---------|-----------|----------------|---------|-------|
+| `multi_delete_001` | 2 | 2 | U-A-U-A | YES |
+| `multi_delete_002` | 3 | 3 | U-A-U-A-U-A | YES |
+| `multi_query_001` | 2 | 2 | U-A-U-A | YES |
+
+All assistant turns have `expectation` field with valid constraint keys. All constraint values match the defined `TurnExpectation` schema.
+
+### 5.3 Episode Logic Consistency
+
+- `multi_delete_001`: Correctly models "ask for username -> confirm deletion" flow with `mustNotCall`/`mustCall` constraints
+- `multi_delete_002`: Correctly models full 3-turn deletion flow including confirmation step; `allowedCall` max=2 accounts for initial + confirmed calls
+- `multi_query_001`: Correctly models "ask for username -> query posts" flow
+
+---
+
+## 6. Summary
+
+### Issues Found: 5
+
+| Priority | Count | Description |
+|----------|-------|-------------|
+| HIGH | 1 | CSS `%%` rendering bug in HTML report |
+| MEDIUM | 2 | NPE risk in `buildSingleTurnResult`, `mustNotCall` semantics gap |
+| LOW | 2 | Redundant `String.valueOf()`, missing comment for confirmation intent carry-over |
+
+### Key Findings
+
+1. **Compilation**: PASS -- no errors
+2. **Build**: PASS -- full build succeeds
+3. **Backward Compatibility**: PASS -- single-turn path fully preserved
+4. **Tech Design Compliance**: 100% of deliverables implemented; 3 minor deviations documented (all improvements or spec discrepancies)
+5. **JSONL Validity**: PASS -- all 3 new episodes have valid JSON and correct structure
+6. **Critical Bug**: The CSS `%%` issue in `HtmlReportGenerator.java` will cause visual layout problems in the HTML report and should be fixed before using the report feature
+
+### Untested Areas
+
+- No unit tests exist for the Phase 2 eval code (no test source set for `src/eval/`)
+- Integration testing (running actual multi-turn episodes against LLM) was not performed as it requires API keys and live services
+
+---
+---
+
+# Previous QA Report (2026-02-13)
+
 # QA 测试报告
 
 **生成时间**: 2026-02-13 18:00

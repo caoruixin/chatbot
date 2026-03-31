@@ -57,7 +57,10 @@ public class HtmlReportGenerator {
         // Row 5: Tag breakdown
         appendTagBreakdown(html, summary);
 
-        // Row 6: Episode list with filter
+        // Row 6: Multi-turn stats (Phase 2)
+        appendMultiTurnStats(html, summary);
+
+        // Row 7: Episode list with filter
         appendEpisodeList(html, runResults, scores);
 
         html.append("</div>\n");
@@ -105,7 +108,7 @@ public class HtmlReportGenerator {
             .layer-bar-row { display: flex; align-items: center; gap: 12px; }
             .layer-bar-name { width: 140px; font-size: 0.9em; font-weight: 600; color: #4a5568; text-align: right; }
             .layer-bar-track { flex: 1; height: 28px; background: #edf2f7; border-radius: 14px; overflow: hidden; }
-            .layer-bar-fill { height: 100%%; border-radius: 14px; transition: width 0.5s; display: flex;
+            .layer-bar-fill { height: 100%; border-radius: 14px; transition: width 0.5s; display: flex;
                              align-items: center; padding-left: 12px; font-size: 0.8em; font-weight: 700; color: #fff; }
             .bar-green { background: linear-gradient(90deg, #38a169, #48bb78); }
             .bar-yellow { background: linear-gradient(90deg, #d69e2e, #ecc94b); }
@@ -119,7 +122,7 @@ public class HtmlReportGenerator {
             /* Tables */
             .breakdown-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
             @media (max-width: 768px) { .breakdown-row { grid-template-columns: 1fr; } }
-            table { width: 100%%; border-collapse: collapse; }
+            table { width: 100%; border-collapse: collapse; }
             th { font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.5px; color: #718096;
                  padding: 8px 12px; text-align: left; border-bottom: 2px solid #edf2f7; }
             td { padding: 10px 12px; border-bottom: 1px solid #f7fafc; font-size: 0.9em; }
@@ -301,6 +304,33 @@ public class HtmlReportGenerator {
         html.append("</table></div></div>\n");
     }
 
+    private void appendMultiTurnStats(StringBuilder html, EvalSummary summary) {
+        EvalSummary.MultiTurnStats mts = summary.getMultiTurnStats();
+        if (mts == null) return;
+
+        html.append("<div class=\"section\"><div class=\"section-title\">Multi-Turn Statistics</div>\n");
+        html.append("<div class=\"card\">\n");
+        html.append("<div class=\"kpi-row\" style=\"margin-bottom:0\">\n");
+        appendKpi(html, String.valueOf(mts.getMultiTurnCount()), "Multi-Turn Episodes", "kpi-neutral");
+        appendKpi(html, String.valueOf(mts.getSingleTurnCount()), "Single-Turn Episodes", "kpi-neutral");
+        appendKpi(html, String.format("%.1f", mts.getAvgTurnsToResolve()), "Avg Turns", "kpi-neutral");
+        appendKpi(html, String.format("%.0f%%", mts.getCheckpointPassRate() * 100), "Checkpoint Pass",
+                mts.getCheckpointPassRate() >= 0.8 ? "kpi-pass" : "kpi-warn");
+        html.append("</div>\n");
+
+        // Resolution type distribution
+        if (mts.getResolutionTypeDistribution() != null && !mts.getResolutionTypeDistribution().isEmpty()) {
+            html.append("<div style=\"margin-top:12px;font-size:0.85em;color:#718096\">");
+            html.append("<strong>Resolution: </strong>");
+            for (Map.Entry<String, Integer> entry : mts.getResolutionTypeDistribution().entrySet()) {
+                html.append(esc(entry.getKey())).append(": ").append(entry.getValue()).append("  ");
+            }
+            html.append("</div>\n");
+        }
+
+        html.append("</div></div>\n");
+    }
+
     private void appendEpisodeList(StringBuilder html, Map<String, RunResult> runResults,
                                     Map<String, EvalScore> scores) {
         html.append("<div class=\"section\">\n");
@@ -347,9 +377,20 @@ public class HtmlReportGenerator {
             // Body
             html.append("<div class=\"ep-body\" id=\"ep-").append(esc(episodeId)).append("\">\n");
 
-            // Reply
-            html.append("<div style=\"font-weight:600;font-size:0.85em;color:#718096;margin-bottom:4px\">AI Reply</div>");
-            html.append("<div class=\"reply-box\">").append(esc(rr.getFinalReply())).append("</div>\n");
+            // Multi-turn conversation view or single-turn reply
+            if (rr.getTurnResults() != null && !rr.getTurnResults().isEmpty()) {
+                appendMultiTurnView(html, rr, score);
+            } else {
+                html.append("<div style=\"font-weight:600;font-size:0.85em;color:#718096;margin-bottom:4px\">AI Reply</div>");
+                html.append("<div class=\"reply-box\">").append(esc(rr.getFinalReply())).append("</div>\n");
+            }
+
+            // Metrics summary for multi-turn
+            if (rr.getMetrics() != null && rr.getMetrics().getTurnsToResolve() != null) {
+                html.append("<div class=\"meta-line\">Turns: ").append(rr.getMetrics().getTurnsToResolve());
+                html.append(" | Resolution: ").append(esc(rr.getMetrics().getResolutionType()));
+                html.append("</div>\n");
+            }
 
             // Layer tree (Phase 1 style)
             if (score != null) {
@@ -376,6 +417,25 @@ public class HtmlReportGenerator {
                     html.append("</div>\n");
                 }
                 html.append("</div>\n");
+            }
+
+            // Turn diagnostics summary (Phase 2)
+            if (score != null && score.getTurnDiagnostics() != null && !score.getTurnDiagnostics().isEmpty()) {
+                html.append("<details><summary>Turn Diagnostics (").append(score.getTurnDiagnostics().size()).append(")</summary>");
+                html.append("<table style=\"font-size:0.85em\"><tr><th>Turn</th><th>Status</th><th>Violations</th></tr>\n");
+                for (TurnDiagnostic diag : score.getTurnDiagnostics()) {
+                    html.append("<tr><td>Turn ").append(diag.getTurnIndex()).append("</td>");
+                    html.append("<td class=\"").append(diag.isExpectationMet() ? "td-pass" : "td-fail").append("\">");
+                    html.append(diag.isExpectationMet() ? "PASS" : "FAIL").append("</td>");
+                    html.append("<td style=\"font-size:0.85em\">");
+                    if (diag.getViolations() != null && !diag.getViolations().isEmpty()) {
+                        html.append(esc(String.join("; ", diag.getViolations())));
+                    } else {
+                        html.append("-");
+                    }
+                    html.append("</td></tr>\n");
+                }
+                html.append("</table></details>\n");
             }
 
             // Tool actions
@@ -407,6 +467,65 @@ public class HtmlReportGenerator {
             html.append("</div></div>\n");
         }
         html.append("</div>\n");
+    }
+
+    private void appendMultiTurnView(StringBuilder html, RunResult rr, EvalScore score) {
+        html.append("<div style=\"font-weight:600;font-size:0.85em;color:#718096;margin-bottom:4px\">Multi-Turn Conversation</div>\n");
+
+        for (TurnResult tr : rr.getTurnResults()) {
+            html.append("<div style=\"border-left:3px solid #4299e1;padding:8px 12px;margin:6px 0;background:#f7fafc;border-radius:0 8px 8px 0\">\n");
+
+            // Turn header
+            html.append("<div style=\"font-weight:700;font-size:0.85em;color:#2d3748;margin-bottom:4px\">");
+            html.append("Turn ").append(tr.getTurnIndex()).append("</div>\n");
+
+            // User message
+            html.append("<div style=\"font-size:0.85em;margin:4px 0\">");
+            html.append("<span style=\"color:#718096\">User:</span> ");
+            html.append(esc(tr.getUserMessage())).append("</div>\n");
+
+            // Agent reply
+            html.append("<div style=\"font-size:0.85em;margin:4px 0\">");
+            html.append("<span style=\"color:#718096\">Agent:</span> ");
+            html.append(esc(tr.getAgentReply())).append("</div>\n");
+
+            // Turn meta
+            html.append("<div style=\"font-size:0.8em;color:#a0aec0;margin-top:4px\">");
+            html.append(tr.getLatencyMs()).append("ms");
+            if (tr.getIntentSummary() != null) {
+                html.append(" | Intent: ").append(esc(tr.getIntentSummary().getIntent()));
+                html.append(" (").append(String.format("%.2f", tr.getIntentSummary().getConfidence())).append(")");
+            }
+            if (tr.getActions() != null && !tr.getActions().isEmpty()) {
+                html.append(" | Tools: ");
+                for (int i = 0; i < tr.getActions().size(); i++) {
+                    if (i > 0) html.append(", ");
+                    html.append(esc(tr.getActions().get(i).getName()));
+                }
+            }
+            html.append("</div>\n");
+
+            // Checkpoint result
+            if (tr.getExpectation() != null) {
+                boolean cpPass = tr.getExpectationViolations() == null || tr.getExpectationViolations().isEmpty();
+                String cpClass = cpPass ? "layer-pass" : "layer-fail";
+                String cpIcon = cpPass ? "&#10003;" : "&#10007;";
+                html.append("<div style=\"font-size:0.82em;margin-top:4px\" class=\"").append(cpClass).append("\">");
+                html.append(cpIcon).append(" Checkpoint");
+                if (tr.getExpectation().getSuccessCondition() != null) {
+                    html.append(": ").append(esc(tr.getExpectation().getSuccessCondition()));
+                }
+                html.append("</div>\n");
+
+                if (!cpPass && tr.getExpectationViolations() != null) {
+                    for (String v : tr.getExpectationViolations()) {
+                        html.append("<div class=\"violation\">").append(esc(v)).append("</div>\n");
+                    }
+                }
+            }
+
+            html.append("</div>\n");
+        }
     }
 
     @SuppressWarnings("unchecked")

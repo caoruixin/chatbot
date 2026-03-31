@@ -8,6 +8,10 @@ public class EvalMetrics {
     private Double cost;
     private int toolCallCount;
 
+    // Phase 2: 多轮对话指标
+    private Integer turnsToResolve;
+    private String resolutionType;  // AI_RESOLVED | ESCALATED | ABANDONED
+
     public EvalMetrics() {
     }
 
@@ -49,5 +53,21 @@ public class EvalMetrics {
 
     public void setToolCallCount(int toolCallCount) {
         this.toolCallCount = toolCallCount;
+    }
+
+    public Integer getTurnsToResolve() {
+        return turnsToResolve;
+    }
+
+    public void setTurnsToResolve(Integer turnsToResolve) {
+        this.turnsToResolve = turnsToResolve;
+    }
+
+    public String getResolutionType() {
+        return resolutionType;
+    }
+
+    public void setResolutionType(String resolutionType) {
+        this.resolutionType = resolutionType;
     }
 }
